@@ -75,7 +75,7 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 
 ### Prosodic Structures
 
-Phonotypst provides three functions for visualizing different levels of prosodic structure:
+Phonotypst provides three functions for visualizing different levels of prosodic structure. The functions `syllable()`, `foot()` and `word()` below also have a `scale` argument (float) for adjusting the size of the resulting prosodic tree. Crucially, the scaling includes the tree, the text and the thickness of the lines in the tree.
 
 #### Syllable Level
 

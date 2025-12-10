@@ -35,10 +35,11 @@
 ///
 /// Arguments:
 /// - input (string): A single syllable (e.g., "ka" or "'va")
+/// - scale (float): Scale factor for the diagram (default: 1.0)
 ///
 /// Returns: CeTZ drawing of syllable structure
 ///
-/// Example: `#syllable("man")`
+/// Example: `#syllable("man", scale: 0.8)`
 #let syllable = syllable
 
 /// Draw a foot with syllables
@@ -48,10 +49,11 @@
 ///
 /// Arguments:
 /// - input (string): Syllables separated by dots (e.g., "ka.'va.lo")
+/// - scale (float): Scale factor for the diagram (default: 1.0)
 ///
 /// Returns: CeTZ drawing of foot structure
 ///
-/// Example: `#foot("man.'tal")`
+/// Example: `#foot("man.'tal", scale: 1.2)`
 #let foot = foot
 
 /// Draw a prosodic word structure with explicit foot boundaries
@@ -63,11 +65,12 @@
 /// Arguments:
 /// - input (string): Syllables with optional foot markers in parentheses
 /// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
+/// - scale (float): Scale factor for the diagram (default: 1.0)
 ///
 /// Returns: CeTZ drawing of prosodic structure
 ///
 /// Examples:
 /// - `#word("(ka.'va).lo")` - One iamb with two syllables, one footless syllable
 /// - `#word("('ka.va)", foot: "L")` - Trochee
-/// - `#word("ka.va")` - Two footless syllables
+/// - `#word("ka.va", scale: 0.7)` - Two footless syllables, smaller
 #let word = word

@@ -60,7 +60,7 @@
 }
 
 // Helper function to draw syllable internal structure
-#let draw-syllable-structure(x-offset, sigma-y, syll, terminal-y) = {
+#let draw-syllable-structure(x-offset, sigma-y, syll, terminal-y, diagram-scale: 1.0) = {
   import cetz.draw: *
 
   let has-onset = syll.onset != ""
@@ -74,32 +74,32 @@
   // Branches from syllable
   if has-onset {
     line((x-offset, sigma-y + 0.25), (onset-x, sigma-y - 0.45))
-    content((onset-x, sigma-y - 0.75), text(size: 10pt)[On])
+    content((onset-x, sigma-y - 0.75), text(size: 10 * diagram-scale * 1pt)[On])
     line((onset-x, sigma-y - 1.1), (onset-x, terminal-y + 0.30))
-    content((onset-x, terminal-y), text(size: 11pt)[#syll.onset], anchor: "north")
+    content((onset-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#syll.onset], anchor: "north")
   }
 
   // Rhyme branch
   line((x-offset, sigma-y + 0.25), (rhyme-x, sigma-y - 0.45))
-  content((rhyme-x, sigma-y - 0.75), text(size: 10pt)[Rh])
+  content((rhyme-x, sigma-y - 0.75), text(size: 10 * diagram-scale * 1pt)[Rh])
 
   // Nucleus
   line((rhyme-x, sigma-y - 1.1), (nucleus-x, sigma-y - 1.35))
-  content((nucleus-x, sigma-y - 1.65), text(size: 10pt)[Nu])
+  content((nucleus-x, sigma-y - 1.65), text(size: 10 * diagram-scale * 1pt)[Nu])
   line((nucleus-x, sigma-y - 1.9), (nucleus-x, terminal-y + 0.30))
-  content((nucleus-x, terminal-y), text(size: 11pt)[#syll.nucleus], anchor: "north")
+  content((nucleus-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#syll.nucleus], anchor: "north")
 
   // Coda (if exists)
   if has-coda {
     line((rhyme-x, sigma-y - 1.1), (coda-x, sigma-y - 1.35))
-    content((coda-x, sigma-y - 1.65), text(size: 10pt)[Co])
+    content((coda-x, sigma-y - 1.65), text(size: 10 * diagram-scale * 1pt)[Co])
     line((coda-x, sigma-y - 1.9), (coda-x, terminal-y + 0.30))
-    content((coda-x, terminal-y), text(size: 11pt)[#syll.coda], anchor: "north")
+    content((coda-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#syll.coda], anchor: "north")
   }
 }
 
 // Visualizes a single syllable's internal structure (On/Rh/Nu/Co)
-#let syllable(input) = {
+#let syllable(input, scale: 1.0) = {
   // Parse a single syllable
   let clean-input = if input.starts-with("'") { input.slice(1) } else { input }
   let parsed = parse-syllable(clean-input)
@@ -110,23 +110,25 @@
     stressed: input.starts-with("'")
   )
 
-  cetz.canvas({
+  let diagram-scale = scale  // Capture scale value to avoid conflict with cetz.draw.scale
+
+  cetz.canvas(length: 1cm * diagram-scale, {
     import cetz.draw: *
-    set-style(stroke: 0.7pt)
+    set-style(stroke: 0.7 * diagram-scale * 1pt)
 
     let sigma-y = 0
     let terminal-y = -3.5
     let x-offset = 0
 
     // Syllable node (σ)
-    content((x-offset, sigma-y + 0.54), text(size: 12pt)[*σ*])
+    content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
 
-    draw-syllable-structure(x-offset, sigma-y, syll, terminal-y)
+    draw-syllable-structure(x-offset, sigma-y, syll, terminal-y, diagram-scale: diagram-scale)
   })
 }
 
 // Visualizes foot and syllable levels
-#let foot(input) = {
+#let foot(input, scale: 1.0) = {
   // Parse syllables from dotted input like "ka.'va.lo"
   // All syllables are part of the foot
   let syllables = ()
@@ -175,9 +177,11 @@
     }
   }
 
-  cetz.canvas({
+  let diagram-scale = scale  // Capture scale value to avoid conflict with cetz.draw.scale
+
+  cetz.canvas(length: 1cm * diagram-scale, {
     import cetz.draw: *
-    set-style(stroke: 0.7pt)
+    set-style(stroke: 0.7 * diagram-scale * 1pt)
 
     let spacing = 3.0
     let num-sylls = syllables.len()
@@ -186,7 +190,7 @@
     let foot-x = start-x + head-idx * spacing
 
     // Draw Ft node above the head
-    content((foot-x, -0.9), text(size: 12pt)[*Σ*])
+    content((foot-x, -0.9), text(size: 12 * diagram-scale * 1pt)[*Σ*])
 
     // Draw syllables
     for (i, syll) in syllables.enumerate() {
@@ -195,18 +199,18 @@
       let terminal-y = -5
 
       // Syllable node (σ)
-      content((x-offset, sigma-y + 0.54), text(size: 12pt)[*σ*])
+      content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
 
       // Line from Ft to σ
       line((foot-x, -1.15), (x-offset, sigma-y + 0.8))
 
-      draw-syllable-structure(x-offset, sigma-y, syll, terminal-y)
+      draw-syllable-structure(x-offset, sigma-y, syll, terminal-y, diagram-scale: diagram-scale)
     }
   })
 }
 
 // Visualizes word, foot, and syllable levels
-#let word(input, foot: "R") = {
+#let word(input, foot: "R", scale: 1.0) = {
   // Parse syllables and feet from bracketed input like "(ka.'va).lo"
   // Parentheses indicate foot boundaries
   // foot: "R" (right-aligned) or "L" (left-aligned) - determines PWd alignment
@@ -297,11 +301,13 @@
     }
   }
 
+  let diagram-scale = scale  // Capture scale value to avoid conflict with cetz.draw.scale
+
   // Draw the structure
-  cetz.canvas({
+  cetz.canvas(length: 1cm * diagram-scale, {
     import cetz.draw: *
 
-    set-style(stroke: 0.7pt)
+    set-style(stroke: 0.7 * diagram-scale * 1pt)
 
     let spacing = 3.0
     let num-sylls = syllables.len()
@@ -326,7 +332,7 @@
       pwd-x = start-x + head-idx * spacing
     }
 
-    content((pwd-x, pwd-height), text(size: 12pt)[*PWd*])
+    content((pwd-x, pwd-height), text(size: 12 * diagram-scale * 1pt)[*PWd*])
 
     // Draw footless syllables (connect directly to PWd)
     for (i, syll) in syllables.enumerate() {
@@ -336,12 +342,12 @@
         let terminal-y = -5
 
         // Syllable node (σ)
-        content((x-offset, sigma-y + 0.54), text(size: 12pt)[*σ*])
+        content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
 
         // Line from PWd to σ (footless)
         line((pwd-x, pwd-height - 0.3), (x-offset, sigma-y + 0.75))
 
-        draw-syllable-structure(x-offset, sigma-y, syll, terminal-y)
+        draw-syllable-structure(x-offset, sigma-y, syll, terminal-y, diagram-scale: diagram-scale)
       }
     }
 
@@ -359,7 +365,7 @@
       let foot-x = start-x + head-idx * spacing
 
       // Draw Ft node above the head
-      content((foot-x, -0.9), text(size: 12pt)[*Σ*])
+      content((foot-x, -0.9), text(size: 12 * diagram-scale * 1pt)[*Σ*])
 
       // Line from PWd to Ft
       line((pwd-x, pwd-height - 0.3), (foot-x, -0.65))
@@ -372,12 +378,12 @@
         let terminal-y = -5
 
         // Syllable node (σ)
-        content((x-offset, sigma-y+0.54), text(size: 12pt)[*σ*])
+        content((x-offset, sigma-y+0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
 
         // Line from Ft to σ (naturally vertical for head, angled for others)
         line((foot-x, -1.15), (x-offset, sigma-y + 0.8))
 
-        draw-syllable-structure(x-offset, sigma-y, syll, terminal-y)
+        draw-syllable-structure(x-offset, sigma-y, syll, terminal-y, diagram-scale: diagram-scale)
       }
     }
   })
