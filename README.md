@@ -51,7 +51,7 @@ A comprehensive phonology toolkit for Typst, providing IPA transcription with ti
 #ipa("'sIn,t \\ae ks")  // → ˈsɪnˌtæks
 ```
 
-#### tipa Notation Quick Reference
+#### `tipa` Notation Quick Reference
 
 **Single-character codes** (no space needed):
 
@@ -75,28 +75,48 @@ A comprehensive phonology toolkit for Typst, providing IPA transcription with ti
 
 ### Prosodic Structures
 
-```typst
-// Syllables without feet
-#prosody("ka.va.lo")
+Phonotypst provides three functions for visualizing different levels of prosodic structure:
 
-// One foot with two syllables, plus one footless syllable
-#prosody("(ka.'va).lo")
+#### Syllable Level
+
+```typst
+// Visualize a single syllable's internal structure (σ)
+#syllable("man")
+#syllable("'to") // stress symbol makes no difference here
+```
+
+#### Foot Level
+
+```typst
+// Visualize foot (Σ) and syllable (σ) levels
+#foot("man.'tal")
+#foot("'man.tal")
+```
+
+#### Word Level
+
+```typst
+// Visualize prosodic word (PWd), foot (Σ), and syllable (σ) levels
+#word("(ma.'va).ro")  // One binary iamb; one footless syllable
 
 // Right-aligned prosodic word (default)
-#prosody("(ka.'va).lo", foot: "R")
+#word("ma.('va.ro)")  // One trochee; one footless syllable
 
-// Left-aligned prosodic word
-#prosody("('ka.va)", foot: "L")
+// Disyllabic word
+#word("('ka.va)")
 
-// Multiple feet
-#prosody("('ka.ta)('vas.lo)", foot: "L")
+// A dactyl
+#word("('ka.va.mi)")
+
+// Multiple feet, where foot = main foot/stress
+#word("('ka.ta)('vas.lo)", foot: "L") 
 ```
 
 **Prosody notation:**
 
 - `.` separates syllables
 - `'` before a syllable marks it as stressed (e.g., `'va`)
-- `()` marks foot boundaries
+- `()` marks foot boundaries (used in `#word()`)
 - Characters within syllables are automatically parsed into onset, nucleus, and coda
 
 ## Reference
@@ -117,21 +137,53 @@ Convert tipa-style notation to IPA symbols rendered in Charis SIL font.
 #ipa("'Sip")  // → ˈʃip
 ```
 
-### `prosody(input: string, foot: string)`
+### `syllable(input: string)`
 
-Draw a prosodic structure with explicit foot boundaries marked by parentheses.
+Draw a single syllable's internal structure.
+
+**Parameters:**
+
+- `input` (string): A single syllable (e.g., `"man"` or `"'va"` for stressed)
+
+**Returns:** CeTZ drawing of syllable structure (σ) showing onset, rhyme, nucleus, and coda
+
+**Example:**
+
+```typst
+#syllable("man")
+```
+
+### `foot(input: string)`
+
+Draw a foot with syllables.
+
+**Parameters:**
+
+- `input` (string): Syllables separated by dots, with apostrophes for stress (e.g., `"man.'tal"`)
+
+**Returns:** CeTZ drawing of foot structure (Σ) with syllables (σ)
+
+**Example:**
+
+```typst
+#foot("man.'tal")
+```
+
+### `word(input: string, foot: string)`
+
+Draw a prosodic word structure with explicit foot boundaries marked by parentheses.
 
 **Parameters:**
 
 - `input` (string): Syllables separated by dots, with optional parentheses for feet and apostrophes for stress
 - `foot` (string, optional): Alignment of prosodic word head - `"R"` for right-aligned (default) or `"L"` for left-aligned
 
-**Returns:** CeTZ drawing of prosodic structure showing syllables, feet, and prosodic word
+**Returns:** CeTZ drawing of prosodic structure showing prosodic word (PWd), feet (Σ), and syllables (σ)
 
 **Example:**
 
 ```typst
-#prosody("(ka.'va).lo", foot: "R")
+#word("('ka.ta)('vas.lo)", foot: "L") 
 ```
 
 ## Dependencies
