@@ -129,7 +129,7 @@
   consonant-string,
   lang: none,
   cell-width: 1.8,
-  cell-height: 1.2,
+  cell-height: 0.9,
   label-width: 3.5,
   label-height: 1.2,
   scale: 0.7,

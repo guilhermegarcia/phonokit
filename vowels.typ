@@ -185,7 +185,7 @@
       let right-x = trapezoid.at(1).at(0) * (1 - t) + trapezoid.at(2).at(0) * t
       let y = scaled-height/2 - (scaled-height * t)
 
-      line((left-x, y), (right-x, y), stroke: (paint: gray.lighten(60%), thickness: scaled-line-thickness * 1pt))
+      line((left-x, y), (right-x, y), stroke: (paint: gray.lighten(50%), thickness: scaled-line-thickness * 1pt))
     }
 
     // Draw vertical grid lines
@@ -194,11 +194,11 @@
       let top-x = trapezoid.at(0).at(0) * (1 - t) + trapezoid.at(1).at(0) * t
       let bottom-x = trapezoid.at(3).at(0) * (1 - t) + trapezoid.at(2).at(0) * t
 
-      line((top-x, scaled-height/2), (bottom-x, -scaled-height/2), stroke: (paint: gray.lighten(60%), thickness: scaled-line-thickness * 1pt))
+      line((top-x, scaled-height/2), (bottom-x, -scaled-height/2), stroke: (paint: gray.lighten(50%), thickness: scaled-line-thickness * 1pt))
     }
 
     // Draw the outline
-    line(..trapezoid, close: true, stroke: (paint: gray.lighten(60%), thickness: scaled-line-thickness * 1pt))
+    line(..trapezoid, close: true, stroke: (paint: gray.lighten(50%), thickness: scaled-line-thickness * 1pt))
 
     // Collect vowel positions
     let vowel-positions = ()
