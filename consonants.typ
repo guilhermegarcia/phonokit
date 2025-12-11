@@ -113,7 +113,7 @@
 // Language consonant inventories
 #let language-consonants = (
   "all": "pbtdʈɖcɟkɡqɢʔmɱnɳɲŋɴʙrʀⱱɾɽɸβfvθðszʃʒʂʐçʝxɣχʁħʕhɦɬɮʋɹɻjɰlɭʎʟ",
-  "english": "pbmntdkɡfvθðszʃʒhlɹj",
+  "english": "pbmnŋtdkɡfvθðszʃʒhlɹj",
   "spanish": "pbmnɲtdkɡfθsxlrɾj",
   "french": "pbmnɲtdkɡfrvszʃʒlj",
   "german": "pbmntdkɡfvszʃʒçxhʁlj",
