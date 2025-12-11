@@ -86,6 +86,9 @@
     "'": "ˈ",   // primary stress
     ",": "ˌ",   // secondary stress
     ":": "ː",   // length mark
+
+    // SPACING
+    "\\s": " ",  // space
   )
 
   // Define combining diacritics
@@ -93,6 +96,8 @@
     "\\~": "̃",  // combining tilde (nasalization)
     "\\r": "̥",  // combining ring below (devoicing)
     "\\v": "̩",  // combining vertical line below (voicing)
+    "\\*": "̚",  // combining left angle above (unreleased)
+    "\\h": "ʰ",  // modifier letter small h (aspirated)
   )
 
   // Split by spaces and process each token
@@ -105,49 +110,10 @@
 
     // Check if this token is a diacritic
     if token in diacritics {
-      // Apply diacritic to next token/character
-      i += 1
-      if i < tokens.len() {
-        let next_token = tokens.at(i)
-
-        // Process the next token first
-        if next_token.contains("\\") {
-          if next_token in mappings {
-            result += mappings.at(next_token)
-          } else {
-            result += next_token
-          }
-        } else {
-          // Process first character only
-          let chars = next_token.clusters()
-          if chars.len() > 0 {
-            let first_char = chars.at(0)
-            if first_char in mappings {
-              result += mappings.at(first_char)
-            } else {
-              result += first_char
-            }
-            // Add diacritic after first character
-            result += diacritics.at(token)
-
-            // Process remaining characters
-            for j in range(1, chars.len()) {
-              let char = chars.at(j)
-              if char in mappings {
-                result += mappings.at(char)
-              } else {
-                result += char
-              }
-            }
-            i += 1
-            continue
-          }
-        }
-        // Add diacritic after the character
-        result += diacritics.at(token)
-      }
+      // Just append it - combining diacritics apply to previous character
+      result += diacritics.at(token)
     } else if token.contains("\\") {
-      // Regular backslash command
+      // Backslash command
       if token in mappings {
         result += mappings.at(token)
       } else {
