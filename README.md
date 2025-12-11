@@ -1,6 +1,6 @@
 # Phonotypst
 
-A phonology toolkit for Typst, providing IPA transcription with tipa-style input and prosodic structure visualization.
+A phonology toolkit for Typst, providing IPA transcription with tipa-style input, prosodic structure visualization, and IPA charts for vowels and consonants.
 
 ## Features
 
@@ -20,6 +20,17 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 - **Stress marking**: Mark stressed syllables with apostrophe
 - **Flexible alignment**: Left or right alignment for prosodic word heads
 - **Beautiful diagrams**: Clean `CeTZ`-based visualizations
+
+### IPA Charts Module
+
+- **Vowel charts**: Plot vowels on the IPA vowel trapezoid with accurate positioning
+- **Consonant tables**: Display consonants in the pulmonic IPA consonant table
+- **Language inventories**: Pre-defined inventories for major languages (English, Spanish, French, German, Italian, Portuguese, Japanese, Russian, Arabic, Mandarin)
+- **Custom symbol sets**: Plot any combination of IPA symbols
+- **Automatic positioning**: Symbols positioned according to phonetic properties (place, manner, voicing, frontness, height, roundedness)
+- **Proper IPA formatting**: Voiceless/voiced pairs, grayed-out impossible articulations, minimal pair bullets for vowels
+- **Scalable charts**: Adjust size to fit your document layout
+- **Charis SIL font**: Professional IPA symbol rendering
 
 ## Installation
 
@@ -119,6 +130,54 @@ Phonotypst provides three functions for visualizing different levels of prosodic
 - `()` marks foot boundaries (used in `#word()`)
 - Characters within syllables are automatically parsed into onset, nucleus, and coda
 
+### IPA Charts
+
+Phonotypst provides functions for visualizing IPA vowel and consonant inventories with proper phonetic positioning.
+
+#### Vowel Charts
+
+```typst
+// Plot English vowel inventory
+#vowels("english")
+
+// Plot specific vowels
+#vowels("aeiou")
+
+// Plot French vowels with custom scale
+#vowels("french", scale: 0.5)
+
+// All available vowels
+#vowels("all")
+```
+
+**Available vowel language inventories:** english, spanish, portuguese, italian, french, german, japanese, mandarin, russian, arabic
+
+#### Consonant Tables
+
+```typst
+// Plot complete pulmonic consonant chart
+#consonants("all")
+
+// Plot English consonant inventory
+#consonants("english")
+
+// Plot specific consonants
+#consonants("ptk")
+
+// Plot Spanish consonants with custom scale
+#consonants("spanish", scale: 0.6)
+```
+
+**Available consonant language inventories:** all, english, spanish, french, german, italian, japanese, portuguese, russian, arabic
+
+**Chart features:**
+- Vowels positioned by frontness, height, and roundedness on trapezoid
+- Consonants organized by place and manner of articulation
+- Voiceless consonants on left, voiced on right in each cell
+- Impossible articulations (e.g., pharyngeal nasals) automatically grayed out
+- Minimal pair bullets for rounded/unrounded vowel pairs
+- Default scale of 0.7 fits portrait pages; adjustable with `scale` parameter
+
 ## Reference
 
 ### `ipa(input: string)`
@@ -183,12 +242,64 @@ Draw a prosodic word structure with explicit foot boundaries marked by parenthes
 **Example:**
 
 ```typst
-#word("('ka.ta)('vas.lo)", foot: "L") 
+#word("('ka.ta)('vas.lo)", foot: "L")
+```
+
+### `vowels(vowel-string: string, lang: string, scale: float, ...)`
+
+Plot vowels on the IPA vowel trapezoid with accurate phonetic positioning.
+
+**Parameters:**
+
+- `vowel-string` (string): Vowel symbols to plot, or a language name (e.g., `"english"` or `"aeiou"`)
+- `lang` (string, optional): Explicit language parameter (e.g., `lang: "spanish"`)
+- `scale` (float, optional): Scale factor for entire chart (default: 0.7)
+- `width` (float, optional): Base width of trapezoid (default: 8)
+- `height` (float, optional): Base height of trapezoid (default: 6)
+- `rows` (int, optional): Number of horizontal grid lines (default: 3)
+- `cols` (int, optional): Number of vertical grid lines (default: 2)
+
+**Returns:** CeTZ drawing of IPA vowel chart with positioned vowels
+
+**Available languages:** english, spanish, portuguese, italian, french, german, japanese, mandarin, russian, arabic
+
+**Examples:**
+
+```typst
+#vowels("english")
+#vowels("aeiou")
+#vowels("french", scale: 0.5)
+```
+
+### `consonants(consonant-string: string, lang: string, scale: float, ...)`
+
+Plot consonants on the pulmonic IPA consonant table organized by place and manner of articulation.
+
+**Parameters:**
+
+- `consonant-string` (string): Consonant symbols to plot, or a language name (e.g., `"all"` or `"ptk"`)
+- `lang` (string, optional): Explicit language parameter (e.g., `lang: "russian"`)
+- `scale` (float, optional): Scale factor for entire table (default: 0.7)
+- `cell-width` (float, optional): Width of each cell (default: 1.8)
+- `cell-height` (float, optional): Height of each cell (default: 1.2)
+- `label-width` (float, optional): Width of row labels (default: 3.5)
+- `label-height` (float, optional): Height of column labels (default: 1.2)
+
+**Returns:** CeTZ drawing of IPA consonant table with positioned consonants
+
+**Available languages:** all, english, spanish, french, german, italian, japanese, portuguese, russian, arabic
+
+**Examples:**
+
+```typst
+#consonants("all")
+#consonants("english")
+#consonants("spanish", scale: 0.6)
 ```
 
 ## Dependencies
 
-- [CeTZ](https://github.com/cetz-package/cetz) 0.4.2 - For drawing prosodic structures
+- [CeTZ](https://github.com/cetz-package/cetz) 0.3.2 - For drawing prosodic structures and IPA charts
 
 ## License
 
