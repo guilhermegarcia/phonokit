@@ -8,7 +8,7 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 
 - **tipa-style input**: Use familiar LaTeX tipa notation instead of hunting for Unicode symbols
 - **Comprehensive symbol support**: All IPA consonants, vowels, and other symbols from the tipa chart
-- **Combining diacritics**: Nasalization (`\~`), devoicing (`\r`), voicing (`\v`), and liaison (`\t`)
+- **Combining diacritics**: Nasalized (`\\~`), devoiced (`\\r`), syllabic (`\\v`); the tie (`\\t`) is also available
 - **Suprasegmentals**: Primary stress (`'`), secondary stress (`,`), length (`:`)
 - **Automatic character splitting**: Type `SE` instead of `S E` for efficiency (spacing is necessary around characters using backslashes)
 - **Charis SIL font**: Proper rendering of all IPA symbols
@@ -44,22 +44,22 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 
 ```typst
 // Basic transcription
-#ipa("'hEloU")  // → ˈhɛloʊ
+#ipa("'sIRi")  // → ˈsɪti
 
 // With nasalization
-#ipa("\~ E")  // → ɛ̃
+#ipa("\\~ E")  // → ɛ̃
 
 // With devoicing
-#ipa("\r s")  // → s̥
+#ipa("\\r z")  // → z̥
 
 // With voicing
-#ipa("\v n")  // → n̩
+#ipa("\\v n")  // → n̩
 
 // Affricates
-#ipa("\t s")  // → t͡s
+#ipa("\\t ts")  // → t͡s
 
 // Complex example with multiple features
-#ipa("'sIn,t \ae ks")  // → ˈsɪnˌtæks
+#ipa("'sIn,t \\ae ks")  // → ˈsɪnˌtæks
 ```
 
 #### `tipa` Notation Quick Reference
@@ -73,16 +73,65 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 
 **Multi-character codes** (with backslash, need spaces around them):
 
-- `\textltailn` → ɲ
-- `\ae` → æ
+- `\\textltailn` → ɲ
+- `\\ae` → æ
 - See [tipa chart](http://www.tug.org/tugboat/tb17-2/tb51rei.pdf) for complete list
 
 **Combining diacritics** (need space before target):
 
-- `\~` → ̃ (nasalization)
-- `\r` → ̥ (devoicing/voiceless)
-- `\v` → ̩ (voicing mark)
-- `\t` → ͡ (tie bar/liaison)
+- `\\~` → ̃ (nasalization)
+- `\\r` → ̥ (devoicing/voiceless)
+- `\\v` → ̩ (voicing mark)
+- `\\t` → ͡ (tie bar/liaison)
+
+### IPA Charts
+
+Phonotypst provides functions for visualizing IPA vowel and consonant inventories with proper phonetic positioning.
+
+#### Vowel Charts
+
+```typst
+// Plot English vowel inventory
+#vowels("english")
+
+// Plot specific vowels
+#vowels("aeiou")
+
+// Plot French vowels with custom scale
+#vowels("french", scale: 0.5)
+
+// All available vowels
+#vowels("all")
+```
+
+**Available consonant language inventories:** `all`, `english`, `spanish`, `french`, `german`, `italian`, `japanese`, `portuguese`, `russian`, `arabic`
+
+#### Consonant Tables
+
+```typst
+// Plot complete pulmonic consonant chart
+#consonants("all")
+
+// Plot English consonant inventory
+#consonants("english")
+
+// Plot specific consonants
+#consonants("ptk")
+
+// Plot Spanish consonants with custom scale
+#consonants("spanish", scale: 0.6)
+```
+
+**Available consonant language inventories:** `all`, `english`, `spanish`, `french`, `german`, `italian`, `japanese`, `portuguese`, `russian`, `arabic`
+
+**Chart features:**
+
+- Vowels positioned by frontness, height, and roundedness on trapezoid
+- Consonants organized by place and manner of articulation
+- Voiceless consonants on left, voiced on right in each cell
+- Impossible articulations (e.g., pharyngeal nasals) automatically grayed out
+- Minimal pair bullets for rounded/unrounded vowel pairs
+- Default scale of 0.7 fits portrait pages; adjustable with `scale` parameter
 
 ### Prosodic Structures
 
@@ -131,174 +180,6 @@ Phonotypst provides three functions for visualizing different levels of prosodic
 - Characters within syllables are automatically parsed into onset, nucleus, and coda
 - Geminates are automatically detected for `#foot()` and `#word`
 - For long vowels, use `vv` instead of using the length diacritic `:`
-
-### IPA Charts
-
-Phonotypst provides functions for visualizing IPA vowel and consonant inventories with proper phonetic positioning.
-
-#### Vowel Charts
-
-```typst
-// Plot English vowel inventory
-#vowels("english")
-
-// Plot specific vowels
-#vowels("aeiou")
-
-// Plot French vowels with custom scale
-#vowels("french", scale: 0.5)
-
-// All available vowels
-#vowels("all")
-```
-
-**Available vowel language inventories:** english, spanish, portuguese, italian, french, german, japanese, mandarin, russian, arabic
-
-#### Consonant Tables
-
-```typst
-// Plot complete pulmonic consonant chart
-#consonants("all")
-
-// Plot English consonant inventory
-#consonants("english")
-
-// Plot specific consonants
-#consonants("ptk")
-
-// Plot Spanish consonants with custom scale
-#consonants("spanish", scale: 0.6)
-```
-
-**Available consonant language inventories:** all, english, spanish, french, german, italian, japanese, portuguese, russian, arabic
-
-**Chart features:**
-
-- Vowels positioned by frontness, height, and roundedness on trapezoid
-- Consonants organized by place and manner of articulation
-- Voiceless consonants on left, voiced on right in each cell
-- Impossible articulations (e.g., pharyngeal nasals) automatically grayed out
-- Minimal pair bullets for rounded/unrounded vowel pairs
-- Default scale of 0.7 fits portrait pages; adjustable with `scale` parameter
-
-## Reference
-
-### `ipa(input: string)`
-
-Convert tipa-style notation to IPA symbols rendered in Charis SIL font.
-
-**Parameters:**
-
-- `input` (string): tipa-style notation
-
-**Returns:** Formatted IPA content
-
-**Example:**
-
-```typst
-#ipa("'Sip")  // → ˈʃip
-```
-
-### `syllable(input: string)`
-
-Draw a single syllable's internal structure.
-
-**Parameters:**
-
-- `input` (string): A single syllable (e.g., `"man"` or `"'va"` for stressed)
-
-**Returns:** CeTZ drawing of syllable structure (σ) showing onset, rhyme, nucleus, and coda
-
-**Example:**
-
-```typst
-#syllable("man")
-```
-
-### `foot(input: string)`
-
-Draw a foot with syllables.
-
-**Parameters:**
-
-- `input` (string): Syllables separated by dots, with apostrophes for stress (e.g., `"man.'tal"`)
-
-**Returns:** CeTZ drawing of foot structure (Σ) with syllables (σ)
-
-**Example:**
-
-```typst
-#foot("man.'tal")
-```
-
-### `word(input: string, foot: string)`
-
-Draw a prosodic word structure with explicit foot boundaries marked by parentheses.
-
-**Parameters:**
-
-- `input` (string): Syllables separated by dots, with optional parentheses for feet and apostrophes for stress
-- `foot` (string, optional): Alignment of prosodic word head - `"R"` for right-aligned (default) or `"L"` for left-aligned
-
-**Returns:** CeTZ drawing of prosodic structure showing prosodic word (PWd), feet (Σ), and syllables (σ)
-
-**Example:**
-
-```typst
-#word("('ka.ta)('vas.lo)", foot: "L")
-```
-
-### `vowels(vowel-string: string, lang: string, scale: float, ...)`
-
-Plot vowels on the IPA vowel trapezoid with accurate phonetic positioning.
-
-**Parameters:**
-
-- `vowel-string` (string): Vowel symbols to plot, or a language name (e.g., `"english"` or `"aeiou"`)
-- `lang` (string, optional): Explicit language parameter (e.g., `lang: "spanish"`)
-- `scale` (float, optional): Scale factor for entire chart (default: 0.7)
-- `width` (float, optional): Base width of trapezoid (default: 8)
-- `height` (float, optional): Base height of trapezoid (default: 6)
-- `rows` (int, optional): Number of horizontal grid lines (default: 3)
-- `cols` (int, optional): Number of vertical grid lines (default: 2)
-
-**Returns:** CeTZ drawing of IPA vowel chart with positioned vowels
-
-**Available languages:** english, spanish, portuguese, italian, french, german, japanese, mandarin, russian, arabic
-
-**Examples:**
-
-```typst
-#vowels("english")
-#vowels("aeiou")
-#vowels("french", scale: 0.5)
-```
-
-### `consonants(consonant-string: string, lang: string, scale: float, ...)`
-
-Plot consonants on the pulmonic IPA consonant table organized by place and manner of articulation.
-
-**Parameters:**
-
-- `consonant-string` (string): Consonant symbols to plot, or a language name (e.g., `"all"` or `"ptk"`)
-- `lang` (string, optional): Explicit language parameter (e.g., `lang: "russian"`)
-- `scale` (float, optional): Scale factor for entire table (default: 0.7)
-- `cell-width` (float, optional): Width of each cell (default: 1.8)
-- `cell-height` (float, optional): Height of each cell (default: 1.2)
-- `label-width` (float, optional): Width of row labels (default: 3.5)
-- `label-height` (float, optional): Height of column labels (default: 1.2)
-
-**Returns:** CeTZ drawing of IPA consonant table with positioned consonants
-
-**Available languages:** all, english, spanish, french, german, italian, japanese, portuguese, russian, arabic
-
-**Examples:**
-
-```typst
-#consonants("all")
-#consonants("english")
-#consonants("spanish", scale: 0.6)
-```
 
 ## Dependencies
 

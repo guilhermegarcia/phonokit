@@ -8,6 +8,7 @@
     "k": "k", "g": "ɡ",
     "q": "q", "\\;G": "ɢ",
     "?": "ʔ",
+    "P": "ʔ",
 
     // CONSONANTS - Nasals
     "m": "m", "M": "ɱ", "n": "n",
@@ -92,10 +93,16 @@
   )
 
   // Define combining diacritics
-  let diacritics = (
+  // Forward-looking: precede the phoneme in input (e.g., \~ a → ã)
+  let forward_diacritics = (
     "\\~": "̃",  // combining tilde (nasalization)
     "\\r": "̥",  // combining ring below (devoicing)
     "\\v": "̩",  // combining vertical line below (voicing)
+    "\\t": "͡",  // combining double inverted breve (tie bar for affricates)
+  )
+
+  // Backward-looking: follow the phoneme in input (e.g., p \h → pʰ)
+  let backward_diacritics = (
     "\\*": "̚",  // combining left angle above (unreleased)
     "\\h": "ʰ",  // modifier letter small h (aspirated)
   )
@@ -104,28 +111,43 @@
   let tokens = input.split(" ")
   let result = ""
   let i = 0
+  let pending_diacritic = none
 
   while i < tokens.len() {
     let token = tokens.at(i)
 
-    // Check if this token is a diacritic
-    if token in diacritics {
-      // Just append it - combining diacritics apply to previous character
-      result += diacritics.at(token)
+    // Check if this token is a forward-looking diacritic
+    if token in forward_diacritics {
+      // Store it to apply to next character
+      pending_diacritic = forward_diacritics.at(token)
+    } else if token in backward_diacritics {
+      // Apply immediately to previous character
+      result += backward_diacritics.at(token)
     } else if token.contains("\\") {
       // Backslash command
       if token in mappings {
         result += mappings.at(token)
+        // Apply pending diacritic if any
+        if pending_diacritic != none {
+          result += pending_diacritic
+          pending_diacritic = none
+        }
       } else {
         result += token
       }
     } else {
       // No backslash: split into individual characters
-      for char in token.clusters() {
+      let chars = token.clusters()
+      for (idx, char) in chars.enumerate() {
         if char in mappings {
           result += mappings.at(char)
         } else {
           result += char
+        }
+        // Apply pending diacritic to first character only
+        if idx == 0 and pending_diacritic != none {
+          result += pending_diacritic
+          pending_diacritic = none
         }
       }
     }
