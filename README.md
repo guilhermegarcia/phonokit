@@ -177,25 +177,15 @@ Phonokit provides three functions for visualizing different levels of prosodic s
 - Geminates are automatically detected for `#foot()` and `#word()`
 - For long vowels, use `vv` instead of using the length diacritic `:`
 
-## Dependencies
-
-- [CeTZ](https://github.com/cetz-package/cetz) 0.3.2 - For drawing prosodic structures and IPA charts
-
 ## License
 
 MIT
 
 ## Author
 
-**Guilherme D. Garcia**
+**Guilherme D. Garcia** \
 Email: <guilherme.garcia@lli.ulaval.ca>
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
-
-## Acknowledgments
-
-This package was developed to make phonological notation and visualization easier for linguists using Typst.
-
-Special thanks to SIL International for developing and maintaining Charis SIL, an essential resource for linguistic typography.
