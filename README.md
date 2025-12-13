@@ -1,6 +1,8 @@
-# Phonotypst
+# Phonokit 🪶
 
 A phonology toolkit for Typst, providing IPA transcription with tipa-style input, prosodic structure visualization, and IPA charts for vowels and consonants.
+
+🚨 **Charis SIL font is needed** for this package to work as intended. If you don't already have this font installed, visit <https://software.sil.org/charis/download/>.
 
 ## Features
 
@@ -11,7 +13,6 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 - **Combining diacritics**: Nasalized (`\\~`), devoiced (`\\r`), syllabic (`\\v`); the tie (`\\t`) is also available
 - **Suprasegmentals**: Primary stress (`'`), secondary stress (`,`), length (`:`)
 - **Automatic character splitting**: Type `SE` instead of `S E` for efficiency (spacing is necessary around characters using backslashes)
-- **Charis SIL font** needed for all transcriptions
 
 ### Prosody Module
 
@@ -29,19 +30,16 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 - **Automatic positioning**: Symbols positioned according to phonetic properties (place, manner, voicing, frontness, height, roundedness)
 - **Proper IPA formatting**: Voiceless/voiced pairs, grayed-out impossible articulations, minimal pair bullets for vowels
 - **Scalable charts**: Adjust size to fit your document layout (scaling includes text as expected)
-- **Charis SIL font**: Professional IPA symbol rendering
 
 ## Installation
 
 ### Package Repository
 
-- `http://github.com/guilhermegarcia/phonotypst`
+- `http://github.com/guilhermegarcia/phonokit`
 
 ### Package website
 
-For the most up-to-date information, vignettes and demos, visit the website below.
-
-- `http://gdgarcia.ca/phonotypst`
+For the most up-to-date information about the package, vignettes and demos, visit <https://gdgarcia.ca/phonokit>.
 
 ## Usage
 
@@ -82,16 +80,9 @@ For the most up-to-date information, vignettes and demos, visit the website belo
 - `\\ae` → æ
 - See [tipa chart](http://www.tug.org/tugboat/tb17-2/tb51rei.pdf) for complete list
 
-**Combining diacritics** (a space is required before each diacritic):
-
-- `\\~` → ̃ (nasalization)
-- `\\r` → ̥ (devoicing/voiceless)
-- `\\v` → ̩ (voicing mark)
-- `\\t` → ͡ (tie bar/liaison)
-
 ### IPA Charts
 
-Phonotypst provides functions for visualizing IPA vowel and consonant inventories with proper phonetic positioning.
+Phonokit provides functions for visualizing IPA vowel and consonant inventories with proper phonetic positioning.
 
 #### Vowel Charts
 
@@ -140,7 +131,7 @@ Phonotypst provides functions for visualizing IPA vowel and consonant inventorie
 
 ### Prosodic Structures
 
-Phonotypst provides three functions for visualizing different levels of prosodic structure. The functions `syllable()`, `foot()` and `word()` below also have a `scale` argument (float) for adjusting the size of the resulting prosodic tree. Crucially, the scaling includes the tree, the text and the thickness of the lines in the tree. Furthermore, the length of each line dynamically adapts to the complexity of the representation, which results in a visually balanced figure.
+Phonokit provides three functions for visualizing different levels of prosodic structure. The functions `syllable()`, `foot()` and `word()` below also have a `scale` argument (float) for adjusting the size of the resulting prosodic tree. Crucially, the scaling includes the tree, the text and the thickness of the lines in the tree. Furthermore, the length of each line dynamically adapts to the complexity of the representation, which results in a visually balanced figure.
 
 #### Syllable Level
 
@@ -202,18 +193,6 @@ Email: <guilherme.garcia@lli.ulaval.ca>
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
-
-## Fonts
-
-This package includes **Charis SIL**, a Unicode-based font family designed for broad phonetic transcription and supporting comprehensive IPA symbols. Charis SIL is developed by SIL International and distributed under the SIL Open Font License (OFL).
-
-- **Font**: Charis SIL
-- **Version**: 6.200 (or later)
-- **Copyright**: © 1997-2023 SIL International
-- **License**: SIL Open Font License 1.1
-- **Website**: <https://software.sil.org/charis/>
-
-The inclusion of Charis SIL ensures consistent and accurate rendering of IPA symbols across all systems without requiring users to install additional fonts.
 
 ## Acknowledgments
 

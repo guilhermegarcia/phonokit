@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.3.2": canvas, draw
+#import "@preview/cetz:0.4.2": canvas, draw
 
 // Consonant data with place, manner, and voicing
 // place: 0=bilabial, 1=labiodental, 2=dental, 3=alveolar, 4=postalveolar

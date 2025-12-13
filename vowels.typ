@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.3.2": canvas, draw
+#import "@preview/cetz:0.4.2": canvas, draw
 
 // Vowel data with relative positions (0-1 scale)
 // frontness: 0 = front, 0.5 = central, 1 = back
