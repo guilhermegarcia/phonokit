@@ -71,14 +71,37 @@ For the most up-to-date information about the package, vignettes and demos, visi
 
 - Common vowels: `i I e E a A o O u U @`
 - Common consonants: `p b t d k g f v s z S Z m n N l r`
-- Stress: `'` (primary), `,` (secondary)
-- Length: `:` (place after vowel)
 
-**Multi-character codes** (with backslash, need spaces around them):
+**Multi-character codes**
 
 - `\\textltailn` → ɲ
 - `\\ae` → æ
-- See [tipa chart](http://www.tug.org/tugboat/tb17-2/tb51rei.pdf) for complete list
+- See [`tipa` chart](https://gdgarcia.ca/typst/tipachart.pdf) for complete list
+
+**Diacritics currently supported**:
+
+- Stress: `'` (primary), `,` (secondary)
+- Length: `:` (place after segment)
+- Liaison: `\\t` (place before segment)
+- Devoicing: `\\r` (place before segment)
+- Sillabicity: `\\v` (place before segment)
+- Aspiration: `\\h` (place after segment)
+- Nasal: `\\~` (place before segment)
+- C cedilla: `\\c{c}` (of course, simply typing `ç` is easier depending on your keyboard layout)
+- Unreleased: `\\*` (place after segment)
+
+**Spacing**:
+
+- Empty space: `\\s` (important if you want to transcribe sentences)
+
+:::
+
+**Important:** Anything that has `\\` must not have adjacent characters:
+
+- `\\~ a` is correct for _ã_; `\\~a` is **not** correct
+- `k \\ae t` is correct for _cat_; `k\\aet` is **not** correct
+- `[ \\ae t]` is correct for _at_; `[\\ae t]` is **not** correct
+- `\\ae t` is correct for _at_; `\\aet` is **not** correct
 
 ### IPA Charts
 
