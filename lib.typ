@@ -1,19 +1,27 @@
-// Phonotypst - Phonology toolkit for Typst
+// Phonokit - Phonology toolkit for Typst
 // Author: Guilherme D. Garcia
 //
 // A comprehensive toolkit for phonological and phonetic notation in Typst.
 //
 // This package provides:
 // - IPA transcription with tipa-style input syntax
-// - Prosodic structure visualization (syllables, feet, prosodic words)
+// - Prosodic structure visualization (syllables, moras, feet, prosodic words)
 // - IPA vowel charts (trapezoid) with language inventories
 // - IPA consonant tables (pulmonic) with language inventories
+// - Optimality Theory (OT) tableaux with violation marking and shading
+// - Maximum Entropy (MaxEnt) grammar tableaux with probability calculations
+// - SPE-style feature matrices for phonological representations
+// - Interlinear glossed text (IGT) following Leipzig Glossing Rules
 
 // Import modules
-#import "ipa.typ": ipa
-#import "prosody.typ": syllable, foot, word
-#import "vowels.typ": vowels
-#import "consonants.typ": consonants
+#import "ipa.typ": *
+#import "prosody.typ": *
+#import "ot.typ": *
+#import "extras.typ": *
+#import "vowels.typ": *
+#import "consonants.typ": *
+#import "features.typ": *
+#import "sonority.typ": *
 
 // Re-export IPA function
 /// Convert tipa-style notation to IPA symbols
@@ -32,6 +40,40 @@
 /// Returns: IPA symbols in Charis SIL font
 #let ipa = ipa
 
+// Re-export Sonority function
+/// Visualize sonority profiles based on Parker (2011)
+///
+/// Generates a visual sonority profile for a given phonemic transcription.
+/// Phonemes are mapped to a vertical sonority axis (1-13) based on Parker's
+/// acoustic scale and connected to show the sonority contour of the word.
+///
+/// Features:
+/// - Uses Parker (2011) hierarchy (e.g., Flaps > Laterals > Trills)
+/// - Visualizes syllable boundaries using alternating background shading (white/gray)
+/// - Automatic parsing of tipa-style input strings
+///
+/// Arguments:
+/// - word (string): Phonemic string in tipa-style (use "." for syllable boundaries)
+/// - box-size (float): Size of individual phoneme boxes (default: 0.8)
+/// - scale (float): Overall scale factor for the diagram (default: 1.0)
+/// - y-range (array): Vertical axis range for plotting (default: (0, 8))
+/// - show-lines (bool): Connect phonemes with dashed lines (default: true)
+///
+/// Returns: CeTZ drawing of the sonority profile
+///
+/// Example:
+/// ```
+/// // Visualizes "par.to.me" with 3 distinct background zones
+/// #sonority("par.to.me")
+///
+/// // Demonstrates Flap (R) > Lateral (l) ranking
+/// #sonority("ka.Ra.lo")
+/// ```
+///
+/// Note: Input is automatically truncated to the first 10 phonemes to prevent
+/// visual overflow.
+#let sonority = sonority
+
 // Re-export Prosody functions
 /// Draw a single syllable's internal structure
 ///
@@ -45,6 +87,24 @@
 ///
 /// Example: `#syllable("man", scale: 0.8)`
 #let syllable = syllable
+
+/// Draw a mora-based structure
+///
+/// Visualizes mora (μ) and syllable (σ) levels, showing how syllables
+/// are decomposed into moras based on weight.
+///
+/// Arguments:
+/// - input (string): A single syllable (e.g., "kan" or "ka")
+/// - coda (bool): Whether codas contribute to weight (default: false)
+/// - scale (float): Scale factor for the diagram (default: 1.0)
+///
+/// Returns: CeTZ drawing of moraic structure
+///
+/// Examples:
+/// - `#mora("kan")` - CVN syllable with two moras (coda doesn't count)
+/// - `#mora("kan", coda: true)` - CVN syllable with two moras (coda counts)
+/// - `#mora("ka")` - CV syllable with one mora
+#let mora = mora
 
 /// Draw a foot with syllables
 ///
@@ -84,10 +144,10 @@
 ///
 /// Visualizes vowels on the IPA vowel chart (trapezoid) with proper positioning
 /// based on frontness, height, and roundedness. Supports language-specific
-/// inventories or custom vowel sets.
+/// inventories, custom vowel sets, or tipa-style IPA notation.
 ///
 /// Arguments:
-/// - vowel-string (string): Vowel symbols to plot, or a language name
+/// - vowel-string (string): Vowel symbols to plot, language name, or tipa-style IPA
 /// - lang (string, optional): Explicit language parameter (e.g., lang: "spanish")
 /// - width (float): Base width of trapezoid (default: 8)
 /// - height (float): Base height of trapezoid (default: 6)
@@ -100,7 +160,10 @@
 /// Examples:
 /// - `#vowels("english")` - Plot English vowel inventory
 /// - `#vowels("aeiou")` - Plot specific vowels
+/// - `#vowels("i e E a o O u")` - Plot vowels using tipa-style notation
 /// - `#vowels("french", scale: 0.5)` - Smaller French vowel chart
+///
+/// Note: Diacritics and non-vowel symbols are ignored during plotting
 ///
 /// Available languages: english, spanish, portuguese, italian, french, german,
 /// japanese, mandarin, russian, arabic
@@ -113,8 +176,10 @@
 /// are shown left/right in each cell. Impossible articulations are grayed out.
 ///
 /// Arguments:
-/// - consonant-string (string): Consonant symbols to plot, or a language name
+/// - consonant-string (string): Consonant symbols to plot, language name, or tipa-style IPA
 /// - lang (string, optional): Explicit language parameter (e.g., lang: "russian")
+/// - affricates (bool): Show affricate row after fricatives (default: false)
+/// - aspirated (bool): Show aspirated plosive/affricate rows (default: false)
 /// - cell-width (float): Width of each cell (default: 1.8)
 /// - cell-height (float): Height of each cell (default: 1.2)
 /// - label-width (float): Width of row labels (default: 3.5)
@@ -127,8 +192,121 @@
 /// - `#consonants("all")` - Show complete pulmonic consonant chart
 /// - `#consonants("english")` - Plot English consonant inventory
 /// - `#consonants("ptk")` - Plot specific consonants
+/// - `#consonants("T D s z S Z")` - Plot consonants using tipa-style notation
+/// - `#consonants("t \\t s d \\t z", affricates: true)` - Show affricates row
+/// - `#consonants("mandarin", affricates: true, aspirated: true)` - Show Mandarin with affricates and aspiration
 /// - `#consonants("spanish", scale: 0.5)` - Smaller Spanish consonant chart
 ///
+/// Notes:
+/// - /w/ (labiovelar) appears in both bilabial and velar columns when /ɰ/ is not present; otherwise only bilabial
+/// - Affricates appear in a separate row when affricates: true (displayed without tie bars)
+/// - Aspirated consonants appear in separate rows when aspirated: true (e.g., "Plosive (aspirated)")
+/// - Diacritics and non-consonant symbols are ignored during plotting
+///
 /// Available languages: all, english, spanish, french, german, italian,
-/// japanese, portuguese, russian, arabic
+/// japanese, mandarin, portuguese, russian, arabic
 #let consonants = consonants
+
+// Re-export Optimality Theory functions
+/// Create an Optimality Theory tableau
+///
+/// Generates a formatted OT tableau with candidates, constraints, violations,
+/// and shading for irrelevant cells after fatal violations.
+///
+/// Arguments:
+/// - input (string or content): The input form (can use IPA notation)
+/// - candidates (array): Array of candidate forms (strings or content)
+/// - constraints (array): Array of constraint names (strings)
+/// - violations (array): 2D array of violation strings (use "*" for violations, "!" for fatal)
+/// - winner (int): Index of the winning candidate (1-indexed)
+/// - dashed-lines (array): Indices of constraints to show with dashed borders (optional)
+///
+/// Returns: Table showing OT tableau with winner marked by ☞
+///
+/// Example:
+/// ```
+/// #tableau(
+///   input: "kraTa",
+///   candidates: ("kra.Ta", "ka.Ta", "ka.ra.Ta"),
+///   constraints: ("Max", "Dep", "*Complex"),
+///   violations: (
+///     ("", "", "*"),
+///     ("*!", "", ""),
+///     ("", "*!", ""),
+///   ),
+///   winner: 1, // <- Position of winning cand
+///   dashed-lines: (1,) // <- Note the comma
+/// )
+/// ```
+#let tableau = tableau
+
+/// Create a Maximum Entropy (MaxEnt) grammar tableau
+///
+/// Generates a MaxEnt tableau showing harmony scores, probabilities,
+/// and optional probability visualizations.
+///
+/// Arguments:
+/// - input (string or content): The input form
+/// - candidates (array): Array of candidate forms
+/// - constraints (array): Array of constraint names
+/// - weights (array): Array of constraint weights (numbers)
+/// - violations (array): 2D array of violation counts (numbers)
+/// - visualize (bool): Whether to show probability bars (default: true)
+///
+/// Returns: Table showing MaxEnt tableau with H(x), P*(x), and P(x) columns
+///
+/// Example:
+/// ```
+/// #maxent(
+///   input: "kraTa",
+///   candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
+///   constraints: ("Max", "Dep", "Complex"),
+///   weights: (2.5, 1.8, 1),
+///   violations: (
+///     (0, 0, 1),
+///     (1, 0, 0),
+///     (0, 1, 0),
+///   ),
+///   visualize: true  // Show probability bars (default)
+/// )
+/// ```
+#let maxent = maxent
+
+// SPE/Feature function
+/// Create a feature matrix in SPE notation
+///
+/// Displays phonological features in a vertical matrix with square brackets,
+/// commonly used in Sound Pattern of English (SPE) style representations.
+///
+/// Arguments:
+/// - ..args: Features as separate arguments or comma-separated string
+///
+/// Returns: Mathematical vector notation with features
+///
+/// Examples:
+/// - `#feat("+cons", "-son", "+voice")` - Three features as separate args
+/// - `#feat("+cons,-son,+voice")` - Three features as comma-separated string
+#let feat = feat
+
+/// Display complete distinctive feature matrix for an IPA segment
+///
+/// Takes an IPA symbol and displays its complete distinctive feature specification
+/// from Hayes (2009) Introductory Phonology. Features are shown in SPE-style
+/// vertical matrix notation.
+///
+/// Arguments:
+/// - segment (string): IPA symbol using Unicode or tipa-style notation
+/// - all (bool): Show all features including unspecified (0) values (default: false)
+///
+/// Returns: Complete feature matrix in SPE notation
+///
+/// Examples:
+/// - `#feat-matrix("p")` - Shows feature matrix for /p/
+/// - `#feat-matrix("\\ae")` - Shows feature matrix for /i/
+/// - `#feat-matrix("\\t tS")` - Affricate using tipa notation
+/// - `#feat-matrix("i", all: true)` - Shows all features including 0 values
+///
+/// Note: Based on Hayes (2009) feature system. Includes manner, laryngeal,
+/// and place features for consonants; syllabic, height, backness, and rounding
+/// features for vowels.
+#let feat-matrix = feat-matrix

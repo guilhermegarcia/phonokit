@@ -1,4 +1,5 @@
 #import "@preview/cetz:0.4.2": canvas, draw
+#import "ipa.typ": ipa-to-unicode
 
 // Vowel data with relative positions (0-1 scale)
 // frontness: 0 = front, 0.5 = central, 1 = back
@@ -146,8 +147,9 @@
       error-msg = [*Error:* Language "#lang" not available. \ Available languages: #available]
     }
   } else if vowel-string != "" {
-    // Use as manual vowel specification
-    vowels-to-plot = vowel-string
+    // Use as manual vowel specification - convert IPA notation to Unicode
+    // Note: Diacritics and non-vowel symbols will be ignored during plotting
+    vowels-to-plot = ipa-to-unicode(vowel-string)
   } else {
     // Nothing specified
     error-msg = [*Error:* Either provide vowel string or language name]

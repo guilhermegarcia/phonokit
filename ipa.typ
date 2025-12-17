@@ -1,4 +1,6 @@
-#let ipa(input) = {
+// Convert tipa-style notation to IPA Unicode (without font styling)
+// This is exported separately so other modules can use the conversion logic
+#let ipa-to-unicode(input) = {
   // Define TIPA to IPA mappings
   let mappings = (
     // CONSONANTS - Plosives
@@ -72,7 +74,7 @@
     "7": "ɤ", "o": "o",
 
     // VOWELS - Mid
-    "@": "ə", "\\textschwa": "ə",
+    "@": "ə",
 
     // VOWELS - Open-mid
     "E": "ɛ", "\\oe": "œ", "3": "ɜ",
@@ -155,5 +157,10 @@
     i += 1
   }
 
-  text(font: "Charis SIL", result)
+  result
+}
+
+// Main IPA function: converts tipa-style notation to IPA with Charis SIL font
+#let ipa(input) = {
+  text(font: "Charis SIL", ipa-to-unicode(input))
 }
