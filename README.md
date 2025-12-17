@@ -4,9 +4,11 @@ A phonology toolkit for Typst, providing IPA transcription with tipa-style input
 
 🚨 **Charis SIL font is needed** for this package to work as intended. If you don't already have this font installed, visit <https://software.sil.org/charis/download/>. In addition, New Computer Modern is used for arrows.
 
+**⚠️ Note:** This repo contains the most up-to-date version of the package (version under development).
+
 ## Features
 
-See `vignette.pdf` in this repo for thorough demo of the package.
+📝 See `vignette.pdf` in this repo for *thorough* demo of the package.
 
 ### IPA Module
 
@@ -123,10 +125,10 @@ For the most up-to-date information about the package, vignettes and demos, visi
 
 **Important:** Anything that has `\\` must not have adjacent characters:
 
-- `\\~ a` is correct for _ã_; `\\~a` is **not** correct
-- `k \\ae t` is correct for _cat_; `k\\aet` is **not** correct
-- `[ \\ae t]` is correct for _at_; `[\\ae t]` is **not** correct
-- `\\ae t` is correct for _at_; `\\aet` is **not** correct
+- `\\~ a` is correct for *ã*; `\\~a` is **not** correct
+- `k \\ae t` is correct for *cat*; `k\\aet` is **not** correct
+- `[ \\ae t]` is correct for *at*; `[\\ae t]` is **not** correct
+- `\\ae t` is correct for *at*; `\\aet` is **not** correct
 
 ### IPA Charts
 
