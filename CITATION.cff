@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Garcia
+    given-names: Guilherme D.
+    email: guilherme.garcia@lli.ulaval.ca
+    orcid: https://orcid.org/0000-0003-1412-3856
+title: "Phonokit: Phonology toolkit for Typst"
+version: 0.1.0
+date-released: 2025-12-18
+url: "https://github.com/guilhermegarcia/phonokit"
+repository-code: "https://github.com/guilhermegarcia/phonokit"
+doi: 10.5281/zenodo.17971032
+license: MIT
+keywords:
+  - phonology
+  - linguistics
+  - IPA
+  - typst
+  - prosody
+  - optimality-theory
+  - maxent
+  - sonority
+abstract: "Phonology toolkit for Typst, providing IPA transcription with tipa-style input, prosodic structure visualization, IPA charts for vowels and consonants, sonority profiles, feature matrices for SPE rules, and OT/MaxEnt tableaux."
