@@ -1,5 +1,7 @@
 # Phonokit 🪶
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17971032.svg)](https://doi.org/10.5281/zenodo.17971032)
+
 A phonology toolkit for Typst, providing IPA transcription with tipa-style input, prosodic structure visualization, and IPA charts for vowels and consonants.
 
 🚨 **Charis SIL font is needed** for this package to work as intended. If you don't already have this font installed, visit <https://software.sil.org/charis/download/>. In addition, New Computer Modern is used for arrows.
@@ -374,6 +376,10 @@ MIT
 
 **Guilherme D. Garcia** \
 Email: <guilherme.garcia@lli.ulaval.ca>
+
+## Citation
+
+If you use this software in your research, please cite it using the metadata from the `CITATION.cff` file or click the "Cite this repository" button in the GitHub sidebar.
 
 ## Contributing
 
