@@ -6,6 +6,6 @@ version = "0.1.0"
 entrypoint = "lib.typ"
 authors = ["Guilherme D. Garcia <guilherme.garcia@lli.ulaval.ca>"]
 license = "MIT"
-description = "Phonology toolkit: IPA transcription (tipa-style), prosodic structures, vowel/consonant charts with language inventories, sonority profiles, feature matrices for SPE rules, and OT/MaxEnt tableaux"
+description = "A toolkit for typesetting phonology"
 repository = "https://github.com/guilhermegarcia/phonokit"
 homepage = "https://gdgarcia.ca/phonokit"
