@@ -2,7 +2,7 @@
 categories = ["utility", "text", "visualization"]
 disciplines = ["linguistics"]
 name = "phonokit"
-version = "0.1.0"
+version = "0.2.0"
 entrypoint = "lib.typ"
 authors = ["Guilherme D. Garcia <guilherme.garcia@lli.ulaval.ca>"]
 license = "MIT"
