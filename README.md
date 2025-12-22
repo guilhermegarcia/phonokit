@@ -94,42 +94,26 @@
 
 ## Features
 
-See package homepage or GitHub repository for a comprehensive demo (`vignette.pdf`).
+See package homepage or GitHub repository for a comprehensive demo (`vignette.pdf`). Here are the highlights of the package.
 
 ### IPA Module
 
 - **tipa-style input**: Use familiar LaTeX tipa notation instead of hunting for Unicode symbols
-- **Comprehensive symbol support**: All IPA consonants, vowels, and other symbols from the tipa chart
-- **Combining diacritics**: Nasalized (`\\~`), devoiced (`\\r`), syllabic (`\\v`); the tie (`\\t`) is also available
-- **Suprasegmentals**: Primary stress (`'`), secondary stress (`,`), length (`:`)
-- **Automatic character splitting**: Type `SE` instead of `S E` for efficiency (spacing is necessary around characters using backslashes)
-
-### IPA Charts Module
-
+- **Comprehensive symbol support**: most common IPA consonants, vowels, and diacritics
 - **Vowel charts**: Plot vowels on the IPA vowel trapezoid with accurate positioning
 - **Consonant tables**: Display consonants in the pulmonic IPA consonant table
-- **Language inventories**: Pre-defined inventories for some languages (English, Spanish, French, German, Italian, Portuguese, Japanese, Russian, Arabic, Mandarin)
-- **Custom symbol sets**: Plot any combination of IPA symbols
-- **Automatic positioning**: Symbols positioned according to phonetic properties (place, manner, voicing, frontness, height, roundedness)
-- **Proper IPA formatting**: Voiceless/voiced pairs, grayed-out impossible articulations, minimal pair bullets for vowels
 - **Scalable charts**: Adjust size to fit your document layout (scaling includes text as expected)
 
 ### Prosody Module
 
-- **Prosodic structure visualization**: Draw syllable structures with onset, nucleus, and coda
-- **Mora-based representations**: Visualize syllable weight using moraic structure (μ)
-- **Flexible foot structure**: Use parentheses to mark explicit foot boundaries and stress mark to identify headedness (iambs, trochees)
-- **Stress marking**: Mark stressed syllables with apostrophe `'`
-- **Flexible alignment**: Left or right alignment for prosodic word heads
+- **Prosodic structure visualization**: Draw syllable structures (onset-rhyme and moraic representations) as well as feet and prosodic words with simple and intuitive syntax
 - **Metrical grids**: Inputs as strings or tuples
 
 ### Optimality Theory Module
 
 - **OT tableaux**: Create publication-ready Optimality Theory tableaux with automatic formatting
-- **Violation marking**: Use `*` for violations and `!` for fatal violations
 - **Automatic shading**: Cells are automatically grayed out after fatal violations
-- **Winner indication**: Optimal candidates marked with ☞ (pointing finger)
-- **Constraint ranking**: Display ranked constraints with optional dashed lines for ties
+- **Winner indication**: Optimal candidates automatically marked with ☞ (pointing finger)
 - **IPA support**: Input and candidate forms can use tipa-style IPA notation
 
 ### Maximum Entropy Module
@@ -137,14 +121,14 @@ See package homepage or GitHub repository for a comprehensive demo (`vignette.pd
 - **MaxEnt tableaux**: Generate Maximum Entropy grammar tableaux with probability calculations
 - **Automatic calculations**: Computes harmony scores H(x), unnormalized probabilities P*(x), and normalized probabilities P(x)
 - **Visual probability bars**: Optional graphical representation of candidate probabilities
-- **Weighted constraints**: Supports continuous constraint weights
 - **IPA support**: Input and candidate forms can use tipa-style IPA notation
 
 ## Installation
 
 ### Package Repository
 
-- `http://github.com/guilhermegarcia/phonokit`
+- `http://github.com/guilhermegarcia/phonokit` [(most up-to-date version)](http://github.com/guilhermegarcia/phonokit)
+- `https://typst.app/universe/package/phonokit` [(published on Typst)](https://typst.app/universe/package/phonokit)
 
 ### Package website
 
@@ -188,8 +172,7 @@ Phonokit provides functions for visualizing IPA vowel and consonant inventories 
 #vowels("english")
 
 // Plot specific vowels using IPA notation
-#vowels("aeiou")
-#vowels("i e E a o O u")  // Using tipa-style notation
+#vowels("aeEioOu")
 
 // Plot French vowels with custom scale
 #vowels("french", scale: 0.5)
@@ -213,19 +196,12 @@ Phonokit provides functions for visualizing IPA vowel and consonant inventories 
 
 // Plot specific consonants using IPA notation
 #consonants("ptk")
-#consonants("p t k b d g")  // Using tipa-style notation with spaces
-#consonants("T D s z S Z")  // Fricatives using tipa notation
 
 // Include affricates row with language-specific affricates
 #consonants("english", affricates: true)  // Shows t͡ʃ, d͡ʒ
-#consonants("all", affricates: true)      // Shows all common affricates
-
-// Custom affricates with IPA input
-#consonants("t \\t s d \\t z t \\t S d \\t Z", affricates: true)
 
 // Include aspirated consonants (phonemic aspiration)
 #consonants("mandarin", affricates: true, aspirated: true)  
-#consonants("all", aspirated: true)  
 
 // Plot Spanish consonants with custom scale
 #consonants("spanish", scale: 0.6)
@@ -235,31 +211,11 @@ Phonokit provides functions for visualizing IPA vowel and consonant inventories 
 
 - The `consonants()` function accepts tipa-style IPA input
 - Use `affricates: true` to show a dedicated affricate row (appears after fricatives)
-  - Affricates are displayed **without tie bars** (e.g., tʃ instead of t͡ʃ) since the row label makes it clear
-  - `"all"` with affricates shows: pf, bv (labiodental), ts, dz (alveolar), tʃ, dʒ (postalveolar), ʈʂ, ɖʐ (retroflex)
-  - `"english"` with affricates shows: tʃ, dʒ
-  - `"german"` with affricates shows: pf, ts
-  - `"japanese"` with affricates shows: ts, tɕ, dʑ (alveolo-palatal)
-  - `"mandarin"` with affricates shows: ts, ʈʂ, tɕ
-  - Custom input: affricates are extracted from your IPA string (with or without tie bars)
 - Use `aspirated: true` to show aspirated consonant rows (for languages with phonemic aspiration)
-  - Adds "Plosive (aspirated)" row after "Plosive" with symbols like pʰ, tʰ, kʰ
-  - When combined with `affricates: true`, also adds "Affricate (aspirated)" row with symbols like tsʰ, tʃʰ
-  - `"mandarin"` with aspirated shows: pʰ, tʰ, kʰ (plosives) and tsʰ, ʈʂʰ, tɕʰ (affricates)
-  - `"all"` with aspirated shows: pʰ, tʰ, ʈʰ, cʰ, kʰ, qʰ (all aspirated plosives)
 - /w/ (labiovelar approximant) appears in both bilabial and velar columns when /ɰ/ (velar approximant) is not present; otherwise only under bilabial
 - Diacritics and non-consonant symbols are automatically ignored during plotting
 
 **Available consonant language inventories:** `all`, `english`, `spanish`, `french`, `german`, `italian`, `japanese`, `mandarin`, `portuguese`, `russian`, `arabic`
-
-**Chart features:**
-
-- Vowels positioned by frontness, height, and roundedness on trapezoid
-- Consonants organized by place and manner of articulation
-- Voiceless consonants on left, voiced on right in each cell
-- Impossible articulations (e.g., pharyngeal nasals) automatically grayed out
-- Minimal pair bullets for rounded/unrounded vowel pairs
-- Default scale of 0.7 fits portrait pages; adjustable with `scale` parameter
 
 ### Prosodic Structures
 
@@ -287,8 +243,8 @@ Phonokit provides three functions for visualizing different levels of prosodic s
 
 ```typst
 // Visualize foot (Σ) and syllable (σ) levels
-#foot("man.'tal")
-#foot("'man.tal")
+#foot("man.'tal") // right-headed foot
+#foot("'man.tal") // left-headed foot
 ```
 
 #### Word Level
@@ -313,11 +269,11 @@ Phonokit provides three functions for visualizing different levels of prosodic s
 **Prosody notation:**
 
 - `.` separates syllables
-- `'` before a syllable marks it as stressed (e.g., `'va`)
+- `'` before a syllable marks it as the head of a foot
 - `()` marks foot boundaries (used in `#word()`)
 - Characters within syllables are automatically parsed into onset, nucleus, and coda
 - Geminates are automatically detected for `#foot()` and `#word()`
-- For long vowels, use `:`; `vv` will produce a complex nucleus
+- For long vowels, use `:`; `vv` will produce a complex nucleus (e.g., a diphthong)
 
 #### Metrical grids
 
@@ -352,7 +308,7 @@ The segment #feat("+syl,-cons,+high,-back") represents /i/.
 
 ### Distinctive Feature Matrices
 
-Display complete distinctive feature specifications for IPA segments based on Hayes (2009):
+Display complete distinctive feature specifications for IPA segments based on Hayes (2009).
 
 ```typst
 // Display feature matrix for a consonant
