@@ -6,23 +6,25 @@
 // This package provides:
 // - IPA transcription with tipa-style input syntax
 // - Prosodic structure visualization (syllables, moras, feet, prosodic words)
+// - Autosegmental representations and processes (features and tones)
 // - IPA vowel charts (trapezoid) with language inventories
 // - IPA consonant tables (pulmonic) with language inventories
 // - Optimality Theory (OT) tableaux with violation marking and shading
 // - Maximum Entropy (MaxEnt) grammar tableaux with probability calculations
 // - SPE-style feature matrices for phonological representations
-// - Interlinear glossed text (IGT) following Leipzig Glossing Rules
 
 // Import modules
 #import "ipa.typ": *
 #import "prosody.typ": *
 #import "ot.typ": *
+#import "hasse.typ": *
 #import "extras.typ": *
 #import "vowels.typ": *
 #import "grids.typ": *
 #import "consonants.typ": *
 #import "features.typ": *
 #import "sonority.typ": *
+#import "autosegmental.typ": *
 
 // Re-export IPA function
 /// Convert tipa-style notation to IPA symbols
@@ -249,7 +251,7 @@
 /// - candidates (array): Array of candidate forms (strings or content)
 /// - constraints (array): Array of constraint names (strings)
 /// - violations (array): 2D array of violation strings (use "*" for violations, "!" for fatal)
-/// - winner (int): Index of the winning candidate (1-indexed)
+/// - winner (int): Index of the winning candidate (0-indexed)
 /// - dashed-lines (array): Indices of constraints to show with dashed borders (optional)
 ///
 /// Returns: Table showing OT tableau with winner marked by ☞
@@ -265,7 +267,7 @@
 ///     ("*!", "", ""),
 ///     ("", "*!", ""),
 ///   ),
-///   winner: 1, // <- Position of winning cand
+///   winner: 0, // <- Position of winning cand
 ///   dashed-lines: (1,) // <- Note the comma
 /// )
 /// ```
@@ -302,6 +304,46 @@
 /// )
 /// ```
 #let maxent = maxent
+
+/// Create a Hasse diagram for Optimality Theory constraint rankings
+///
+/// Generates a visual representation of the partial order of constraint rankings.
+///
+/// Features:
+/// - Supports partial orders (not all constraints need to be ranked)
+/// - Handles floating constraints with no ranking relationships
+/// - Supports dashed and dotted line styles for different edge types
+/// - Auto-scales for complex hierarchies
+///
+/// Arguments:
+/// - rankings (array): Array of tuples representing rankings:
+///   - Three-element tuple `(A, B, level)` means A dominates B, and A is at stratum `level` (REQUIRED)
+///   - Four-element tuple `(A, B, level, style)` means A dominates B, A at stratum `level`, with line `style`
+///   - Single-element tuple `(A,)` means A is floating (no ranking)
+///   - Line styles: "solid" (default), "dashed", "dotted"
+///   - Note: Level specification is REQUIRED for all edges to ensure proper stratification
+/// - scale (number or auto): Scale factor for diagram (default: auto-scales based on complexity)
+/// - node-spacing (number): Horizontal spacing between nodes (default: 2.5)
+/// - level-spacing (number): Vertical spacing between levels (default: 1.5)
+///
+/// Returns: A Hasse diagram showing the constraint hierarchy
+///
+/// Examples:
+/// ```
+/// // Basic scenario
+/// #hasse(
+///   (
+///     ("*Complex", "Max", 0),
+///     ("*Complex", "Dep", 0),
+///     ("Onset", "Max", 0),
+///     ("Onset", "Dep", 0),
+///     ("Max", "NoCoda", 1),
+///     ("Dep", "NoCoda", 1),
+///   ),
+///   scale: 0.9
+/// )
+/// ```
+#let hasse = hasse
 
 // SPE/Feature function
 /// Create a feature matrix in SPE notation
@@ -341,3 +383,62 @@
 /// and place features for consonants; syllabic, height, backness, and rounding
 /// features for vowels.
 #let feat-matrix = feat-matrix
+
+/// Create an autosegmental representation
+///
+/// Generates an autosegmental representation visualizing features or tones
+/// on a separate tier from segments. Supports spreading (one-to-many associations),
+/// delinking, multiple linking, and floating features/tones. Ideal for illustrating
+/// phonological processes like tone spreading, vowel harmony, or feature geometry.
+///
+/// Arguments:
+/// - segments (array): Segment strings (use "" for empty timing slots)
+/// - features (array): Feature/tone labels corresponding to segments (use "" for no association)
+/// - links (array): Tuples of (feature-index, segment-index) for association lines (default: ())
+/// - delinks (array): Tuples of (feature-index, segment-index) for delinking marks (default: ())
+/// - spacing (float): Horizontal spacing between segments (default: 0.8)
+/// - arrow (bool): Show arrow between representations (for process diagrams) (default: false)
+/// - tone (bool): Whether the representation shows tones vs features (default: false)
+/// - highlight (array): Indices of segments to highlight with background color (default: ())
+/// - float (array): Indices of floating (unassociated) features/tones (default: ())
+/// - multilinks (array): Tuples of (feature-index, (seg1, seg2, ...)) for one-to-many links (default: ())
+/// - baseline (string): Optional baseline text below segments (default: "")
+/// - gloss (string): Optional gloss text below baseline (default: "")
+///
+/// Returns: Autosegmental representation
+///
+/// Examples:
+/// ```
+/// // Basic tone spreading: L tone spreads to multiple syllables
+/// #autoseg(
+///   ("a", "", "g", "a", "f", "i"),
+///   features: ("L", "", "", "H", "", ""),
+///   links: ((0, 3),),
+///   delinks: ((3, 3),),
+///   tone: true,
+///   spacing: 0.5,
+///   multilinks: ((3, (3, 5)),),
+/// )
+///
+/// // Feature spreading with arrow (showing phonological process)
+/// #autoseg(
+///   ("t", "a", "n"),
+///   features: ("+nasal", "", ""),
+///   links: ((0, 0),),
+///   arrow: true,
+/// )
+///
+/// // Floating tone with highlighting
+/// #autoseg(
+///   ("m", "a", "m", "a"),
+///   features: ("H", "L", "", ""),
+///   float: (0,),
+///   highlight: (1, 3),
+///   tone: true,
+/// )
+/// ```
+///
+/// Note: Index numbering is 0-based. Use empty strings "" in segments or features
+/// arrays to create timing slots without content or features without associations.
+#let autoseg = autoseg
+

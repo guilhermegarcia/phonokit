@@ -19,7 +19,8 @@
 
 ⚠️ **Charis SIL font is needed** for this package to work exactly as intended. If you don't already have this font installed, visit <https://software.sil.org/charis/download/>. New Computer Modern is used for arrows.
 
-## Examples
+## Some examples
+
 <!-- img width is set so the table gets evenly spaced by GitHubs css -->
 <table>
 <tr>
@@ -66,7 +67,35 @@
   <td>Syllable structure (onset-rhyme and moraic representations)</td>
   <td>Prosodic word (with metrical parsing)</td>
 </tr>
+  <tr>
+    <td>
+      <a href="gallery/grid_example.typ">
+      <img src="gallery/grid_example.png" width="250px">
+
+  </td>
+  <td>
+    <a href="gallery/autoseg_example_1.typ">
+      <img src="gallery/autoseg_example_1.png" width="250px">
+    </a>
+  </td>
+  
+  <td>
+      <a href="gallery/autoseg_example_3.typ">
+      <img src="gallery/autoseg_example_3.png" width="250px">
+
+  </td>
+</tr>
 <tr>
+  <td>Metrical grids with support for IPA</td>
+  <td>Autosegmental phonology: features</td>
+  <td>Autosegmental phonology: tones</td>
+</tr>
+<tr>
+    <td>
+    <a href="gallery/spe_example.typ">
+      <img src="gallery/spe_example.png" width="250px">
+    </a>
+  </td>
   <td>
     <a href="gallery/ot_example.typ">
       <img src="gallery/ot_example.png" width="250px">
@@ -77,20 +106,16 @@
       <img src="gallery/maxent_example.png" width="250px">
     </a>
   </td>
-  <td>
-      <a href="gallery/grid_example.typ">
-      <img src="gallery/grid_example.png" width="250px">
-
-  </td>
+  
 </tr>
 <tr>
+  <td>SPE-style matrix</td>
   <td>Optimality theory tableaux with automatic shading</td>
   <td>MaxEnt tableaux with automatic calculation</td>
-  <td>Metrical grids with support for IPA</td>
 </tr>
 </table>
 
-*Click on the example image to jump to the code.*
+*Click on the example image to go to the code.*
 
 ## Features
 
@@ -108,6 +133,16 @@ See package homepage or GitHub repository for a comprehensive demo (`vignette.pd
 
 - **Prosodic structure visualization**: Draw syllable structures (onset-rhyme and moraic representations) as well as feet and prosodic words with simple and intuitive syntax
 - **Metrical grids**: Inputs as strings or tuples
+- **Sonority profile**: Visualize the sonority of a string
+
+### Autosegmental Module
+
+- **Features and tones**: Create autosegmental representation for both features and tones
+- **Support for common processes**: Easily add linking, delinking, floating tones, one-to-many relationships and highlighting. Additional options for spacing and annotation also available
+
+### SPE module
+
+- **Feature matrices**: Easily display feature matrices for SPE-style rules
 
 ### Optimality Theory Module
 
@@ -115,6 +150,7 @@ See package homepage or GitHub repository for a comprehensive demo (`vignette.pd
 - **Automatic shading**: Cells are automatically grayed out after fatal violations
 - **Winner indication**: Optimal candidates automatically marked with ☞ (pointing finger)
 - **IPA support**: Input and candidate forms can use tipa-style IPA notation
+- **Hasse diagrams**: Generate Hasse diagrams to visualize constraint rankings
 
 ### Maximum Entropy Module
 
@@ -291,19 +327,71 @@ Easy-to-use function to design metrical grids with two types of inputs (strings 
 )
 ```
 
+### Autosegmental phonology
+
+Represent both features and tones as well as common processes (e.g., spreading, delinking, etc.).
+
+```typst
+// A simple spreading of [+nas]
+#autoseg(
+  ("k", "\\ae", "n", "t"),
+  features: ("", "", "[+nas]", ""),
+  links: ((2, 1),),
+  spacing: 1.0,
+  arrow: true,
+)
+```
+
+Tone-related processes can be represented using the same function. See vignette for more details.
+
+```typst
+// A simple spreading of [+nas]
+#autoseg(
+  ("m", "u", "s", "u"),
+  features: ("", "L", "", "H"),
+  tone: true,
+  spacing: 0.5, // keep consistent
+  baseline: 37%,
+  gloss: [_woman_],
+) +
+#autoseg(
+  ("k", "u", "n", "d", "u"),
+  features: ("", "H", "", "", ""), // H at position 1, but will be repositioned
+  tone: true,
+  float: (1,), // Mark H as floating so it doesn't draw vertical stem
+  multilinks: ((1, (1, 4)),), // H links to segments at positions 1 and 4
+  spacing: 0.5,
+  baseline: 37%,
+  arrow: false,
+  gloss: [_short_],
+) #a-r
+#autoseg(
+  ("m", "u", "s", "u", "–", "k", "u", "n", "d", "u"),
+  features: ("", "L", "", "H", "", "", "H", "", "", ""),
+  links: ((1, 3),), // link between L and H
+  delinks: ((3, 3),),
+  arrow: false,
+  multilinks: ((6, (6, 9)),), // automatically erases vertical line in position 6
+  tone: true,
+  baseline: 37%,
+  spacing: 0.50,
+  gloss: [_short woman_],
+)
+```
+
 ### SPE Feature Matrices
 
 Create SPE-style phonological feature matrices:
 
 ```typst
 // Features as separate arguments
-#feat("+consonantal", "-sonorant", "+voice")
+#feat("+consonantal", "–sonorant", "+voice")
 
 // Features as comma-separated string
-#feat("+cons,-son,+voice,-cont,+ant")
+#feat("+cons,–son,+voice,–cont,+ant")
 
 // Use in inline text
-The segment #feat("+syl,-cons,+high,-back") represents /i/.
+The segment #feat("+syl,–cons,+high,–back") represents /i/.
 ```
 
 ### Distinctive Feature Matrices
@@ -352,6 +440,25 @@ Create OT tableaux with automatic violation marking and shading:
   ),
   winner: 1, // <- Position of winning cand
   dashed-lines: (1,) // <- Note the comma
+)
+```
+
+### Hasse diagrams
+
+Create OT tableaux with automatic violation marking and shading:
+
+```typst
+// Basic scenario
+#hasse(
+  (
+    ("*Complex", "Max", 0),
+    ("*Complex", "Dep", 0),
+    ("Onset", "Max", 0),
+    ("Onset", "Dep", 0),
+    ("Max", "NoCoda", 1),
+    ("Dep", "NoCoda", 1),
+  ),
+  scale: 0.9
 )
 ```
 

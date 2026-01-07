@@ -17,14 +17,34 @@
 // NOTE: --- The Main Function ---
 #let tableau(
   input: "Input",
-  candidates: (), 
-  constraints: (), 
-  violations: (), 
-  winner: 0, 
-  dashed-lines: () 
+  candidates: (),
+  constraints: (),
+  violations: (),
+  winner: 0,
+  dashed-lines: (),
+  scale: none
 ) = {
-  
-  // 1. Shading Logic
+
+  // 1. Validation and Truncation
+  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed in tableau")
+
+  // Truncate constraint names to 10 characters
+  let constraints = constraints.map(c => {
+    if c.len() > 10 { c.slice(0, 10) } else { c }
+  })
+
+  // Scale: use user-provided scale if given, otherwise auto-scale
+  let scale-factor = if scale != none {
+    scale
+  } else if constraints.len() > 5 {
+    0.7
+  } else {
+    1.0
+  }
+  let font-size = scale-factor * 1em
+  let scaled-finger = text(size: 14pt * scale-factor)[☞]
+
+  // 2. Shading Logic
   let fatal-map = ()
   for (r, row-viols) in violations.enumerate() {
     let fatal-col = 999 
@@ -34,18 +54,18 @@
     fatal-map.push(fatal-col)
   }
 
-  // 2. Prepare Input Content (The Fix)
-  let input-content = if type(input) == str { 
-    [/#ipa(input)/] 
-  } else { 
-    input 
+  // 3. Prepare Input Content
+  let input-content = if type(input) == str {
+    [/#ipa(input)/]
+  } else {
+    input
   }
 
-  // 3. Grid Definitions
+  // 4. Grid Definitions
   let col-defs = (auto, 2pt) + constraints.map(_ => auto)
   let row-defs = (1.75em, 2pt) + candidates.map(_ => 1.75em)
 
-  table(
+  text(size: font-size)[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
@@ -82,7 +102,7 @@
     ..candidates.enumerate().map(((i, cand)) => {
       let cells = ()
       let cand-content = if type(cand) == str { ipa(cand) } else { cand }
-      let prefix = if (i + 1) == winner { finger + " " } else { "" }
+      let prefix = if i == winner { scaled-finger + " " } else { "" }
       
       cells.push(align(right)[#prefix #cand-content])
       cells.push([])
@@ -92,26 +112,44 @@
         if j < row-viols.len() {
           cells.push(format-viol(row-viols.at(j)))
         } else {
-          cells.push([]) 
+          cells.push([])
         }
       }
       return cells
     }).flatten()
-  )
+  )]
 }
 
 
 // NOTE: --- MAXENT TABLEAU FUNCTION ---
 #let maxent(
   input: "Input",
-  candidates: (), 
-  constraints: (), 
-  weights: (), 
+  candidates: (),
+  constraints: (),
+  weights: (),
   violations: (),
-  visualize: true 
+  visualize: true,
+  scale: none
 ) = {
 
-  // 1. CALCULATIONS
+  // 1. Validation and Truncation
+  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed in maxent")
+
+  // Truncate constraint names to 10 characters
+  let constraints = constraints.map(c => {
+    if c.len() > 10 { c.slice(0, 10) } else { c }
+  })
+
+  // Scale: use user-provided scale if given, otherwise auto-scale
+  let font-size = if scale != none {
+    scale * 1em
+  } else if constraints.len() > 5 {
+    0.7em
+  } else {
+    1em
+  }
+
+  // 2. CALCULATIONS
   let h-scores = ()
   let p-star-scores = ()
   let total-p-star = 0.0
@@ -136,7 +174,7 @@
     candidates.map(_ => 0.0)
   }
 
-  // 2. GRID DEFINITIONS
+  // 3. GRID DEFINITIONS
   let col-defs = (auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto, auto)
   if visualize {
     col-defs.push(3cm) // The Floating Column
@@ -145,7 +183,7 @@
   let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
   let last-col-idx = col-defs.len() - 1
 
-  table(
+  text(size: font-size)[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
@@ -227,6 +265,6 @@
 
       return cells
     }).flatten()
-  )
+  )]
 }
 

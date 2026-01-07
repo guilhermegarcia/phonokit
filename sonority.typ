@@ -80,7 +80,7 @@
 }
 
 // Main sonority plotting function
-#let plot-son(
+#let sonority(
   word,                   // Tipa-style string
   syl: none,              // (Legacy/unused directly in calculation now, kept for API compatibility)
   stressed: none,         // Index of stressed syllable
@@ -160,5 +160,3 @@
     }
   })
 }
-
-#let sonority = plot-son
