@@ -1,4 +1,3 @@
-
 #import "@preview/cetz:0.4.2": canvas, draw
 #import "ipa.typ": ipa-to-unicode
 
@@ -205,31 +204,60 @@
   "arabic": "",
 )
 
-// Helper function to extract affricates from braces {affricate}
-#let extract-affricates(input) = {
-  let affricates = ()
+// Helper function to extract braced content {phoneme} from input
+// Braced content can be affricates, aspirated consonants, etc.
+#let extract-braced-content(input) = {
+  let braced-items = ()
   let cleaned = ""
   let in-braces = false
-  let current-affricate = ""
+  let current-item = ""
 
   for char in input.clusters() {
     if char == "{" {
       in-braces = true
-      current-affricate = ""
+      current-item = ""
     } else if char == "}" {
-      if in-braces and current-affricate != "" {
-        affricates.push(current-affricate)
+      if in-braces and current-item != "" {
+        braced-items.push(current-item)
       }
       in-braces = false
-      current-affricate = ""
+      current-item = ""
     } else if in-braces {
-      current-affricate += char
+      current-item += char
     } else {
       cleaned += char
     }
   }
 
-  (affricates: affricates, cleaned: cleaned)
+  (braced-items: braced-items, cleaned: cleaned)
+}
+
+// Helper function to categorize braced items into affricates, aspirated plosives, and aspirated affricates
+#let categorize-braced-items(braced-items) = {
+  let affricates = ()
+  let aspirated-plosives = ()
+  let aspirated-affricates = ()
+
+  for item in braced-items {
+    // Convert IPA notation to Unicode (spaces are required for diacritics like \h)
+    let converted = ipa-to-unicode(item)
+
+    // Check which category this belongs to
+    if converted in aspirated-affricate-data {
+      aspirated-affricates.push(converted)
+    } else if converted in aspirated-plosive-data {
+      aspirated-plosives.push(converted)
+    } else if converted in affricate-data {
+      affricates.push(converted)
+    }
+    // Unknown braced items are silently ignored
+  }
+
+  (
+    affricates: affricates,
+    aspirated-plosives: aspirated-plosives,
+    aspirated-affricates: aspirated-affricates,
+  )
 }
 
 // Main consonants function
@@ -247,6 +275,8 @@
   // Determine which consonants to plot
   let consonants-to-plot = ""
   let custom-affricates-string = ""
+  let custom-aspirated-plosives-string = ""
+  let custom-aspirated-affricates-string = ""
   let error-msg = none
 
   // Check if consonant-string is actually a language name
@@ -261,18 +291,24 @@
     }
   } else if consonant-string != "" {
     // Use as manual consonant specification
-    // Extract affricates in braces first
-    let extracted = extract-affricates(consonant-string)
+    // Extract braced content first (affricates, aspirated consonants, etc.)
+    let extracted = extract-braced-content(consonant-string)
 
-    // Convert IPA notation to Unicode for consonants (excluding braced affricates)
+    // Convert IPA notation to Unicode for consonants (excluding braced items)
     consonants-to-plot = ipa-to-unicode(extracted.cleaned)
 
-    // Convert each affricate separately and store as a string
-    let converted-affricates = ()
-    for aff in extracted.affricates {
-      converted-affricates.push(ipa-to-unicode(aff))
+    // Categorize braced items into their respective types
+    let categorized = categorize-braced-items(extracted.braced-items)
+    // Note: .join("") returns none for empty arrays in Typst, so we check length first
+    if categorized.affricates.len() > 0 {
+      custom-affricates-string = categorized.affricates.join("")
     }
-    custom-affricates-string = converted-affricates.join("")
+    if categorized.aspirated-plosives.len() > 0 {
+      custom-aspirated-plosives-string = categorized.aspirated-plosives.join("")
+    }
+    if categorized.aspirated-affricates.len() > 0 {
+      custom-aspirated-affricates-string = categorized.aspirated-affricates.join("")
+    }
   } else {
     error-msg = [*Error:* Either provide consonant string or language name]
   }
@@ -306,7 +342,8 @@
     } else if lang != none and lang in language-aspirated-plosives {
       aspirated-plosives-to-plot = language-aspirated-plosives.at(lang)
     } else {
-      aspirated-plosives-to-plot = consonants-to-plot
+      // For custom input, use aspirated plosives extracted from braces
+      aspirated-plosives-to-plot = custom-aspirated-plosives-string
     }
 
     // Aspirated affricates (only if affricates is also true)
@@ -316,7 +353,8 @@
       } else if lang != none and lang in language-aspirated-affricates {
         aspirated-affricates-to-plot = language-aspirated-affricates.at(lang)
       } else {
-        aspirated-affricates-to-plot = custom-affricates-string
+        // For custom input, use aspirated affricates extracted from braces
+        aspirated-affricates-to-plot = custom-aspirated-affricates-string
       }
     }
   }
