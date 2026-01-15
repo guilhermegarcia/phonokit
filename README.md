@@ -11,7 +11,7 @@
 [![DOI](zenodo-badge.svg)](https://doi.org/10.5281/zenodo.17971031)
 [![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fguilhermegarcia%2Fphonokit%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/phonokit)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/guilhermegarcia/phonokit/blob/main/LICENSE)
-[![User Manual](https://img.shields.io/badge/manual-.pdf-purple)](https://github.com/guilhermegarcia/phonokit/blob/main/vignette.pdf)
+[![User Manual](https://img.shields.io/badge/manual-.pdf-purple)](https://doi.org/10.5281/zenodo.18260076)
 
 </div>
 
@@ -115,9 +115,9 @@
 
 *Click on the example image to go to the code.*
 
-## Features
+## Manual
 
-See package homepage or GitHub repository for a comprehensive demo (`vignette.pdf`). Here are the highlights of the package.
+Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive demonstration of available functions.
 
 ### IPA Module
 
