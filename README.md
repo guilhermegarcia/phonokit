@@ -1,5 +1,3 @@
-# Phonokit
-
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://gdgarcia.ca/typst/logo_white.png">
