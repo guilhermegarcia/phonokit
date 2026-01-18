@@ -237,7 +237,7 @@
   result
 }
 
-// Main IPA function: converts tipa-style notation to IPA with Charis SIL font
-#let ipa(input) = {
-  text(font: "Charis SIL", ipa-to-unicode(input))
+// Main IPA function: converts tipa-style notation to IPA with Charis SIL as default font
+#let ipa(input, font: "Charis SIL") = {
+  text(font: font, ipa-to-unicode(input))
 }

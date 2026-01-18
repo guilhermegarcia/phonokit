@@ -166,6 +166,7 @@
   scale: 1.0, // Overall scale
   y-range: (0, 8), // Sonority range for y-axis
   show-lines: true, // Connect phonemes with lines
+  font: "Charis SIL",
 ) = {
   // Convert tipa-style input to IPA
   let ipa-string = ipa-to-unicode(word)
@@ -233,7 +234,7 @@
       // Add phoneme label (always black now)
       content(
         (x, y),
-        text(size: 10pt, font: "Charis SIL", fill: black)[#phoneme],
+        text(size: 10pt, font: font, fill: black)[#phoneme],
         anchor: "center",
       )
     }

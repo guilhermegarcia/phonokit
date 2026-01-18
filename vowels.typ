@@ -123,6 +123,7 @@
   rows: 3, // Only 2 internal horizontal lines
   cols: 2, // Only 1 vertical line inside trapezoid
   scale: 0.7, // Scale factor for entire chart
+  font: "Charis SIL",
 ) = {
   // Determine which vowels to plot
   let vowels-to-plot = ""
@@ -235,7 +236,7 @@
       // Draw white circle to cover grid lines
       circle(vp.pos, radius: scaled-circle-radius, fill: white, stroke: none)
       // Draw vowel on top
-      content(vp.pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", vp.vowel))
+      content(vp.pos, text(size: scaled-font-size * 1pt, font: font, vp.vowel))
     }
   })
 }

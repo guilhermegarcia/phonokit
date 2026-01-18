@@ -14,6 +14,7 @@
   multilinks: (),
   baseline: 40%,
   gloss: "",
+  font: "Charis SIL",
 ) = {
   box(inset: 1.2em, baseline: baseline, cetz.canvas({
     import cetz.draw: *
@@ -45,7 +46,7 @@
         // 3. Labels (segment)
         // Use horizon alignment to ensure consistent baseline across all segments
         content((x, seg_y), padding: 0.1, anchor: seg_anchor_dir, box(height: 1em, align(horizon, text(
-          font: "Charis SIL",
+          font: font,
           ipa(seg),
         ))))
 
@@ -72,7 +73,7 @@
               radius: 100%,
               width: 1.2em,
               height: 1.2em,
-              align(center + horizon, text(font: "Charis SIL", f)),
+              align(center + horizon, text(font: font, f)),
             ))
 
             // Create anchor for this specific tone (for sub-indexing in links)
@@ -162,7 +163,7 @@
         radius: 100%,
         width: 1.2em,
         height: 1.2em,
-        align(center + horizon, text(font: "Charis SIL", tone_text)),
+        align(center + horizon, text(font: font, tone_text)),
       ))
 
       // Draw solid lines to each segment (no arrows, no dashes)

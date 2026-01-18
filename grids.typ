@@ -33,7 +33,7 @@
 //    met-grid(("te", 2), ("ne", 1), ("see", 3), ipa: true)  // Auto-converts strings to IPA
 //    Format: array of (content, level) tuples
 //
-#let met-grid(..args, ipa: true) = {
+#let met-grid(..args, ipa: true, font: "Charis SIL") = {
   let data = ()
 
   // Determine input format
@@ -49,7 +49,7 @@
 
         // If ipa mode is enabled and text-content is a string, convert it
         if ipa and type(text-content) == str {
-          text-content = text(font: "Charis SIL", ipa-to-unicode(text-content))
+          text-content = text(font: font, ipa-to-unicode(text-content))
         }
 
         data.push((text: text-content, level: level))

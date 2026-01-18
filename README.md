@@ -15,7 +15,7 @@
 
 </div>
 
-⚠️ **Charis SIL font is needed** for this package to work exactly as intended. If you don't already have this font installed, visit <https://software.sil.org/charis/download/>. New Computer Modern is used for arrows.
+⚠️ **Charis SIL font is needed** for this package to work exactly as intended out of the box. If you don't already have this font installed, visit <https://software.sil.org/charis/download/>. New Computer Modern is used for arrows, which is included with Typst by default.
 
 ## Some examples
 
@@ -76,7 +76,7 @@
       <img src="gallery/autoseg_example_1.png" width="250px">
     </a>
   </td>
-  
+
   <td>
       <a href="gallery/autoseg_example_3.typ">
       <img src="gallery/autoseg_example_3.png" width="250px">
@@ -104,7 +104,7 @@
       <img src="gallery/maxent_example.png" width="250px">
     </a>
   </td>
-  
+
 </tr>
 <tr>
   <td>SPE-style matrix</td>
@@ -187,7 +187,7 @@ For the most up-to-date information about the package, vignettes and demos, visi
 // With devoicing
 #ipa("\\r z")  // → z̥
 
-// Syllabic segments 
+// Syllabic segments
 #ipa("\\v n")  // → n̩
 
 // Affricates
@@ -299,7 +299,7 @@ Phonokit provides three functions for visualizing different levels of prosodic s
 #word("('ka.va.mi)")
 
 // Multiple feet, where foot = main foot is to the left
-#word("('ka.ta)('vas.lo)", foot: "L") 
+#word("('ka.ta)('vas.lo)", foot: "L")
 ```
 
 **Prosody notation:**
