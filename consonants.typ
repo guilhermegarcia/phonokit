@@ -271,6 +271,7 @@
   label-width: 3.5,
   label-height: 1.2,
   scale: 0.7,
+  font: "Charis SIL",
 ) = {
   // Determine which consonants to plot
   let consonants-to-plot = ""
@@ -673,13 +674,13 @@
         if pair.voiced != none {
           let pos = (cell-center-x, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiced), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiced), anchor: "center")
         }
         // In rare cases where voiceless sonorants exist, also center them
         if pair.voiceless != none {
           let pos = (cell-center-x, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiceless), anchor: "center")
         }
       } else {
         // Obstruents: use left/right positioning for voicing contrast
@@ -688,13 +689,13 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiceless), anchor: "center")
         }
 
         if pair.voiced != none {
           let pos = (cell-center-x + offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiced), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiced), anchor: "center")
         }
       }
     }
@@ -716,7 +717,7 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiceless), anchor: "center")
         }
       }
     }
@@ -739,13 +740,13 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiceless), anchor: "center")
         }
 
         if pair.voiced != none {
           let pos = (cell-center-x + offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiced), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiced), anchor: "center")
         }
       }
     }
@@ -768,7 +769,7 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, text(size: scaled-font-size * 1pt, font: font, pair.voiceless), anchor: "center")
         }
       }
     }

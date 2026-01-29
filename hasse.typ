@@ -54,6 +54,7 @@
   scale: auto,
   node-spacing: 2.5,
   level-spacing: 1.5,
+  font: "Charis SIL",
 ) = {
   // Validate input
   assert(type(rankings) == array, message: "rankings must be an array of tuples")
@@ -449,7 +450,7 @@
         padding: 0.1,
         anchor: "center",
         text(
-          font: "Charis SIL",
+          font: font,
           size: 10pt * scale-factor,
           formatted-name,
         ),

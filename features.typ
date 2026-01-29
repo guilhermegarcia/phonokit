@@ -20,7 +20,7 @@
 /// #feat("+consonantal", "-sonorant", "+voice")
 /// #feat("+cons,-son,+voice")  // comma-separated also works
 /// ```
-#let feat(..args) = {
+#let feat(..args, font: "Charis SIL") = {
   let items = args.pos()
 
   // 1. Split string if comma-separated
@@ -28,11 +28,11 @@
     items = items.at(0).split(",")
   }
 
-  // 2. Style the items (Charis SIL + Larger Size)
+  // 2. Style the items (Charis SIL by default + Larger Size)
   let features = items.map(i => {
     let content = if type(i) == str { i.trim() } else { i }
-    // Set font to Charis SIL and size to normal (1em) or larger (e.g., 1.1em)
-    text(font: "Charis SIL", size: 1em, content)
+    // Set font to Charis SIL by default and size to normal (1em) or larger (e.g., 1.1em)
+    text(font: font, size: 1em, content)
   })
 
   // 3. Use math.vec for perfect axis alignment
@@ -2101,10 +2101,10 @@
   }
 
   // Display as inline block with top alignment to allow side-by-side placement
-  let phoneme = text(size: 1em, font: "Charis SIL")[/#symbol/]
+  let phoneme = text(size: 1em, font: font)[/#symbol/]
 
   // Build matrix manually for precise control over alignment
-  let features = feature-list.map(f => text(font: "Charis SIL", size: 0.8em)[#f])
+  let features = feature-list.map(f => text(font: font, size: 0.8em)[#f])
   let content-stack = stack(
     dir: ttb,
     spacing: 0.55em,

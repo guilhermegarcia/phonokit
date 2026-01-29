@@ -39,8 +39,9 @@
 ///
 /// Arguments:
 /// - input (string): tipa-style notation
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
-/// Returns: IPA symbols in Charis SIL font
+/// Returns: IPA symbols in Charis SIL as default font
 #let ipa = ipa
 
 /// Visualize sonority profiles based on Parker (2011)
@@ -60,6 +61,7 @@
 /// - scale (float): Overall scale factor for the diagram (default: 1.0)
 /// - y-range (array): Vertical axis range for plotting (default: (0, 8))
 /// - show-lines (bool): Connect phonemes with dashed lines (default: true)
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: CeTZ drawing of the sonority profile
 ///
@@ -195,6 +197,7 @@
 ///   - String format: syllables separated by dots, each ending with stress level (e.g., "te2.ne1.see3")
 ///   - Tuple format: pairs of (syllable, level) passed as separate arguments
 /// - ipa (bool): Automatically convert strings to IPA notation (default: true)
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: Table showing syllables with stacked × marks indicating stress levels
 ///
@@ -225,6 +228,7 @@
 /// - rows (int): Number of horizontal grid lines (default: 3)
 /// - cols (int): Number of vertical grid lines (default: 2)
 /// - scale (float): Scale factor for entire chart (default: 0.7)
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: CeTZ drawing of IPA vowel chart with positioned vowels
 ///
@@ -256,6 +260,7 @@
 /// - label-width (float): Width of row labels (default: 3.5)
 /// - label-height (float): Height of column labels (default: 1.2)
 /// - scale (float): Scale factor for entire table (default: 0.7)
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: CeTZ drawing of IPA consonant table with positioned consonants
 ///
@@ -468,6 +473,7 @@
 /// - scale (number or auto): Scale factor for diagram (default: auto-scales based on complexity)
 /// - node-spacing (number): Horizontal spacing between nodes (default: 2.5)
 /// - level-spacing (number): Vertical spacing between levels (default: 1.5)
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: A Hasse diagram showing the constraint hierarchy
 ///
@@ -496,6 +502,7 @@
 ///
 /// Arguments:
 /// - ..args: Features as separate arguments or comma-separated string
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: Mathematical vector notation with features
 ///
@@ -547,6 +554,7 @@
 /// - multilinks (array): Tuples of (feature-index, (seg1, seg2, ...)) for one-to-many links (default: ())
 /// - baseline (string): Optional baseline text below segments (default: "")
 /// - gloss (string): Optional gloss text below baseline (default: "")
+/// - font (string): Font name for rendering IPA (default: "Charis SIL")
 ///
 /// Returns: Autosegmental representation
 ///
