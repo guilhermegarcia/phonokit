@@ -2,6 +2,7 @@
 // Part of phonokit package
 
 #import "@preview/cetz:0.4.2"
+#import "_config.typ": phonokit-font
 
 /// Create a Hasse diagram for Optimality Theory constraint rankings
 ///
@@ -448,8 +449,8 @@
         (x, y),
         padding: 0.1,
         anchor: "center",
-        text(
-          font: "Charis SIL",
+        context text(
+          font: phonokit-font.get(),
           size: 10pt * scale-factor,
           formatted-name,
         ),

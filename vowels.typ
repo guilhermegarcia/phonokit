@@ -1,5 +1,6 @@
 #import "@preview/cetz:0.4.2": canvas, draw
 #import "ipa.typ": ipa-to-unicode
+#import "_config.typ": phonokit-font
 
 // Vowel data with relative positions (0-1 scale)
 // frontness: 0 = front, 0.5 = central, 1 = back
@@ -235,7 +236,7 @@
       // Draw white circle to cover grid lines
       circle(vp.pos, radius: scaled-circle-radius, fill: white, stroke: none)
       // Draw vowel on top
-      content(vp.pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", vp.vowel))
+      content(vp.pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), vp.vowel))
     }
   })
 }

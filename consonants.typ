@@ -1,5 +1,6 @@
 #import "@preview/cetz:0.4.2": canvas, draw
 #import "ipa.typ": ipa-to-unicode
+#import "_config.typ": phonokit-font
 
 // Consonant data with place, manner, and voicing
 // place: 0=bilabial, 1=labiodental, 2=dental, 3=alveolar, 4=postalveolar
@@ -673,13 +674,13 @@
         if pair.voiced != none {
           let pos = (cell-center-x, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiced), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiced), anchor: "center")
         }
         // In rare cases where voiceless sonorants exist, also center them
         if pair.voiceless != none {
           let pos = (cell-center-x, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
         }
       } else {
         // Obstruents: use left/right positioning for voicing contrast
@@ -688,13 +689,13 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
         }
 
         if pair.voiced != none {
           let pos = (cell-center-x + offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiced), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiced), anchor: "center")
         }
       }
     }
@@ -716,7 +717,7 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
         }
       }
     }
@@ -739,13 +740,13 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
         }
 
         if pair.voiced != none {
           let pos = (cell-center-x + offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiced), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiced), anchor: "center")
         }
       }
     }
@@ -768,7 +769,7 @@
         if pair.voiceless != none {
           let pos = (cell-center-x - offset, cell-center-y)
           circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-          content(pos, text(size: scaled-font-size * 1pt, font: "Charis SIL", pair.voiceless), anchor: "center")
+          content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
         }
       }
     }

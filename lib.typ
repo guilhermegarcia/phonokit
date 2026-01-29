@@ -14,6 +14,7 @@
 // - SPE-style feature matrices for phonological representations
 
 // Import modules
+#import "_config.typ": phonokit-init
 #import "ipa.typ": *
 #import "prosody.typ": *
 #import "ot.typ": *
@@ -26,6 +27,21 @@
 #import "sonority.typ": *
 #import "autosegmental.typ": *
 #import "ex.typ": *
+
+/// Initialize phonokit settings
+///
+/// Call this at the top of your document to configure package-wide settings.
+/// Currently supports setting a custom font for all phonokit functions.
+///
+/// Arguments:
+/// - font (string): Font name to use for IPA rendering (default: "Charis SIL")
+///
+/// Example:
+/// ```
+/// #import "@preview/phonokit:0.4.0": *
+/// #phonokit-init(font: "Libertinus Serif")
+/// ```
+#let phonokit-init = phonokit-init
 
 /// Convert tipa-style notation to IPA symbols
 ///
@@ -40,7 +56,7 @@
 /// Arguments:
 /// - input (string): tipa-style notation
 ///
-/// Returns: IPA symbols in Charis SIL font
+/// Returns: IPA symbols in the configured font (default: Charis SIL)
 #let ipa = ipa
 
 /// Visualize sonority profiles based on Parker (2011)

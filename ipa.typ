@@ -243,7 +243,11 @@
   result
 }
 
-// Main IPA function: converts tipa-style notation to IPA with Charis SIL font
+// Main IPA function: converts tipa-style notation to IPA
+#import "_config.typ": phonokit-font
+
 #let ipa(input) = {
-  text(font: "Charis SIL", ipa-to-unicode(input))
+  context {
+    text(font: phonokit-font.get(), ipa-to-unicode(input))
+  }
 }

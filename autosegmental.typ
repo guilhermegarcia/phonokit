@@ -1,5 +1,6 @@
 #import "@preview/cetz:0.4.2"
 #import "ipa.typ": ipa
+#import "_config.typ": phonokit-font
 
 #let autoseg(
   segments,
@@ -44,8 +45,8 @@
       group(name: "n" + str(i), {
         // 3. Labels (segment)
         // Use horizon alignment to ensure consistent baseline across all segments
-        content((x, seg_y), padding: 0.1, anchor: seg_anchor_dir, box(height: 1em, align(horizon, text(
-          font: "Charis SIL",
+        content((x, seg_y), padding: 0.1, anchor: seg_anchor_dir, box(height: 1em, align(horizon, context text(
+          font: phonokit-font.get(),
           ipa(seg),
         ))))
 
@@ -72,7 +73,7 @@
               radius: 100%,
               width: 1.2em,
               height: 1.2em,
-              align(center + horizon, text(font: "Charis SIL", f)),
+              align(center + horizon, context text(font: phonokit-font.get(), f)),
             ))
 
             // Create anchor for this specific tone (for sub-indexing in links)
@@ -162,7 +163,7 @@
         radius: 100%,
         width: 1.2em,
         height: 1.2em,
-        align(center + horizon, text(font: "Charis SIL", tone_text)),
+        align(center + horizon, context text(font: phonokit-font.get(), tone_text)),
       ))
 
       // Draw solid lines to each segment (no arrows, no dashes)

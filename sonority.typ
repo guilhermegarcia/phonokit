@@ -3,6 +3,7 @@
 // Based on Parker (2011) sonority scale
 
 #import "ipa.typ": ipa, ipa-to-unicode
+#import "_config.typ": phonokit-font
 #import "@preview/cetz:0.4.2"
 
 // Sonority scale based on Parker (2011)
@@ -233,7 +234,7 @@
       // Add phoneme label (always black now)
       content(
         (x, y),
-        text(size: 10pt, font: "Charis SIL", fill: black)[#phoneme],
+        context text(size: 10pt, font: phonokit-font.get(), fill: black)[#phoneme],
         anchor: "center",
       )
     }
