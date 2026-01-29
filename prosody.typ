@@ -641,7 +641,7 @@
   diagram-scale: 1.0,
   geminate-coda-x: none,
   geminate-onset-x: none,
-  mora_symbol: "μ",
+  mora-symbol: "μ",
 ) = {
   import cetz.draw: *
 
@@ -709,8 +709,8 @@
     let mora1-x = nucleus-mora-x - mora-spacing / 2
     let mora2-x = nucleus-mora-x + mora-spacing / 2
 
-    content((mora1-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora_symbol])
-    content((mora2-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora_symbol])
+    content((mora1-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora-symbol])
+    content((mora2-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora-symbol])
 
     line((x-offset, sigma-y + 0.25), (mora1-x, mora-y + 0.35))
     line((x-offset, sigma-y + 0.25), (mora2-x, mora-y + 0.35))
@@ -726,7 +726,7 @@
     }
   } else {
     // Short vowel: ONE mora
-    content((nucleus-mora-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora_symbol])
+    content((nucleus-mora-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora-symbol])
     line((x-offset, sigma-y + 0.25), (nucleus-mora-x, mora-y + 0.35))
 
     let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -743,7 +743,7 @@
   if num-coda > 0 {
     if coda {
       // Moraic coda: ONE μ shared by all segments
-      content((coda-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora_symbol])
+      content((coda-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora-symbol])
       line((x-offset, sigma-y + 0.25), (coda-x, mora-y + 0.35))
 
       // Check if this is a geminate coda
@@ -1609,7 +1609,7 @@
         diagram-scale: diagram-scale,
         geminate-coda-x: gem-coda-x,
         geminate-onset-x: gem-onset-x,
-        mora_symbol: sym_mora,
+        mora-symbol: sym_mora,
       )
     }
 
@@ -1962,7 +1962,7 @@
         diagram-scale: diagram-scale,
         geminate-coda-x: gem-coda-x,
         geminate-onset-x: gem-onset-x,
-        mora_symbol: sym_mora,
+        mora-symbol: sym_mora,
       )
     }
 
