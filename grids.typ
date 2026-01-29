@@ -91,7 +91,11 @@
   // Add the syllable row at the bottom
   let syllable-row = ()
   for item in data {
-    syllable-row.push(item.text)
+    if type(item.text) == str {
+      syllable-row.push(context text(font: phonokit-font.get(), item.text))
+    } else {
+      syllable-row.push(item.text)
+    }
   }
   rows.push(syllable-row)
 
