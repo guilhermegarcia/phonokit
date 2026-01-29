@@ -69,7 +69,7 @@
     <td>
       <a href="gallery/grid_example.typ">
       <img src="gallery/grid_example.png" width="250px">
-
+</a>
   </td>
   <td>
     <a href="gallery/autoseg_example_1.typ">
@@ -80,7 +80,7 @@
   <td>
       <a href="gallery/autoseg_example_3.typ">
       <img src="gallery/autoseg_example_3.png" width="250px">
-
+</a>
   </td>
 </tr>
 <tr>
@@ -162,11 +162,16 @@ Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensi
 - **HG tableaux**: Generate HG tableaux with automatic calculation of harmony given constraint weights and violations
 - **Noisy HG**: Generate NHG tableaux with automatic calculation of harmony and probabilities derived from simulated noise and multiple evaluations
 
+### General Module
+
+- **Numbered examples**: Create examples and sub-examples with labels and correct alignment
+- **Shortcuts**: Quick commands to add a range of arrows, angle brackets for extrametricality, and SPE-style underlines for context
+
 ## Installation
 
 ### Package Repository
 
-- `http://github.com/guilhermegarcia/phonokit` [(most up-to-date version)](http://github.com/guilhermegarcia/phonokit)
+- `https://github.com/guilhermegarcia/phonokit` [(most up-to-date version)](http://github.com/guilhermegarcia/phonokit)
 - `https://typst.app/universe/package/phonokit` [(published on Typst)](https://typst.app/universe/package/phonokit)
 
 ### Package website
@@ -345,7 +350,7 @@ Represent both features and tones as well as common processes (e.g., spreading, 
 Tone-related processes can be represented using the same function. See vignette for more details.
 
 ```typst
-// A simple spreading of [+nas]
+// Tone spreading with delinking
 #autoseg(
   ("m", "u", "s", "u"),
   features: ("", "L", "", "H"),
@@ -438,14 +443,14 @@ Create OT tableaux with automatic violation marking and shading:
     ("*!", "", ""),
     ("", "*!", ""),
   ),
-  winner: 1, // <- Position of winning cand
+  winner: 0, // <- Position of winning cand
   dashed-lines: (1,) // <- Note the comma
 )
 ```
 
 ### Hasse diagrams
 
-Create OT tableaux with automatic violation marking and shading:
+Create Hasse diagrams with minimal syntax.
 
 ```typst
 // Basic scenario
@@ -516,6 +521,23 @@ Create HG and noisy HG tableaux with probability calculations:
 )
 ```
 
+### Numbered Examples
+
+Built on top of tables, `#ex()` allows for easy alignment of numbered examples. Sub-examples can also be labelled. To use this function, add this line after importing the package: `#show: ex-rules`.
+
+```typst
+// Numbered example with sub-examples
+#ex(caption: "A phonology example")[
+      #table(
+        columns: 4,
+        stroke: none,
+        align: left,
+        [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
+        [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
+      )
+    ] <phon-ex>
+```
+
 ## License
 
 MIT
@@ -523,7 +545,8 @@ MIT
 ## Author
 
 **Guilherme D. Garcia** \
-Email: <guilherme.garcia@lli.ulaval.ca>
+Email: <guilherme.garcia@lli.ulaval.ca> \
+Website: <https://gdgarcia.ca>
 
 ## Citation
 

@@ -56,6 +56,7 @@
     "X": "χ",
     "K": "ʁ",
     "\\textcrh": "ħ",
+    "\\barredh": "ħ",
     "Q": "ʕ",
     "h": "h",
     "H": "ɦ",
@@ -68,6 +69,7 @@
     "\\*r": "ɹ",
     "j": "j",
     "\\textturnmrleg": "ɰ",
+    "\\mw": "ɰ",
     "\\:R": "ɻ",
     // CONSONANTS - Lateral Approximants
     "l": "l",
@@ -79,9 +81,11 @@
     // OTHER CONSONANTS - Clicks
     "\\!o": "ʘ",
     "\\textdoublebarpipe": "ǂ",
+    "\\doublebarpipe": "ǂ",
     "||": "ǁ",
     // OTHER CONSONANTS - Other
     "\\textbarglotstop": "ʡ",
+    "\\barredP": "ʡ",
     // OTHER CONSONANTS - Implosives
     "\\!b": "ɓ",
     "\\!d": "ɗ",
@@ -94,9 +98,10 @@
     "\\;H": "ʜ",
     "\\textctz": "ʦ",
     "\\textbarrevglotstop": "ʢ",
+    "\\barrevglotstop": "ʢ",
     // OTHER CONSONANTS - Approximant/Flap
-    "4": "ɤ",
     "\\textturnlonglegr": "ɺ",
+    "\\turnlonglegr": "ɺ",
     // VOWELS - Close
     "i": "i",
     "I": "ɪ",
@@ -121,6 +126,7 @@
     "\\oe": "œ",
     "3": "ɜ",
     "\\textcloseepsilon": "ɞ",
+    "\\closeepsilon": "ɞ",
     "2": "ʌ",
     "O": "ɔ",
     // VOWELS - Near-open/Open

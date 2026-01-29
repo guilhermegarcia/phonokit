@@ -2,8 +2,19 @@
 categories = ["utility", "text", "visualization"]
 disciplines = ["linguistics"]
 name = "phonokit"
-version = "0.3.0"
+version = "0.3.6"
 exclude = ["gallery/"]
+keywords = [
+  "linguistics",
+  "phonology",
+  "phonetics",
+  "IPA",
+  "transcription",
+  "prosody",
+  "optimality-theory",
+  "features",
+  "autosegmental",
+]
 entrypoint = "lib.typ"
 authors = ["Guilherme D. Garcia <guilherme.garcia@lli.ulaval.ca>"]
 license = "MIT"

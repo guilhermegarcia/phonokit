@@ -25,8 +25,8 @@
 #import "features.typ": *
 #import "sonority.typ": *
 #import "autosegmental.typ": *
+#import "ex.typ": *
 
-// Re-export IPA function
 /// Convert tipa-style notation to IPA symbols
 ///
 /// Supports:
@@ -43,7 +43,6 @@
 /// Returns: IPA symbols in Charis SIL font
 #let ipa = ipa
 
-// Re-export Sonority function
 /// Visualize sonority profiles based on Parker (2011)
 ///
 /// Generates a visual sonority profile for a given phonemic transcription.
@@ -77,7 +76,6 @@
 /// visual overflow.
 #let sonority = sonority
 
-// Re-export Prosody functions
 /// Draw a single syllable's internal structure
 ///
 /// Visualizes only the syllable (σ) level with onset, rhyme, nucleus, and coda.
@@ -104,7 +102,7 @@
 /// Returns: CeTZ drawing of moraic structure
 ///
 /// Examples:
-/// - `#mora("kan")` - CVN syllable with two moras (coda doesn't count)
+/// - `#mora("kan")` - CVN syllable with one mora (coda doesn't count)
 /// - `#mora("kan", coda: true)` - CVN syllable with two moras (coda counts)
 /// - `#mora("ka")` - CV syllable with one mora
 #let mora = mora
@@ -122,6 +120,24 @@
 ///
 /// Example: `#foot("man.'tal", scale: 1.2)`
 #let foot = foot
+
+/// Draw a foot with moraic structure
+///
+/// Visualizes foot (Σ), syllable (σ), and mora (μ) levels. Combines foot
+/// structure with moraic weight representation.
+/// Stressed syllables are marked with an apostrophe before the syllable.
+///
+/// Arguments:
+/// - input (string): Syllables separated by dots (e.g., "po.'Ral")
+/// - coda (bool): Whether codas contribute to weight (default: false)
+/// - scale (float): Scale factor for the diagram (default: 1.0)
+///
+/// Returns: CeTZ drawing of moraic foot structure
+///
+/// Examples:
+/// - `#foot-mora("po.'Ral", coda: true)` - Disyllabic foot with moraic structure
+/// - `#foot-mora("'po.Ra.ma")` - Dactyl with moraic structure
+#let foot-mora = foot-mora
 
 /// Draw a prosodic word structure with explicit foot boundaries
 ///
@@ -142,7 +158,26 @@
 /// - `#word("ka.va", scale: 0.7)` - Two footless syllables, smaller
 #let word = word
 
-// Re-export Metrical Grid function
+/// Draw a prosodic word structure with moraic representation
+///
+/// Visualizes prosodic word (PWd), foot (Σ), syllable (σ), and mora (μ) levels.
+/// Combines prosodic word structure with moraic weight representation.
+/// Use parentheses to mark foot boundaries.
+/// Stressed syllables are marked with an apostrophe before the syllable.
+///
+/// Arguments:
+/// - input (string): Syllables with optional foot markers in parentheses
+/// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
+/// - coda (bool): Whether codas contribute to weight (default: false)
+/// - scale (float): Scale factor for the diagram (default: 1.0)
+///
+/// Returns: CeTZ drawing of moraic prosodic structure
+///
+/// Examples:
+/// - `#word-mora("('po.Ra).ma", coda: true)` - Trochee with unfooted syllable
+/// - `#word-mora("('po.Ra).('ma.pa)", foot: "L")` - Two feet, left-headed PWd
+#let word-mora = word-mora
+
 /// Create a metrical grid representation for stress and rhythm analysis
 ///
 /// Visualizes hierarchical stress levels using stacked × marks above syllables.
@@ -156,23 +191,26 @@
 ///    - Array of (syllable, level) tuples
 ///
 /// Arguments:
-/// - String format: `met-grid("te2.ne1.see3.Ti3.tans1")`
-/// - Array with IPA: `met-grid(("te", 2), ("ne", 1), ("si", 3), ipa: true)`
+/// - ..args: Either a single string or multiple (syllable, level) tuples
+///   - String format: syllables separated by dots, each ending with stress level (e.g., "te2.ne1.see3")
+///   - Tuple format: pairs of (syllable, level) passed as separate arguments
 /// - ipa (bool): Automatically convert strings to IPA notation (default: true)
 ///
 /// Returns: Table showing syllables with stacked × marks indicating stress levels
 ///
 /// Examples:
-/// - `#met-grid("te2.ne1.see3.Ti3.tans1")` - String format
-/// - `#met-grid(("Ten", 2), ("ne", 1), ("see", 3))` - Array format
-/// - `#met-grid(("T", 2), ("E", 1), ("n", 1), ("E", 1), ipa: true)` - Auto-IPA conversion
+/// - `#met-grid("bu3.tter1.fly2")` - String format
+/// - `met-grid(
+///          ("b2", 3),
+///          ("R \\schwar", 1),
+///          ("flaI", 2),
+///        )` - Array format
 ///
 /// Note: The string format uses numbers to indicate stress levels, which conflicts
 /// with IPA numeric symbols. For IPA compatibility, use the array format.
 #let met-grid = met-grid
 
 
-// Re-export IPA Chart functions
 /// Plot vowels on an IPA vowel trapezoid
 ///
 /// Visualizes vowels on the IPA vowel chart (trapezoid) with proper positioning
@@ -199,7 +237,7 @@
 /// Note: Diacritics and non-vowel symbols are ignored during plotting
 ///
 /// Available languages: english, spanish, portuguese, italian, french, german,
-/// japanese, mandarin, russian, arabic
+/// japanese, russian, arabic
 #let vowels = vowels
 
 /// Plot consonants on an IPA consonant table
@@ -227,7 +265,6 @@
 /// - `#consonants("ptk")` - Plot specific consonants
 /// - `#consonants("T D s z S Z")` - Plot consonants using tipa-style notation
 /// - `#consonants("t \\t s d \\t z", affricates: true)` - Show affricates row
-/// - `#consonants("mandarin", affricates: true, aspirated: true)` - Show Mandarin with affricates and aspiration
 /// - `#consonants("spanish", scale: 0.5)` - Smaller Spanish consonant chart
 ///
 /// Notes:
@@ -238,10 +275,9 @@
 /// - Diacritics and non-consonant symbols are ignored during plotting
 ///
 /// Available languages: all, english, spanish, french, german, italian,
-/// japanese, mandarin, portuguese, russian, arabic
+/// japanese, portuguese, russian, arabic
 #let consonants = consonants
 
-// Re-export Optimality Theory functions
 /// Create an Optimality Theory tableau
 ///
 /// Generates a formatted OT tableau with candidates, constraints, violations,
@@ -254,7 +290,7 @@
 /// - violations (array): 2D array of violation strings (use "*" for violations, "!" for fatal)
 /// - winner (int): Index of the winning candidate (0-indexed)
 /// - dashed-lines (array): Indices of constraints to show with dashed borders (optional)
-/// - shade (bool): Whether cells should be shaded after fatal violations
+/// - shade (bool): Whether cells should be shaded after fatal violations (default: true)
 ///
 /// Returns: Table showing OT tableau with winner marked by ☞
 ///
@@ -482,8 +518,8 @@
 ///
 /// Examples:
 /// - `#feat-matrix("p")` - Shows feature matrix for /p/
-/// - `#feat-matrix("\\ae")` - Shows feature matrix for /i/
-/// - `#feat-matrix("\\t tS")` - Affricate using tipa notation
+/// - `#feat-matrix("\\ae")` - Shows feature matrix for /æ/
+/// - `#feat-matrix("\\t tS")` - Affricate using tipa-inspired notation
 /// - `#feat-matrix("i", all: true)` - Shows all features including 0 values
 ///
 /// Note: Based on Hayes (2009) feature system. Includes manner, laryngeal,
@@ -549,4 +585,114 @@
 /// arrays to create timing slots without content or features without associations.
 #let autoseg = autoseg
 
+/// Create a numbered linguistic example
+///
+/// Generates numbered examples (1), (2), etc. similar to linguex in LaTeX.
+/// Use with tables and subex-label() for aligned, labelable sub-examples.
+///
+/// Arguments:
+/// - body (content): The example content (typically a table)
+/// - number-dy (length): Vertical offset for the number (optional; default: 0.4em)
+/// - caption (string): Caption for outline (hidden in document; optional)
+///
+/// Returns: Numbered example that can be labeled and referenced
+///
+/// Example:
+/// ```
+/// #ex(caption: "A phonology example")[
+///   #table(
+///     columns: 3, // <- where we may specify widths
+///     stroke: none,
+///     align: left,
+///     [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
+///     [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
+///   )
+/// ] <ex-phon1>
+///
+/// See @ex-phon1.
+/// ```
+#let ex = ex
 
+/// Create a sub-example label for use in tables
+///
+/// Generates automatic lettering (a., b., c., ...) for table rows.
+/// Place in the first column of each row and attach a label after it.
+///
+/// Returns: Labelable letter marker (a., b., c., ...)
+///
+/// Example:
+/// ```
+/// #ex(caption: "A phonology example")[
+///   #table(
+///     columns: 4, // <- where we may specify widths
+///     stroke: none,
+///     align: left,
+///     [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
+///     [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
+///   )
+/// ] <ex-phon2>
+///
+/// See @ex-phon2, @ex-anba, and @ex-anka.
+/// ```
+#let subex-label = subex-label
+
+/// Show rules for linguistic examples
+///
+/// Apply this to enable proper reference formatting for ex() and subex-label().
+/// References render as (1), (1a), (1b), etc.
+///
+/// Usage: `#show: ex-rules`
+#let ex-rules = ex-rules
+
+/// Arrow symbols for phonological rules and processes
+///
+/// Convenience symbols for showing derivations, mappings, and processes.
+/// All arrows use New Computer Modern font for consistent styling.
+///
+/// Available arrows:
+/// - `#a-r` → right arrow
+/// - `#a-l` ← left arrow
+/// - `#a-u` ↑ up arrow
+/// - `#a-d` ↓ down arrow
+/// - `#a-lr` ↔ bidirectional arrow
+/// - `#a-ud` ↕ vertical bidirectional arrow
+/// - `#a-sr` ↝ squiggly right arrow
+/// - `#a-sl` ↜ squiggly left arrow
+/// - `#a-r-large` → large right arrow with horizontal spacing
+///
+/// Example: `#ipa("/anba/") #a-r #ipa("[amba]")` produces /anba/ → [amba]
+#let a-r = a-r
+#let a-l = a-l
+#let a-u = a-u
+#let a-d = a-d
+#let a-lr = a-lr
+#let a-ud = a-ud
+#let a-sr = a-sr
+#let a-sl = a-sl
+#let a-r-large = a-r-large
+
+/// Create an underline blank for fill-in exercises or SPE rules
+///
+/// Generates a horizontal line (underline) useful for worksheets,
+/// exercises, or indicating missing/redacted content.
+///
+/// Arguments:
+/// - width (length): Width of the blank line (default: 2em)
+///
+/// Returns: A box with bottom stroke
+///
+/// Example: `The word #blank() means "house".`
+#let blank = blank
+
+/// Mark extrametrical content with angle brackets
+///
+/// Wraps content in ⟨angle brackets⟩ to indicate extrametricality
+/// in metrical phonology representations.
+///
+/// Arguments:
+/// - content: The content to mark as extrametrical
+///
+/// Returns: Content wrapped in ⟨⟩
+///
+/// Example: `#extra[tion]` produces ⟨tion⟩
+#let extra = extra
