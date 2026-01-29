@@ -99,6 +99,7 @@
 /// Arguments:
 /// - input (string): A single syllable (e.g., "ka" or "'va")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
+/// - symbol (array): Domain labels top-down: (σ) (default: ("σ",))
 ///
 /// Returns: CeTZ drawing of syllable structure
 ///
@@ -114,6 +115,7 @@
 /// - input (string): A single syllable (e.g., "kan" or "ka")
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
+/// - symbol (array): Domain labels top-down: (σ, μ) (default: ("σ", "μ"))
 ///
 /// Returns: CeTZ drawing of moraic structure
 ///
@@ -131,6 +133,7 @@
 /// Arguments:
 /// - input (string): Syllables separated by dots (e.g., "ka.'va.lo")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
+/// - symbol (array): Domain labels top-down: (Σ, σ) (default: ("Σ", "σ"))
 ///
 /// Returns: CeTZ drawing of foot structure
 ///
@@ -147,6 +150,7 @@
 /// - input (string): Syllables separated by dots (e.g., "po.'Ral")
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
+/// - symbol (array): Domain labels top-down: (Σ, σ, μ) (default: ("Σ", "σ", "μ"))
 ///
 /// Returns: CeTZ drawing of moraic foot structure
 ///
@@ -165,6 +169,7 @@
 /// - input (string): Syllables with optional foot markers in parentheses
 /// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
+/// - symbol (array): Domain labels top-down: (ω, Σ, σ) (default: ("ω", "Σ", "σ"))
 ///
 /// Returns: CeTZ drawing of prosodic structure
 ///
@@ -186,6 +191,7 @@
 /// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
+/// - symbol (array): Domain labels top-down: (ω, Σ, σ, μ) (default: ("ω", "Σ", "σ", "μ"))
 ///
 /// Returns: CeTZ drawing of moraic prosodic structure
 ///

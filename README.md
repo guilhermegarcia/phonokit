@@ -8,7 +8,7 @@
 
 <div align="center">
 
-[![DOI](zenodo-badge.svg)](https://doi.org/10.5281/zenodo.17971031)
+[![DOI](https://zenodo.org/badge/1113733598.svg)](https://doi.org/10.5281/zenodo.17971031)
 [![Typst Package](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fguilhermegarcia%2Fphonokit%2Fmain%2Ftypst.toml&query=%24.package.version&prefix=v&logo=typst&label=package&color=239DAD)](https://typst.app/universe/package/phonokit)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/guilhermegarcia/phonokit/blob/main/LICENSE)
 [![User Manual](https://img.shields.io/badge/manual-.pdf-purple)](https://doi.org/10.5281/zenodo.18260076)
@@ -119,6 +119,15 @@
 
 Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive demonstration of available functions.
 
+## Fonts
+
+As of version `0.3.7`, the package allows the user to choose a global font for all functions. By default, Charis SIL is used (Typst has a fallback font should you not have it installed). However, you can use whichever font you prefer with the following command:
+
+```typst
+#import "@preview/phonokit:0.3.7": *
+#phonokit-init(font: "New Computer Modern") // <- add to the top of your document
+```
+
 ### IPA Module
 
 - **tipa-style input**: Use familiar LaTeX tipa notation instead of hunting for Unicode symbols
@@ -129,7 +138,7 @@ Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensi
 
 ### Prosody Module
 
-- **Prosodic structure visualization**: Draw syllable structures (onset-rhyme and moraic representations) as well as feet and prosodic words with simple and intuitive syntax
+- **Prosodic structure visualization**: Draw syllable structures (onset-rhyme and moraic representations) as well as feet and prosodic words with simple and intuitive syntax. You can also define which symbols you prefer to use for different prosodic domains
 - **Metrical grids**: Inputs as strings or tuples
 - **Sonority profile**: Visualize the sonority of a string
 
