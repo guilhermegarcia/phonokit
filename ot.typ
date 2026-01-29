@@ -1,4 +1,5 @@
 #import "ipa.typ": *
+#import "_config.typ": phonokit-font
 
 #let finger = text(size: 14pt)[☞]
 #let viol-sym = text(size: 1.2em)[#sym.ast]
@@ -89,7 +90,7 @@
   let col-defs = (auto, 2pt) + constraints.map(_ => auto)
   let row-defs = (1.75em, 2pt) + candidates.map(_ => 1.75em)
 
-  text(size: font-size)[#table(
+  context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
@@ -207,7 +208,7 @@
 
   let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
 
-  text(size: font-size)[#table(
+  context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
@@ -340,7 +341,7 @@
 
   let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
 
-  text(size: font-size)[#table(
+  context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
@@ -546,7 +547,7 @@
 
   let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
 
-  text(size: font-size)[#table(
+  context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
@@ -691,7 +692,7 @@
   let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
   let last-col-idx = col-defs.len() - 1
 
-  text(size: font-size)[#table(
+  context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
     align: (col, row) => (if col == 0 { right } else { center }) + horizon,
