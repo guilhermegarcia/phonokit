@@ -193,7 +193,7 @@
   // Branches from syllable
   if has-onset {
     line((x-offset, sigma-y + 0.25), (onset-x, sigma-y - 0.45))
-    content((onset-x, sigma-y - 0.75), text(size: 10 * diagram-scale * 1pt)[On])
+    content((onset-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[On])
 
     // Branch to each onset segment
     let onset-segments = smart-clusters(syll.onset)
@@ -222,11 +222,11 @@
 
   // Rhyme branch
   line((x-offset, sigma-y + 0.25), (rhyme-x, sigma-y - 0.45))
-  content((rhyme-x, sigma-y - 0.75), text(size: 10 * diagram-scale * 1pt)[Rh])
+  content((rhyme-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[Rh])
 
   // Nucleus
   line((rhyme-x, sigma-y - 1.1), (nucleus-x, sigma-y - 1.35))
-  content((nucleus-x, sigma-y - 1.65), text(size: 10 * diagram-scale * 1pt)[Nu])
+  content((nucleus-x, sigma-y - 1.65), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[Nu])
 
   // Branch to each nucleus segment
   let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -241,7 +241,7 @@
   // Coda (if exists)
   if has-coda {
     line((rhyme-x, sigma-y - 1.1), (coda-x, sigma-y - 1.35))
-    content((coda-x, sigma-y - 1.65), text(size: 10 * diagram-scale * 1pt)[Co])
+    content((coda-x, sigma-y - 1.65), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[Co])
 
     // Branch to each coda segment
     // Always draw all segments, but handle geminates specially
@@ -377,12 +377,12 @@
     }
 
     // Syllable node (σ)
-    content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+    content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
 
     // Onset branches (if exists)
     if has-onset {
       line((x-offset, sigma-y + 0.25), (onset-x, sigma-y - 0.45))
-      content((onset-x, sigma-y - 0.75), text(size: 10 * diagram-scale * 1pt)[On])
+      content((onset-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[On])
 
       let onset-total-width = (num-onset - 1) * segment-spacing
       let onset-start-x = onset-x - onset-total-width / 2
@@ -396,11 +396,11 @@
 
     // Rhyme branch
     line((x-offset, sigma-y + 0.25), (rhyme-x, sigma-y - 0.45))
-    content((rhyme-x, sigma-y - 0.75), text(size: 10 * diagram-scale * 1pt)[Rh])
+    content((rhyme-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[Rh])
 
     // Nucleus - positioned lower for standalone view (roughly halfway between Rh and segments)
     line((rhyme-x, sigma-y - 1.1), (nucleus-x, sigma-y - 1.65))
-    content((nucleus-x, sigma-y - 2.0), text(size: 10 * diagram-scale * 1pt)[Nu])
+    content((nucleus-x, sigma-y - 2.0), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[Nu])
 
     // Branch to each nucleus segment
     let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -415,7 +415,7 @@
     // Coda (if exists) - also positioned lower
     if has-coda {
       line((rhyme-x, sigma-y - 1.1), (coda-x, sigma-y - 1.65))
-      content((coda-x, sigma-y - 2.0), text(size: 10 * diagram-scale * 1pt)[Co])
+      content((coda-x, sigma-y - 2.0), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[Co])
 
       let coda-total-width = (num-coda - 1) * segment-spacing
       let coda-start-x = coda-x - coda-total-width / 2
@@ -493,7 +493,7 @@
     let x-offset = 0
 
     // Syllable node (σ)
-    content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+    content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
 
     // Calculate segment counts
     let onset-segments = if parsed.onset != "" { smart-clusters(parsed.onset) } else { () }
@@ -554,8 +554,8 @@
       let mora2-x = nucleus-mora-x + mora-spacing / 2
 
       // Draw two μ nodes
-      content((mora1-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
-      content((mora2-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
+      content((mora1-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
+      content((mora2-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
 
       // Lines from σ to both morae
       line((x-offset, sigma-y + 0.25), (mora1-x, mora-y + 0.35))
@@ -574,7 +574,7 @@
       }
     } else {
       // Short vowel: one mora
-      content((nucleus-mora-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
+      content((nucleus-mora-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
       line((x-offset, sigma-y + 0.25), (nucleus-mora-x, mora-y + 0.35))
 
       // Draw nucleus segments below mora
@@ -593,7 +593,7 @@
       if coda {
         // Moraic coda: ONE μ for all coda segments (they share the mora)
         // Draw the coda μ
-        content((coda-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
+        content((coda-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
 
         // Line from σ to coda μ
         line((x-offset, sigma-y + 0.25), (coda-x, mora-y + 0.35))
@@ -703,8 +703,8 @@
     let mora1-x = nucleus-mora-x - mora-spacing / 2
     let mora2-x = nucleus-mora-x + mora-spacing / 2
 
-    content((mora1-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
-    content((mora2-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
+    content((mora1-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
+    content((mora2-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
 
     line((x-offset, sigma-y + 0.25), (mora1-x, mora-y + 0.35))
     line((x-offset, sigma-y + 0.25), (mora2-x, mora-y + 0.35))
@@ -720,7 +720,7 @@
     }
   } else {
     // Short vowel: ONE mora
-    content((nucleus-mora-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
+    content((nucleus-mora-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
     line((x-offset, sigma-y + 0.25), (nucleus-mora-x, mora-y + 0.35))
 
     let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -737,7 +737,7 @@
   if num-coda > 0 {
     if coda {
       // Moraic coda: ONE μ shared by all segments
-      content((coda-x, mora-y), text(size: 12 * diagram-scale * 1pt)[μ])
+      content((coda-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[μ])
       line((x-offset, sigma-y + 0.25), (coda-x, mora-y + 0.35))
 
       // Check if this is a geminate coda
@@ -946,7 +946,7 @@
     let terminal-y = -5
 
     // Draw Ft node above the head
-    content((foot-x, ft-height), text(size: 12 * diagram-scale * 1pt)[*Σ*])
+    content((foot-x, ft-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*Σ*])
 
     // Detect geminates
     // A geminate occurs when the last consonant of a coda matches the first consonant of the next onset
@@ -971,7 +971,7 @@
       let x-offset = start-x + syllable-positions.at(i)
 
       // Syllable node (σ)
-      content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+      content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
 
       // Line from Ft to σ
       line((foot-x, ft-height - 0.25), (x-offset, sigma-y + 0.8))
@@ -1249,7 +1249,7 @@
 
     let pwd-height = min-pwd-height
 
-    content((pwd-x, pwd-height), text(size: 12 * diagram-scale * 1pt)[*PWd*])
+    content((pwd-x, pwd-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*PWd*])
 
     // Detect geminates
     // A geminate occurs when the last consonant of a coda matches the first consonant of the next onset
@@ -1276,7 +1276,7 @@
         let sigma-y = -2.4
         let terminal-y = -5
 
-        content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+        content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
         line((pwd-x, pwd-height - 0.3), (x-offset, sigma-y + 0.75))
 
         let gem-coda-x = none
@@ -1319,7 +1319,7 @@
 
       let foot-x = start-x + syllable-positions.at(head-idx)
 
-      content((foot-x, -0.9), text(size: 12 * diagram-scale * 1pt)[*Σ*])
+      content((foot-x, -0.9), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*Σ*])
       line((pwd-x, pwd-height - 0.3), (foot-x, -0.65))
 
       for syll-idx in foot {
@@ -1328,7 +1328,7 @@
         let sigma-y = -2.4
         let terminal-y = -5
 
-        content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+        content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
         line((foot-x, -1.15), (x-offset, sigma-y + 0.8))
 
         let gem-coda-x = none
@@ -1541,7 +1541,7 @@
     let terminal-y = -5
 
     // Draw Ft node above the head
-    content((foot-x, ft-height), text(size: 12 * diagram-scale * 1pt)[*Σ*])
+    content((foot-x, ft-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*Σ*])
 
     // Detect geminates
     // A geminate occurs when the last consonant of a coda matches the first consonant of the next onset
@@ -1566,7 +1566,7 @@
       let x-offset = start-x + syllable-positions.at(i)
 
       // Syllable node (σ)
-      content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+      content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
 
       // Line from Ft to σ
       line((foot-x, ft-height - 0.25), (x-offset, sigma-y + 0.8))
@@ -1861,7 +1861,7 @@
     let pwd-y = min-pwd-height
 
     // Draw PWd node
-    content((pwd-x, pwd-y), text(size: 12 * diagram-scale * 1pt)[*PWd*])
+    content((pwd-x, pwd-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*PWd*])
 
     // Detect geminates
     // A geminate occurs when the last consonant of a coda matches the first consonant of the next onset
@@ -1893,7 +1893,7 @@
       }
 
       let foot-x = start-x + syllable-positions.at(head-idx)
-      content((foot-x, ft-y), text(size: 12 * diagram-scale * 1pt)[*Σ*])
+      content((foot-x, ft-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*Σ*])
       line((pwd-x, pwd-y - 0.3), (foot-x, ft-y + 0.25))
 
       // Draw lines from Ft to syllables in this foot
@@ -1916,7 +1916,7 @@
       let x-offset = start-x + syllable-positions.at(i)
 
       // Syllable node (σ)
-      content((x-offset, sigma-y + 0.54), text(size: 12 * diagram-scale * 1pt)[*σ*])
+      content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[*σ*])
 
       // Check for geminate
       let gem-coda-x = none

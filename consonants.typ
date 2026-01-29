@@ -409,7 +409,7 @@
       let x = scaled-label-width + (i * scaled-cell-width) + (scaled-cell-width / 2)
       let y = total-height / 2 - (scaled-label-height / 2)
 
-      content((x, y), text(size: scaled-label-font-size * 1pt, place), anchor: "center")
+      content((x, y), context text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), place), anchor: "center")
     }
 
     // Draw row headers (manners of articulation)
@@ -417,7 +417,7 @@
       let x = scaled-label-width - 0.2
       let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height) - (scaled-cell-height / 2)
 
-      content((x, y), text(size: scaled-label-font-size * 1pt, manner), anchor: "east")
+      content((x, y), context text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), manner), anchor: "east")
     }
 
     // Calculate row positions accounting for optional row insertions (needed for grid drawing)

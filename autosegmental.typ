@@ -267,7 +267,7 @@
       // Calculate center of the entire representation
       let center_x = ((segments.len() - 1) / 2) * spacing
       // Use fixed-height box to ensure consistent baseline alignment across autoseg instances
-      content((center_x, gloss_y), padding: 0.1, anchor: gloss_anchor_dir, box(height: 1em, align(horizon, text(size: 0.9em, gloss))))
+      content((center_x, gloss_y), padding: 0.1, anchor: gloss_anchor_dir, box(height: 1em, align(horizon, context text(size: 0.9em, font: phonokit-font.get(), gloss))))
     }
   }))
 }
