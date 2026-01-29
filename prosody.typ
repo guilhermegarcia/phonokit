@@ -1,5 +1,6 @@
 #import "@preview/cetz:0.4.2"
 #import "ipa.typ": ipa-to-unicode
+#import "_config.typ": phonokit-font
 
 // Follows the same spacing convention as #ipa():
 //   - Backslash commands need spaces: "t \\ae p" → "tæp"
@@ -214,7 +215,7 @@
       } else {
         // Normal segment: draw line and text
         line((onset-x, sigma-y - 1.1), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
   }
@@ -234,7 +235,7 @@
   for (i, segment) in nucleus-segments.enumerate() {
     let seg-x = nucleus-start-x + i * segment-spacing
     line((nucleus-x, sigma-y - 1.9), (seg-x, terminal-y + line-offset))
-    content((seg-x, terminal-y + text-offset), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+    content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
   }
 
   // Coda (if exists)
@@ -259,7 +260,7 @@
       } else {
         // Normal segment: draw line and text
         line((coda-x, sigma-y - 1.9), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
   }
@@ -389,7 +390,7 @@
       for (i, segment) in onset-segments.enumerate() {
         let seg-x = onset-start-x + i * segment-spacing
         line((onset-x, sigma-y - 1.1), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
 
@@ -408,7 +409,7 @@
     for (i, segment) in nucleus-segments.enumerate() {
       let seg-x = nucleus-start-x + i * segment-spacing
       line((nucleus-x, sigma-y - 2.25), (seg-x, terminal-y + line-offset))
-      content((seg-x, terminal-y + text-offset), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+      content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
     }
 
     // Coda (if exists) - also positioned lower
@@ -422,7 +423,7 @@
       for (i, segment) in coda-segments.enumerate() {
         let seg-x = coda-start-x + i * segment-spacing
         line((coda-x, sigma-y - 2.25), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
   }))
@@ -538,7 +539,7 @@
       for (i, segment) in onset-segments.enumerate() {
         let seg-x = onset-start-x + i * segment-spacing
         line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
 
@@ -569,7 +570,7 @@
         // Lines from both morae converge to the segment
         line((mora1-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
         line((mora2-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     } else {
       // Short vowel: one mora
@@ -583,7 +584,7 @@
       for (i, segment) in nucleus-segments.enumerate() {
         let seg-x = nucleus-start-x + i * segment-spacing
         line((nucleus-mora-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
 
@@ -608,7 +609,7 @@
           line((coda-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
 
           // Draw segment
-          content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
         }
       } else {
         // Non-moraic coda: connects directly to σ
@@ -618,7 +619,7 @@
         for (i, segment) in coda-segments.enumerate() {
           let seg-x = coda-start-x + i * segment-spacing
           line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-          content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
         }
       }
     }
@@ -690,7 +691,7 @@
       for (i, segment) in onset-segments.enumerate() {
         let seg-x = onset-start-x + i * segment-spacing
         line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
       }
     }
   }
@@ -715,7 +716,7 @@
       let seg-x = nucleus-start-x + i * segment-spacing
       line((mora1-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
       line((mora2-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-      content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+      content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
     }
   } else {
     // Short vowel: ONE mora
@@ -728,7 +729,7 @@
     for (i, segment) in nucleus-segments.enumerate() {
       let seg-x = nucleus-start-x + i * segment-spacing
       line((nucleus-mora-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-      content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+      content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
     }
   }
 
@@ -751,7 +752,7 @@
         for (i, segment) in coda-segments.enumerate() {
           let seg-x = coda-start-x + i * segment-spacing
           line((coda-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-          content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
         }
       }
     } else {
@@ -768,7 +769,7 @@
         for (i, segment) in coda-segments.enumerate() {
           let seg-x = coda-start-x + i * segment-spacing
           line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-          content((seg-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#segment], anchor: "north")
+          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
         }
       }
     }
@@ -1007,7 +1008,7 @@
     // Draw geminate segments
     for gem in geminates {
       let terminal-y = -5
-      content((gem.gem-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#gem.gem-text], anchor: "north")
+      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
     }
   }))
 }
@@ -1362,7 +1363,7 @@
     // Draw geminate segments
     for gem in geminates {
       let terminal-y = -5
-      content((gem.gem-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#gem.gem-text], anchor: "north")
+      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
     }
   }))
 }
@@ -1597,7 +1598,7 @@
     // Draw geminate segments
     for gem in geminates {
       let terminal-y = -5
-      content((gem.gem-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#gem.gem-text], anchor: "north")
+      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
     }
   }))
 }
@@ -1944,7 +1945,7 @@
     // Draw geminate segments
     for gem in geminates {
       let terminal-y = -5
-      content((gem.gem-x, terminal-y), text(size: 11 * diagram-scale * 1pt)[#gem.gem-text], anchor: "north")
+      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
     }
   }))
 }
