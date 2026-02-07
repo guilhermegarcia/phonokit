@@ -19,101 +19,66 @@
 
 ## Some examples
 
-<!-- img width is set so the table gets evenly spaced by GitHubs css -->
 <table>
 <tr>
-  <td>
-    <a href="gallery/ipa_example.typ">
-      <img src="gallery/ipa_example.png" width="250px">
-    </a>
+  <td align="center" width="33%">
+    <a href="gallery/ipa_example.typ"><img src="gallery/ipa_example.png" width="100%"></a>
+    <br><sub>IPA transcription based on tipa</sub>
   </td>
-  <td>
-    <a href="gallery/consonants_example.typ">
-      <img src="gallery/consonants_example.png" width="250px">
-    </a>
+  <td align="center" width="33%">
+    <a href="gallery/consonants_example.typ"><img src="gallery/consonants_example.png" width="100%"></a>
+    <br><sub>Consonant inventories (with pre-defined languages)</sub>
   </td>
-  <td>
-    <a href="gallery/vowels_example.typ">
-      <img src="gallery/vowels_example.png" width="250px">
-    </a>
+  <td align="center" width="33%">
+    <a href="gallery/vowels_example.typ"><img src="gallery/vowels_example.png" width="100%"></a>
+    <br><sub>Vowel trapezoids (with pre-defined languages)</sub>
   </td>
 </tr>
 <tr>
-  <td>IPA transcription based on tipa</td>
-  <td>Consonant inventories (with some pre-defined languages for quick plotting)</td>
-  <td>Vowel trapezoids (with some pre-defined languages for quick plotting)</td>
-</tr>
-<tr>
-  <td>
-    <a href="gallery/sonority_example.typ">
-      <img src="gallery/sonority_example.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/multi-tier_example.typ"><img src="gallery/multi-tier_example.png" width="100%"></a>
+    <br><sub>Multi-tier representations</sub>
   </td>
-  <td>
-    <a href="gallery/syllable_example.typ">
-      <img src="gallery/syllable_example.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/syllable_example.typ"><img src="gallery/syllable_example.png" width="100%"></a>
+    <br><sub>Syllable structure (onset-rhyme and moraic)</sub>
   </td>
-  <td>
-    <a href="gallery/word_example.typ">
-      <img src="gallery/word_example.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/word_example.typ"><img src="gallery/word_example.png" width="100%"></a>
+    <br><sub>Prosodic word (with metrical parsing)</sub>
   </td>
 </tr>
 <tr>
-  <td>Sonority profile with syllabification</td>
-  <td>Syllable structure (onset-rhyme and moraic representations)</td>
-  <td>Prosodic word (with metrical parsing)</td>
-</tr>
-  <tr>
-    <td>
-      <a href="gallery/grid_example.typ">
-      <img src="gallery/grid_example.png" width="250px">
-</a>
+  <td align="center">
+    <a href="gallery/grid_example.typ"><img src="gallery/grid_example.png" width="100%"></a>
+    <br><sub>Metrical grids with IPA support</sub>
   </td>
-  <td>
-    <a href="gallery/autoseg_example_1.typ">
-      <img src="gallery/autoseg_example_1.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/autoseg_example_1.typ"><img src="gallery/autoseg_example_1.png" width="100%"></a>
+    <br><sub>Autosegmental phonology: features</sub>
   </td>
-  
-  <td>
-      <a href="gallery/autoseg_example_3.typ">
-      <img src="gallery/autoseg_example_3.png" width="250px">
-</a>
+  <td align="center">
+    <a href="gallery/autoseg_example_3.typ"><img src="gallery/autoseg_example_3.png" width="100%"></a>
+    <br><sub>Autosegmental phonology: tones</sub>
   </td>
 </tr>
 <tr>
-  <td>Metrical grids with support for IPA</td>
-  <td>Autosegmental phonology: features</td>
-  <td>Autosegmental phonology: tones</td>
-</tr>
-<tr>
-    <td>
-    <a href="gallery/spe_example.typ">
-      <img src="gallery/spe_example.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/spe_example.typ"><img src="gallery/spe_example.png" width="100%"></a>
+    <br><sub>SPE-style feature matrix</sub>
   </td>
-  <td>
-    <a href="gallery/ot_example.typ">
-      <img src="gallery/ot_example.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/ot_example.typ"><img src="gallery/ot_example.png" width="100%"></a>
+    <br><sub>OT tableaux with automatic shading</sub>
   </td>
-  <td>
-      <a href="gallery/maxent_example.typ">
-      <img src="gallery/maxent_example.png" width="250px">
-    </a>
+  <td align="center">
+    <a href="gallery/maxent_example.typ"><img src="gallery/maxent_example.png" width="100%"></a>
+    <br><sub>MaxEnt tableaux with automatic calculation</sub>
   </td>
-  
-</tr>
-<tr>
-  <td>SPE-style matrix</td>
-  <td>Optimality theory tableaux with automatic shading</td>
-  <td>MaxEnt tableaux with automatic calculation</td>
 </tr>
 </table>
 
-*Click on the example image to go to the code.*
+<sub>Click on any image to view its source code.</sub>
 
 ## Manual
 
@@ -139,6 +104,7 @@ As of version `0.3.7`, the package allows the user to choose a global font for a
 ### Prosody Module
 
 - **Prosodic structure visualization**: Draw syllable structures (onset-rhyme and moraic representations) as well as feet and prosodic words with simple and intuitive syntax. You can also define which symbols you prefer to use for different prosodic domains
+- **Multi-tier representations**: Create complex non-linear representations
 - **Metrical grids**: Inputs as strings or tuples
 - **Sonority profile**: Visualize the sonority of a string
 
@@ -324,6 +290,33 @@ Phonokit provides three functions for visualizing different levels of prosodic s
 - Characters within syllables are automatically parsed into onset, nucleus, and coda
 - Geminates are automatically detected for `#foot()` and `#word()`
 - For long vowels, use `:`; `vv` will produce a complex nucleus (e.g., a diphthong)
+
+#### Multi-tier representations
+
+`#multi-tier()` provides a flexible grid-based system for building complex non-linear structures such as CV phonology, skeletal tiers, and morphology-phonology interfaces.
+
+```typst
+#multi-tier(
+  levels: (
+    ("O", "R", "", "O", "R", "O", "R"),
+    ("", "N1", "", "", "N2", "", "N3"),
+    ("", "x", "x", "x", "x", "x", "x"),
+    ("", "", "s", "t", "E", "m", ""),
+  ),
+  links: (
+    ((0, 1), (2, 2)),
+  ),
+  ipa: (3,),
+  arrows: (
+    ((3, 3), (3, 2)),
+    ((0, 4), (0, 1)),
+  ),
+  arrow-delinks: (
+    (1,)
+  ),
+  spacing: 1,
+)
+```
 
 #### Metrical grids
 

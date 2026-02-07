@@ -18,6 +18,22 @@
   stroke: (bottom: 0.5pt + black),
 )
 
+// NOTE: -- Greek symbols (upright, for phonological notation)
+#let alpha = sym.alpha
+#let beta = sym.beta
+#let gamma = sym.gamma
+#let delta = sym.delta
+#let lambda = sym.lambda
+#let mu = sym.mu
+#let phi = sym.phi
+#let pi = sym.pi
+#let sigma = sym.sigma
+#let tau = sym.tau
+#let omega = sym.omega
+#let Phi = sym.Phi
+#let Sigma = sym.Sigma
+#let Omega = sym.Omega
+
 // NOTE: Extrametricality
 #let extra(content) = [⟨#content⟩]
 

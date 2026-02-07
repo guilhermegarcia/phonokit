@@ -26,6 +26,7 @@
 #import "features.typ": *
 #import "sonority.typ": *
 #import "autosegmental.typ": *
+#import "multi-tier.typ": *
 #import "ex.typ": *
 
 /// Initialize phonokit settings
@@ -38,7 +39,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.3.7": *
+/// #import "@preview/phonokit:0.4.0": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -607,6 +608,65 @@
 /// arrays to create timing slots without content or features without associations.
 #let autoseg = autoseg
 
+/// Create a multi-tier phonological representation
+///
+/// Draws N-tier diagrams for CV phonology, skeletal tier structures, and other
+/// multi-level representations. Each tier is a row of labels connected by
+/// association lines. Supports auto-linking, floating elements, highlighting,
+/// dashed lines, and delinking marks.
+///
+/// Arguments:
+/// - levels (array): Array of arrays; each inner array is a tier of label strings (use "" for empty positions).
+///   Entries can be "label", ("label", col) for fractional columns, or ("label", col, level) for fractional levels.
+/// - links (array): Extra solid lines as ((level1, col1), (level2, col2)) tuples (default: ())
+/// - dashed (array): Dashed lines as ((level1, col1), (level2, col2)) tuples (default: ())
+/// - delinks (array): Cross marks on connections as ((level1, col1), (level2, col2)) tuples (default: ())
+/// - arrows (array): Rectangular-path arrows as ((level, col-from), (level, col-to)) tuples (default: ()).
+///   Top-level arrows arc above; bottom-level arrows arc below. Arrowhead at destination.
+/// - arrow-delinks (array): Indices of arrows that should have a delink mark (||) at the midpoint (default: ())
+/// - float (array): Positions excluded from auto-linking as (level, col) tuples (default: ())
+/// - highlight (array): Positions with circle highlight as (level, col) tuples (default: ())
+/// - ipa (array): Level indices whose labels should be rendered as IPA (default: ())
+/// - tier-labels (array): Labels for tiers as (level, "label") tuples, placed to the right (default: ())
+/// - spacing (float): Horizontal spacing between columns (default: 1.5)
+/// - level-spacing (float): Vertical spacing between tiers (default: 1.2)
+/// - stroke-width (length): Line thickness (default: 0.05em)
+/// - baseline (string): Vertical alignment (default: 40%)
+/// - scale (float): Uniform scale factor (default: 1.0)
+///
+/// Returns: Multi-tier phonological representation
+///
+/// Examples:
+/// ```
+/// // Basic CV tier structure
+/// #multi-tier(
+///   levels: (
+///     ("σ", "", "σ", ""),
+///     ("O", "R", "O", "R"),
+///     ("C", "V", "C", "V"),
+///     ("p", "a", "t", "o"),
+///   ),
+///   links: (
+///     ((0, 0), (1, 0)), ((0, 0), (1, 1)),
+///     ((0, 2), (1, 2)), ((0, 2), (1, 3)),
+///   ),
+/// )
+///
+/// // With floating and highlighted elements
+/// #multi-tier(
+///   levels: (
+///     ("x", "x", "x"),
+///     ("a", "", "b"),
+///   ),
+///   float: ((1, 1),),
+///   highlight: ((0, 1),),
+/// )
+/// ```
+///
+/// Note: Trailing digits in labels are automatically rendered as subscripts
+/// (e.g., "O1" becomes O₁). Standalone "x" is rendered as "×" (multiplication sign).
+#let multi-tier = multi-tier
+
 /// Create a numbered linguistic example
 ///
 /// Generates numbered examples (1), (2), etc. similar to linguex in LaTeX.
@@ -692,6 +752,35 @@
 #let a-sr = a-sr
 #let a-sl = a-sl
 #let a-r-large = a-r-large
+
+/// Upright Greek symbols for phonological notation
+///
+/// Convenience bindings for commonly used Greek letters in phonology.
+/// These render upright in text mode (unlike math-mode `$sigma$` which italicizes).
+///
+/// Lowercase:
+/// - `#alpha` α, `#beta` β, `#gamma` γ, `#delta` δ
+/// - `#lambda` λ, `#mu` μ, `#phi` φ, `#pi` π
+/// - `#sigma` σ, `#tau` τ, `#omega` ω
+///
+/// Uppercase:
+/// - `#Sigma` Σ (foot), `#Phi` Φ (phonological phrase), `#Omega` Ω (utterance)
+///
+/// Example: `The syllable #sigma contains an onset and a rhyme.`
+#let alpha = alpha
+#let beta = beta
+#let gamma = gamma
+#let delta = delta
+#let lambda = lambda
+#let mu = mu
+#let phi = phi
+#let pi = pi
+#let sigma = sigma
+#let tau = tau
+#let omega = omega
+#let Phi = Phi
+#let Sigma = Sigma
+#let Omega = Omega
 
 /// Create an underline blank for fill-in exercises or SPE rules
 ///
