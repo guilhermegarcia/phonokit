@@ -636,30 +636,28 @@
 ///
 /// Returns: Multi-tier phonological representation
 ///
-/// Examples:
+/// Example:
 /// ```
-/// // Basic CV tier structure
+/// // From Goad (2012)
 /// #multi-tier(
 ///   levels: (
-///     ("σ", "", "σ", ""),
-///     ("O", "R", "O", "R"),
-///     ("C", "V", "C", "V"),
-///     ("p", "a", "t", "o"),
+///     ("O", "R", "", "O", "R", "O", "R"),
+///     ("", "N1", "", "", "N2", "", "N3"),
+///     ("", "x", "x", "x", "x", "x", "x"),
+///     ("", "", "s", "t", "E", "m", ""),
 ///   ),
 ///   links: (
-///     ((0, 0), (1, 0)), ((0, 0), (1, 1)),
-///     ((0, 2), (1, 2)), ((0, 2), (1, 3)),
+///     ((0, 1), (2, 2)),
 ///   ),
-/// )
-///
-/// // With floating and highlighted elements
-/// #multi-tier(
-///   levels: (
-///     ("x", "x", "x"),
-///     ("a", "", "b"),
+///   ipa: (3,),
+///   arrows: (
+///     ((3, 3), (3, 2)),
+///     ((0, 4), (0, 1)),
 ///   ),
-///   float: ((1, 1),),
-///   highlight: ((0, 1),),
+///   arrow-delinks: (
+///     (1,)
+///   ),
+///   spacing: 1,
 /// )
 /// ```
 ///
@@ -764,7 +762,7 @@
 /// - `#sigma` σ, `#tau` τ, `#omega` ω
 ///
 /// Uppercase:
-/// - `#Sigma` Σ (foot), `#Phi` Φ (phonological phrase), `#Omega` Ω (utterance)
+/// - `#cap-sigma` Σ (foot), `#cap-phi` Φ (phonological phrase), `#cap-omega` Ω (utterance)
 ///
 /// Example: `The syllable #sigma contains an onset and a rhyme.`
 #let alpha = alpha
@@ -778,9 +776,9 @@
 #let sigma = sigma
 #let tau = tau
 #let omega = omega
-#let Phi = Phi
-#let Sigma = Sigma
-#let Omega = Omega
+#let cap-phi = cap-phi
+#let cap-sigma = cap-sigma
+#let cap-omega = cap-omega
 
 /// Create an underline blank for fill-in exercises or SPE rules
 ///

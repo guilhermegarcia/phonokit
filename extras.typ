@@ -30,9 +30,9 @@
 #let sigma = sym.sigma
 #let tau = sym.tau
 #let omega = sym.omega
-#let Phi = sym.Phi
-#let Sigma = sym.Sigma
-#let Omega = sym.Omega
+#let cap-phi = sym.Phi
+#let cap-sigma = sym.Sigma
+#let cap-omega = sym.Omega
 
 // NOTE: Extrametricality
 #let extra(content) = [⟨#content⟩]
