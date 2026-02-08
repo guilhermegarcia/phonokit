@@ -7,7 +7,7 @@ authors:
     orcid: https://orcid.org/0000-0003-1412-3856
 title: "phonokit: a toolkit to create phonological representations"
 version: 0.4.0
-date-released: 2026-01-29
+date-released: 2026-02-12
 url: "https://github.com/guilhermegarcia/phonokit"
 repository-code: "https://github.com/guilhermegarcia/phonokit"
 doi: 10.5281/zenodo.18190181
