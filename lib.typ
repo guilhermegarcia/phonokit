@@ -39,7 +39,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.4.0": *
+/// #import "@preview/phonokit:0.4.1": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -274,6 +274,7 @@
 /// - lang (string, optional): Explicit language parameter (e.g., lang: "russian")
 /// - affricates (bool): Show affricate row after fricatives (default: false)
 /// - aspirated (bool): Show aspirated plosive/affricate rows (default: false)
+/// - abbreviate (bool): Use abbreviated place/manner labels (default: false)
 /// - cell-width (float): Width of each cell (default: 1.8)
 /// - cell-height (float): Height of each cell (default: 1.2)
 /// - label-width (float): Width of row labels (default: 3.5)

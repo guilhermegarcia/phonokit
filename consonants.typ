@@ -135,6 +135,20 @@
   "Glottal",
 )
 
+#let places-short = (
+  "Bilab",
+  "Labdent",
+  "Dent",
+  "Alv",
+  "Postalv",
+  "Retro",
+  "Pal",
+  "Vel",
+  "Uvu",
+  "Phar",
+  "Glot",
+)
+
 // Row labels (manners of articulation)
 #let manners = (
   "Plosive",
@@ -145,6 +159,17 @@
   "Lateral fricative",
   "Approximant",
   "Lateral approximant",
+)
+
+#let manners-short = (
+  "Plos",
+  "Nas",
+  "Trill",
+  "Tap/Flap",
+  "Fric",
+  "Lat fric",
+  "Approx",
+  "Lat approx",
 )
 
 // Language consonant inventories
@@ -267,6 +292,7 @@
   lang: none,
   affricates: false,
   aspirated: false,
+  abbreviate: false,
   cell-width: 1.8,
   cell-height: 0.9,
   label-width: 3.5,
@@ -360,25 +386,27 @@
     }
   }
 
+  // Select label sets based on abbreviation setting
+  let display-places = if abbreviate { places-short } else { places }
+  let display-manners = if abbreviate { manners-short } else { manners }
+
   // Build manners array with optional rows
-  let display-manners = manners
   if aspirated {
-    // Insert "Plosive (aspirated)" after "Plosive" (index 0)
-    display-manners = manners.slice(0, 1) + ("Plosive (aspirated)",) + manners.slice(1)
+    let asp-plos-label = if abbreviate { "Plos (asp)" } else { "Plosive (aspirated)" }
+    display-manners = display-manners.slice(0, 1) + (asp-plos-label,) + display-manners.slice(1)
   }
   if affricates {
-    // Insert "Affricate" after "Fricative"
-    // Index is 4 if no aspirated row, 5 if aspirated row was added
+    let affr-label = if abbreviate { "Affr" } else { "Affricate" }
     let affricate-insert-index = if aspirated { 6 } else { 5 }
     display-manners = (
-      display-manners.slice(0, affricate-insert-index) + ("Affricate",) + display-manners.slice(affricate-insert-index)
+      display-manners.slice(0, affricate-insert-index) + (affr-label,) + display-manners.slice(affricate-insert-index)
     )
 
-    // If both affricates and aspirated, add "Affricate (aspirated)" too
     if aspirated {
+      let asp-affr-label = if abbreviate { "Affr (asp)" } else { "Affricate (aspirated)" }
       display-manners = (
         display-manners.slice(0, affricate-insert-index + 1)
-          + ("Affricate (aspirated)",)
+          + (asp-affr-label,)
           + display-manners.slice(affricate-insert-index + 1)
       )
     }
@@ -405,11 +433,11 @@
     let total-height = scaled-label-height + (num-rows * scaled-cell-height)
 
     // Draw column headers (places of articulation)
-    for (i, place) in places.enumerate() {
+    for (i, place) in display-places.enumerate() {
       let x = scaled-label-width + (i * scaled-cell-width) + (scaled-cell-width / 2)
-      let y = total-height / 2 - (scaled-label-height / 2)
+      let y = total-height / 2 - (scaled-label-height * 0.65)
 
-      content((x, y), context text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), place), anchor: "center")
+      content((x, y), context text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), top-edge: "cap-height", bottom-edge: "baseline", place), anchor: "center")
     }
 
     // Draw row headers (manners of articulation)

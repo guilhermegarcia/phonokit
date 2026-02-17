@@ -181,7 +181,7 @@
       for col in range(max-col) {
         content(
           (col * spacing, pad + 0.3),
-          text(size: 0.7em * scale-factor, fill: grid-color, str(col)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(col)),
         )
       }
 
@@ -189,7 +189,23 @@
       for level-i in range(num-levels) {
         content(
           (-pad - 0.4, level-y(level-i)),
-          text(size: 0.7em * scale-factor, fill: grid-color, str(level-i)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(level-i)),
+        )
+      }
+
+      // Column index labels (below the diagram)
+      for col in range(max-col) {
+        content(
+          (col * spacing, -(num-levels - 1) * level-spacing - pad - 0.3),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(col)),
+        )
+      }
+
+      // Level index labels (right of the diagram)
+      for level-i in range(num-levels) {
+        content(
+          ((max-col - 1) * spacing + pad + 0.4, level-y(level-i)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(level-i)),
         )
       }
 

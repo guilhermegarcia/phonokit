@@ -89,7 +89,7 @@ Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensi
 As of version `0.3.7`, the package allows the user to choose a global font for all functions. By default, Charis SIL is used (Typst has a fallback font should you not have it installed). However, you can use whichever font you prefer with the following command:
 
 ```typst
-#import "@preview/phonokit:0.3.7": *
+#import "@preview/phonokit:0.4.1": *
 #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
 ```
 
