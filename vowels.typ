@@ -124,6 +124,15 @@
   rows: 3, // Only 2 internal horizontal lines
   cols: 2, // Only 1 vertical line inside trapezoid
   scale: 0.7, // Scale factor for entire chart
+  arrows: (), // List of (from-tipa-str, to-tipa-str) tuples
+  arrow-color: black, // Color for arrow lines and heads
+  arrow-style: "solid", // "solid" or "dashed"
+  curved: false, // Curve arrows with a quadratic bezier arc
+  shift: (), // List of (tipa-str, x-offset, y-offset) tuples
+  shift-color: gray, // Color for shifted vowel symbols
+  shift-size: none, // Font size for shifted vowels; none = same as regular
+  highlight: (), // List of tipa strings whose background circle is highlighted
+  highlight-color: luma(220), // Circle color for highlighted vowels (default: light gray)
 ) = {
   // Determine which vowels to plot
   let vowels-to-plot = ""
@@ -164,6 +173,13 @@
   let scaled-bullet-radius = 0.09 * scale
   let scaled-font-size = 22 * scale
   let scaled-line-thickness = 0.85 * scale
+  let scaled-arrow-mark = 1.5 * scale
+  let resolved-shift-size = if shift-size != none { shift-size * scale } else { scaled-font-size * 1pt }
+  // Split highlight into regular-vowel highlights (strings) and shifted-vowel
+  // highlights (arrays in the same (tipa-str, x, y) format as shift:)
+  let highlight-set = highlight.filter(h => type(h) == str).map(ipa-to-unicode)
+  let highlight-shifts = highlight.filter(h => type(h) != str)
+    .map(h => (ipa-to-unicode(h.at(0)), h.at(1), h.at(2)))
 
   canvas({
     import draw: *
@@ -201,6 +217,23 @@
     // Draw the outline
     line(..trapezoid, close: true, stroke: (paint: gray.lighten(30%), thickness: scaled-line-thickness * 1pt))
 
+    // Resolve an arrow endpoint to a canvas position.
+    // endpoint is either a tipa string (canonical vowel position) or a
+    // (tipa-str, x-offset, y-offset) array (shifted position, same format as shift:).
+    // Returns (found, position) where found is false if the vowel is unknown.
+    let pos-of(endpoint) = {
+      let is-str = type(endpoint) == str
+      let v = ipa-to-unicode(if is-str { endpoint } else { endpoint.at(0) })
+      let x-off = if is-str { 0 } else { endpoint.at(1) }
+      let y-off = if is-str { 0 } else { endpoint.at(2) }
+      if v in vowel-data {
+        let base = get-vowel-position(vowel-data.at(v), trapezoid, scaled-width, scaled-height, scaled-offset)
+        (true, (base.at(0) + x-off, base.at(1) + y-off))
+      } else {
+        (false, (0, 0))
+      }
+    }
+
     // Collect vowel positions
     let vowel-positions = ()
     for vowel in vowels-to-plot.clusters() {
@@ -208,6 +241,75 @@
         let vowel-info = vowel-data.at(vowel)
         let pos = get-vowel-position(vowel-info, trapezoid, scaled-width, scaled-height, scaled-offset)
         vowel-positions.push((vowel: vowel, info: vowel-info, pos: pos))
+      }
+    }
+
+    // Draw arrows between vowel positions (e.g. diphthongs)
+    for arrow in arrows {
+      let fr = pos-of(arrow.at(0))
+      let tr = pos-of(arrow.at(1))
+      if fr.at(0) and tr.at(0) {
+        let from-pos = fr.at(1)
+        let to-pos = tr.at(1)
+        let dx = to-pos.at(0) - from-pos.at(0)
+        let dy = to-pos.at(1) - from-pos.at(1)
+        let dist = calc.sqrt(dx * dx + dy * dy)
+
+        // Bezier control point: 90° CCW offset at 30% of chord, anchored on the
+        // midpoint of the original (unadjusted) endpoints so the curve shape is
+        // independent of the circle-edge adjustment below.
+        let mid-x = (from-pos.at(0) + to-pos.at(0)) / 2
+        let mid-y = (from-pos.at(1) + to-pos.at(1)) / 2
+        let ctrl = (mid-x + (-dy / dist) * dist * 0.3, mid-y + (dx / dist) * dist * 0.3)
+
+        // Tangent unit vector at the destination:
+        //   straight → chord direction
+        //   curved   → ctrl→to-pos direction (true tangent of the bezier at t=1)
+        // This must be computed before adjusted-to so that the endpoint is backed
+        // off along the actual arrival angle of the curve, not the chord.
+        let tangent = if curved {
+          let ex = to-pos.at(0) - ctrl.at(0)
+          let ey = to-pos.at(1) - ctrl.at(1)
+          let ed = calc.sqrt(ex * ex + ey * ey)
+          (ex / ed, ey / ed)
+        } else {
+          (dx / dist, dy / dist)
+        }
+
+        // Pull the endpoint back to the circle edge along the arrival tangent
+        let adjusted-to = (
+          to-pos.at(0) - tangent.at(0) * scaled-circle-radius,
+          to-pos.at(1) - tangent.at(1) * scaled-circle-radius,
+        )
+
+        let shaft-stroke = (paint: arrow-color, thickness: scaled-line-thickness * 1.5pt,
+          dash: if arrow-style == "dashed" { "dashed" } else { none })
+        let head-stroke = (paint: arrow-color, thickness: scaled-line-thickness * 1.5pt)
+        let mark-style = (end: ">", fill: arrow-color, scale: scaled-arrow-mark)
+
+        if arrow-style == "dashed" {
+          // Draw dashed shaft without a mark
+          if curved {
+            bezier(from-pos, adjusted-to, ctrl, stroke: shaft-stroke)
+          } else {
+            line(from-pos, adjusted-to, stroke: shaft-stroke)
+          }
+          // Draw a near-zero-length solid segment at the endpoint so the mark
+          // is rendered solid and correctly oriented, independent of the dash pattern
+          let tiny = 0.01
+          let head-anchor = (
+            adjusted-to.at(0) - tangent.at(0) * tiny,
+            adjusted-to.at(1) - tangent.at(1) * tiny,
+          )
+          line(head-anchor, adjusted-to, stroke: head-stroke, mark: mark-style)
+        } else {
+          // Solid: shaft and arrowhead in one draw call
+          if curved {
+            bezier(from-pos, adjusted-to, ctrl, stroke: shaft-stroke, mark: mark-style)
+          } else {
+            line(from-pos, adjusted-to, stroke: shaft-stroke, mark: mark-style)
+          }
+        }
       }
     }
 
@@ -231,12 +333,25 @@
       }
     }
 
-    // Plot vowels with white background circles
+    // Plot vowels with background circles (white, or highlight color if highlighted)
     for vp in vowel-positions {
-      // Draw white circle to cover grid lines
-      circle(vp.pos, radius: scaled-circle-radius, fill: white, stroke: none)
-      // Draw vowel on top
-      content(vp.pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), vp.vowel))
+      let circle-fill = if vp.vowel in highlight-set { highlight-color } else { white }
+      circle(vp.pos, radius: scaled-circle-radius, fill: circle-fill, stroke: none)
+      content(vp.pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), top-edge: "x-height", bottom-edge: "baseline", vp.vowel))
+    }
+
+    // Draw shifted vowels (on top of regular vowels)
+    for s in shift {
+      let vowel = ipa-to-unicode(s.at(0))
+      let x-off = s.at(1)
+      let y-off = s.at(2)
+      if vowel in vowel-data {
+        let base-pos = get-vowel-position(vowel-data.at(vowel), trapezoid, scaled-width, scaled-height, scaled-offset)
+        let shifted-pos = (base-pos.at(0) + x-off, base-pos.at(1) + y-off)
+        let shift-fill = if highlight-shifts.any(h => h.at(0) == vowel and h.at(1) == x-off and h.at(2) == y-off) { highlight-color } else { white }
+        circle(shifted-pos, radius: scaled-circle-radius, fill: shift-fill, stroke: none)
+        content(shifted-pos, context text(size: resolved-shift-size, font: phonokit-font.get(), fill: shift-color, top-edge: "x-height", bottom-edge: "baseline", vowel))
+      }
     }
   })
 }

@@ -39,7 +39,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.4.1": *
+/// #import "@preview/phonokit:0.4.5": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -248,6 +248,18 @@
 /// - rows (int): Number of horizontal grid lines (default: 3)
 /// - cols (int): Number of vertical grid lines (default: 2)
 /// - scale (float): Scale factor for entire chart (default: 0.7)
+/// - arrows (array): List of (from-vowel, to-vowel) tuples for drawing directed
+///   arrows between vowel positions (e.g. diphthongs). Each vowel string accepts
+///   tipa-style notation. Unknown vowels are silently skipped. (default: ())
+/// - arrow-color (color): Color for arrow lines and heads (default: black)
+/// - arrow-style (string): "solid" or "dashed" line style for arrows (default: "solid")
+/// - shift (array): List of (vowel, x-offset, y-offset) tuples. Draws a copy of
+///   the vowel symbol offset from its canonical trapezoid position by (x, y) in
+///   CeTZ canvas units. If the vowel is already plotted, an additional copy is
+///   drawn; otherwise it is created. Unknown vowels are silently skipped. (default: ())
+/// - shift-color (color): Color for shifted vowel symbols (default: gray)
+/// - shift-size (length, optional): Font size for shifted vowels; none uses the
+///   same size as regular vowels (default: none)
 ///
 /// Returns: CeTZ drawing of IPA vowel chart with positioned vowels
 ///
@@ -256,6 +268,9 @@
 /// - `#vowels("aeiou")` - Plot specific vowels
 /// - `#vowels("i e E a o O u")` - Plot vowels using tipa-style notation
 /// - `#vowels("french", scale: 0.5)` - Smaller French vowel chart
+/// - `#vowels("aU", arrows: (("a", "U"),))` - Diphthong /aʊ/ with arrow
+/// - `#vowels("english", arrows: (("e", "I"),), arrow-style: "dashed")` - Dashed arrow
+/// - `#vowels("english", shift: (("E", 0.3, 0.2),), shift-color: red)` - Shifted allophone
 ///
 /// Note: Diacritics and non-vowel symbols are ignored during plotting
 ///
