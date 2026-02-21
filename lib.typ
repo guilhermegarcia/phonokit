@@ -266,11 +266,9 @@
 /// Examples:
 /// - `#vowels("english")` - Plot English vowel inventory
 /// - `#vowels("aeiou")` - Plot specific vowels
-/// - `#vowels("i e E a o O u")` - Plot vowels using tipa-style notation
 /// - `#vowels("french", scale: 0.5)` - Smaller French vowel chart
 /// - `#vowels("aU", arrows: (("a", "U"),))` - Diphthong /aʊ/ with arrow
 /// - `#vowels("english", arrows: (("e", "I"),), arrow-style: "dashed")` - Dashed arrow
-/// - `#vowels("english", shift: (("E", 0.3, 0.2),), shift-color: red)` - Shifted allophone
 ///
 /// Note: Diacritics and non-vowel symbols are ignored during plotting
 ///

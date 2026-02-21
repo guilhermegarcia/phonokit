@@ -244,7 +244,38 @@
       }
     }
 
-    // Draw arrows between vowel positions (e.g. diphthongs)
+    // Build the global obstacle list for curved-arrow avoidance:
+    // all plotted vowels plus all shifted copies, pre-computed once.
+    let shifted-obs = shift
+      .filter(s => ipa-to-unicode(s.at(0)) in vowel-data)
+      .map(s => {
+        let sv = ipa-to-unicode(s.at(0))
+        let base = get-vowel-position(vowel-data.at(sv), trapezoid, scaled-width, scaled-height, scaled-offset)
+        (base.at(0) + s.at(1), base.at(1) + s.at(2))
+      })
+    let all-obstacle-positions = vowel-positions.map(vp => vp.pos) + shifted-obs
+
+    // True if p is either at/near endpoint ep, or is its minimal-pair partner.
+    // Minimal-pair partners share height (dy ≈ 0) and lie exactly 2×scaled-offset
+    // apart in x (one rounded, one unrounded). They are geometrically inseparable
+    // from their partner, so arrows approaching ep will inevitably pass near the
+    // partner and should not try to avoid it. The ±40% relative tolerance on the
+    // distance keeps the check scale-independent while excluding near-front lax
+    // pairs like ɪ/ʏ (whose inter-vowel distance is only ~68% of 2×scaled-offset).
+    let near-or-pair(p, ep) = {
+      let dx = p.at(0) - ep.at(0)
+      let dy = p.at(1) - ep.at(1)
+      let d  = calc.sqrt(dx*dx + dy*dy)
+      let at-endpoint   = d < scaled-circle-radius * 0.5
+      let is-pair = calc.abs(dy) < scaled-offset * 0.1 and calc.abs(d - 2*scaled-offset) < scaled-offset * 0.4
+      at-endpoint or is-pair
+    }
+
+    // Draw arrows in three phases so that arrowhead clustering can be applied
+    // after all control points and tangents are known.
+
+    // ── Phase 1: compute drawing parameters for every valid arrow ────────────
+    let arrows-data = ()
     for arrow in arrows {
       let fr = pos-of(arrow.at(0))
       let tr = pos-of(arrow.at(1))
@@ -254,19 +285,59 @@
         let dx = to-pos.at(0) - from-pos.at(0)
         let dy = to-pos.at(1) - from-pos.at(1)
         let dist = calc.sqrt(dx * dx + dy * dy)
-
-        // Bezier control point: 90° CCW offset at 30% of chord, anchored on the
-        // midpoint of the original (unadjusted) endpoints so the curve shape is
-        // independent of the circle-edge adjustment below.
         let mid-x = (from-pos.at(0) + to-pos.at(0)) / 2
         let mid-y = (from-pos.at(1) + to-pos.at(1)) / 2
-        let ctrl = (mid-x + (-dy / dist) * dist * 0.3, mid-y + (dx / dist) * dist * 0.3)
 
-        // Tangent unit vector at the destination:
-        //   straight → chord direction
-        //   curved   → ctrl→to-pos direction (true tangent of the bezier at t=1)
-        // This must be computed before adjusted-to so that the endpoint is backed
-        // off along the actual arrival angle of the curve, not the chord.
+        // Control point selection for curved arrows.
+        // Two obstacle lists are used in priority order:
+        //   strict – excludes only the exact endpoints; pair partners are live
+        //            obstacles so the algorithm avoids departing through them
+        //            (e.g. ɔ→ɪ must not start by crossing through ʌ).
+        //   loose  – also excludes pair partners; used as a fallback only when
+        //            no strict-safe path exists.
+        // Sampling at t = 0.1 and 0.9 (in addition to interior midpoints) catches
+        // obstacles very close to the source or destination vowel.
+        let ctrl = if curved {
+          let px = -dy / dist  // CCW perpendicular unit vector
+          let py =  dx / dist
+          let ccw-sm = (mid-x + px * dist * 0.30, mid-y + py * dist * 0.30)
+          let cw-sm  = (mid-x - px * dist * 0.30, mid-y - py * dist * 0.30)
+          let ccw-lg = (mid-x + px * dist * 0.55, mid-y + py * dist * 0.55)
+          let cw-lg  = (mid-x - px * dist * 0.55, mid-y - py * dist * 0.55)
+          let local-obs-strict = all-obstacle-positions.filter(p => {
+            let dfx = p.at(0) - from-pos.at(0)
+            let dfy = p.at(1) - from-pos.at(1)
+            let dtx = p.at(0) - to-pos.at(0)
+            let dty = p.at(1) - to-pos.at(1)
+            let far-from = calc.sqrt(dfx*dfx + dfy*dfy) > scaled-circle-radius * 0.5
+            let far-to   = calc.sqrt(dtx*dtx + dty*dty) > scaled-circle-radius * 0.5
+            far-from and far-to
+          })
+          let local-obs-loose = all-obstacle-positions.filter(p =>
+            not near-or-pair(p, from-pos) and not near-or-pair(p, to-pos)
+          )
+          let clearance = scaled-circle-radius * 1.3
+          let sample-ts = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+          let hits(obs, c) = obs.any(ob =>
+            sample-ts.any(t => {
+              let bx = (1-t)*(1-t)*from-pos.at(0) + 2*t*(1-t)*c.at(0) + t*t*to-pos.at(0)
+              let by = (1-t)*(1-t)*from-pos.at(1) + 2*t*(1-t)*c.at(1) + t*t*to-pos.at(1)
+              let ex = ob.at(0) - bx
+              let ey = ob.at(1) - by
+              calc.sqrt(ex*ex + ey*ey) < clearance
+            })
+          )
+          let ctrl-candidates = (ccw-sm, cw-sm, ccw-lg, cw-lg)
+          let chosen = ctrl-candidates.find(c => not hits(local-obs-strict, c))
+          let chosen = if chosen != none { chosen } else {
+            ctrl-candidates.find(c => not hits(local-obs-loose, c))
+          }
+          if chosen != none { chosen } else { ccw-sm }
+        } else {
+          (mid-x + (-dy / dist) * dist * 0.3, mid-y + (dx / dist) * dist * 0.3)
+        }
+
+        // Tangent at destination: ctrl→to-pos for curves, chord for straight lines.
         let tangent = if curved {
           let ex = to-pos.at(0) - ctrl.at(0)
           let ey = to-pos.at(1) - ctrl.at(1)
@@ -276,39 +347,87 @@
           (dx / dist, dy / dist)
         }
 
-        // Pull the endpoint back to the circle edge along the arrival tangent
+        // Pull endpoint back to circle edge along the arrival tangent
         let adjusted-to = (
           to-pos.at(0) - tangent.at(0) * scaled-circle-radius,
           to-pos.at(1) - tangent.at(1) * scaled-circle-radius,
         )
 
-        let shaft-stroke = (paint: arrow-color, thickness: scaled-line-thickness * 1.5pt,
-          dash: if arrow-style == "dashed" { "dashed" } else { none })
-        let head-stroke = (paint: arrow-color, thickness: scaled-line-thickness * 1.5pt)
-        let mark-style = (end: ">", fill: arrow-color, scale: scaled-arrow-mark)
+        arrows-data.push((
+          from-pos: from-pos,
+          to-pos: to-pos,
+          ctrl: ctrl,
+          tangent: tangent,
+          adjusted-to: adjusted-to,
+        ))
+      }
+    }
 
-        if arrow-style == "dashed" {
-          // Draw dashed shaft without a mark
-          if curved {
-            bezier(from-pos, adjusted-to, ctrl, stroke: shaft-stroke)
-          } else {
-            line(from-pos, adjusted-to, stroke: shaft-stroke)
-          }
-          // Draw a near-zero-length solid segment at the endpoint so the mark
-          // is rendered solid and correctly oriented, independent of the dash pattern
-          let tiny = 0.01
-          let head-anchor = (
-            adjusted-to.at(0) - tangent.at(0) * tiny,
-            adjusted-to.at(1) - tangent.at(1) * tiny,
-          )
-          line(head-anchor, adjusted-to, stroke: head-stroke, mark: mark-style)
+    // ── Phase 2: merge arrowheads converging at the same vowel ───────────────
+    // When multiple arrows target the same vowel and their adjusted-to points
+    // are within cluster-radius of each other, snap them all to their centroid
+    // and use the averaged (renormalized) tangent for a consistent arrowhead.
+    let cluster-radius = scaled-circle-radius
+    let arrows-data = arrows-data.map(a => {
+      let cluster = arrows-data.filter(b => {
+        let dtx = b.to-pos.at(0) - a.to-pos.at(0)
+        let dty = b.to-pos.at(1) - a.to-pos.at(1)
+        let same-target = calc.sqrt(dtx*dtx + dty*dty) < 0.01
+        let dax = b.adjusted-to.at(0) - a.adjusted-to.at(0)
+        let day = b.adjusted-to.at(1) - a.adjusted-to.at(1)
+        same-target and calc.sqrt(dax*dax + day*day) < cluster-radius
+      })
+      if cluster.len() > 1 {
+        let n = cluster.len()
+        let tx = cluster.map(b => b.tangent.at(0)).sum() / n
+        let ty = cluster.map(b => b.tangent.at(1)).sum() / n
+        let tn = calc.sqrt(tx*tx + ty*ty)
+        let avg-tan = if tn > 0.001 { (tx/tn, ty/tn) } else { a.tangent }
+        // Re-derive adjusted-to from the normalised tangent so the tip lands
+        // exactly on the circle edge (the centroid of circle-edge points sits
+        // strictly inside the circle and would leave the head floating there).
+        let snapped = (
+          a.to-pos.at(0) - avg-tan.at(0) * scaled-circle-radius,
+          a.to-pos.at(1) - avg-tan.at(1) * scaled-circle-radius,
+        )
+        (from-pos: a.from-pos, to-pos: a.to-pos, ctrl: a.ctrl,
+         tangent: avg-tan, adjusted-to: snapped)
+      } else {
+        a
+      }
+    })
+
+    // ── Phase 3: render ──────────────────────────────────────────────────────
+    let shaft-stroke = (paint: arrow-color, thickness: scaled-line-thickness * 1.5pt,
+      dash: if arrow-style == "dashed" { "dashed" } else { none })
+    let head-stroke = (paint: arrow-color, thickness: scaled-line-thickness * 1.5pt)
+    let mark-style = (end: ">", fill: arrow-color, scale: scaled-arrow-mark)
+    for a in arrows-data {
+      let from-pos = a.from-pos
+      let adjusted-to = a.adjusted-to
+      let ctrl = a.ctrl
+      let tangent = a.tangent
+      if arrow-style == "dashed" {
+        // Draw dashed shaft without a mark
+        if curved {
+          bezier(from-pos, adjusted-to, ctrl, stroke: shaft-stroke)
         } else {
-          // Solid: shaft and arrowhead in one draw call
-          if curved {
-            bezier(from-pos, adjusted-to, ctrl, stroke: shaft-stroke, mark: mark-style)
-          } else {
-            line(from-pos, adjusted-to, stroke: shaft-stroke, mark: mark-style)
-          }
+          line(from-pos, adjusted-to, stroke: shaft-stroke)
+        }
+        // Solid near-zero segment at the tip renders the mark independently of
+        // the dash pattern, correctly oriented along the arrival tangent
+        let tiny = 0.01
+        let head-anchor = (
+          adjusted-to.at(0) - tangent.at(0) * tiny,
+          adjusted-to.at(1) - tangent.at(1) * tiny,
+        )
+        line(head-anchor, adjusted-to, stroke: head-stroke, mark: mark-style)
+      } else {
+        // Solid: shaft and arrowhead in one draw call
+        if curved {
+          bezier(from-pos, adjusted-to, ctrl, stroke: shaft-stroke, mark: mark-style)
+        } else {
+          line(from-pos, adjusted-to, stroke: shaft-stroke, mark: mark-style)
         }
       }
     }
