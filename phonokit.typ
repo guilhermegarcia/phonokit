@@ -1771,7 +1771,7 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 
 
 
-// #pagebreak()
+#pagebreak()
 #bibliography("references.bib", title: "References", style: "apa")
 #pagebreak()
 
