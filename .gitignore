@@ -1,8 +1,9 @@
 # macOS
 .DS_Store
 
-phonokit.typ
+# phonokit.typ
 references.bib
+inuit/
 
 
 # Editor and IDE files
