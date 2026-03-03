@@ -1,7 +1,16 @@
 #import "syllabics.typ": roman, roman-to-syllabics, syllabics, syllabics-to-roman
 #import "ipa.typ": ipa
+#show raw.where(block: true): it => {
+  set text(font: "Berkeley Mono", size: 1em)
+  block(
+    fill: luma(240),
+    inset: 10pt,
+    radius: 4pt,
+    width: auto,
+    it,
+  )
+}
 
-// #set page(paper: "a5", margin: 2cm)
 #set text(font: "Charis", size: 11pt)
 #show regex("[\u{1400}-\u{167F}]"): it => text(
   font: ("Noto Sans Canadian Aboriginal", "Euphemia UCAS"),
@@ -10,7 +19,7 @@
 #align(center)[
   #text(size: 14pt, weight: "bold")[Phonokit — Inuktitut Syllabics (demo)]
   #v(0.3em)
-  #text(size: 9pt, fill: gray)[Architecture proof-of-concept — tables to be verified]
+  #text(size: 9pt, fill: gray)[Architecture proof-of-concept — tables to be verified!]
 ]
 
 #v(1em)
@@ -25,11 +34,21 @@ The Government of Nunavut, in collaboration with Microsoft, proudly announces th
 
 == Function
 
+Below is the current output using the function `syllabics()` as follows:
+
+```typst
+#syllabics(
+  "Kavamatkut nunavunmi, havaqatigiblugit ukua {Microsoft}kut, quviahungnikkut tuhaqtitijut aularutaagut Inuktitut titiraqhimajunun-uqaqtaujut nipiliurutikkut aulapkaininga hamani {Azure AI Speech} kivgaqtuutaini. Titiraqhimajunun-uqaqtaujut nipiliurutikkut piinarialaqijut uvani {Edge} qiniqhiaviani, atuqhugit Taiguaqniq Nipiquqtujumik, unalu {Microsoft} Numiktirutaa uvani {Bing}mi, aalaniklu {Microsoft} uuktuutaini ilaliutijukhat uvani {2025}mi. Una iniqtirninga, ilaujuq tamaqtailinirmun Akhuurutiginirmun Inuktut Qaritaujakkut Havaakhaq, hivuliqhuqtaujuq ukunanga Havakvianin Pituqhiliqijitkut, takunaqtuq amigaituni ukiuni akhuurutit, nunallaanin-pihimajuq akhuurutit uqauhiq piinarialaqijaangani ilaujuqlu ubluni inuunirmun inuuhiq Nunavunmi.",
+)
+```
+
 #syllabics(
   "Kavamatkut nunavunmi, havaqatigiblugit ukua {Microsoft}kut, quviahungnikkut tuhaqtitijut aularutaagut Inuktitut titiraqhimajunun-uqaqtaujut nipiliurutikkut aulapkaininga hamani {Azure AI Speech} kivgaqtuutaini. Titiraqhimajunun-uqaqtaujut nipiliurutikkut piinarialaqijut uvani {Edge} qiniqhiaviani, atuqhugit Taiguaqniq Nipiquqtujumik, unalu {Microsoft} Numiktirutaa uvani {Bing}mi, aalaniklu {Microsoft} uuktuutaini ilaliutijukhat uvani {2025}mi. Una iniqtirninga, ilaujuq tamaqtailinirmun Akhuurutiginirmun Inuktut Qaritaujakkut Havaakhaq, hivuliqhuqtaujuq ukunanga Havakvianin Pituqhiliqijitkut, takunaqtuq amigaituni ukiuni akhuurutit, nunallaanin-pihimajuq akhuurutit uqauhiq piinarialaqijaangani ilaujuqlu ubluni inuunirmun inuuhiq Nunavunmi.",
 )
 
 == Original
+
+And this is what the government has in the official version. I see differences, so the question is a) why, b) do we want the input to match the official version, and c) whether this is even a good metric in the first place (maybe I'm comparing apples to oranges here).
 
 ᓄᓇᕗᑦ ᒐᕙᒪᒃᑯᑦ, ᐱᓕᕆᖃᑎᖃᖅᖢᑎᒃ Microsoft−ᑯᓐᓂ, ᐅᐱᒍᓱᒃᖢᑎᒃ ᑐᓴᖅᑎᑦᑎᕗᑦ ᓴᖅᑭᑕᐅᓂᖓᓂᒃ ᐃᓄᒃᑎᑐᑦ ᑎᑎᕋᐅᓯᑦ ᐅᖃᐅᓯᐅᔪᒃᓴᓂᒃ ᐊᐅᓚᓂᖏᓐᓂᒃ AZure AI ᐅᖃᕆᐅᖅᓴᑎᑦᑎᔨᓂᒃ. ᑎᑎᕋᖃᑦᑕᐅᑎᓂᖅ ᐅᖃᓪᓚᖕᓂᐊᕐᓗᓂ ᒫᓐᓇ ᒪᓂᒪᓕᖅᐳᑦ Edge browser−ᑯᑦ, ᐊᑐᕐᓗᒍ Read Aloud, ᐊᒻᒪᓗ Microsoft Translator Bing−ᒥ, ᐊᒻᒪᓗ ᐃᓚᔭᐅᓗᐊᒃᑲᓐᓂᓛᖅᑐᑦ Microsoft−ᒧᑦ ᐊᑐᖅᑕᐅᕙᒃᑐᓂᒃ ᐃᓚᓕᐅᔾᔭᐅᔪᖃᓛᖅᖢᓂ 2025−ᒥ. ᑕᒪᓐᓇ ᐊᓂᒍᖅᑎᑕᐅᔪᖅ, ᐃᓚᒋᔭᐅᓪᓗᓂ ᔭᒐᑎᑦᑎᑦᑕᐃᓕᒪᓂᕐᒧᑦ ᐅᔾᔨᕐᓇᖅᓯᑎᑦᑎᓂᕐᒧᓪᓗ ᐃᓄᒃᑐᑦ ᐱᓕᕆᔾᔪᑕᐅᕙᒃᑐᓄᑦ ᐱᓕᕆᐊᖑᕙᒃᑐᑎᒍᑦ, ᑲᔪᓯᑎᑕᐅᓪᓗᓂ ᐃᓕᖅᑯᓯᓕᕆᔨᒃᑯᓐᓄᑦ, ᐊᒃᑐᐊᓂᖃᖅᐳᖅ ᐊᕐᕌᒍᒐᓴᕐᓄᑦ ᐱᓕᕆᐊᖃᓪᓚᕆᒍᒪᕙᖕᓂᖏᓐᓄᑦ, ᓄᓇᓕᖕᓂ−ᑲᔪᓯᑎᑕᐅᔪᓄᑦ ᐱᓇᔪᒃᑕᐅᔪᓄᑦ ᑕᒪᓐᓇ ᐅᖃᐅᓯᖅ ᒪᓂᒪᓂᖅᓴᐅᖁᓪᓗᒍ ᐃᓚᓕᐅᔾᔭᐅᓯᒪᓗᓂᓗ ᖃᐅᑕᒫᑦ ᐃᓅᓯᕆᔭᐅᔪᓄᑦ ᓄᓇᕘᓕᒫᒥ.
 
@@ -64,6 +83,8 @@ The Government of Nunavut, in collaboration with Microsoft, proudly announces th
 
 In Nunavut, /ai/ is written as the A-form syllable + standalone #syllabics("i") (i).
 In Nunavik, a dedicated fourth orientation encodes /ai/ as a single character.
+
+In the table below, we can use `#syllabics("pai", dialect: "nunavut")` to specify the desired dialect. This allows us to control for any dialect-specific variation provided that we have a reliable, rule-based conversion table.
 
 #table(
   columns: (auto, auto, auto, auto),
@@ -151,9 +172,17 @@ numbers). Wrap any Roman segment in `{...}` to pass it through untouched:
 
 = Inline use with IPA
 
-The word #syllabics("inuk") #ipa("['" + "inuk]") means 'person' in Inuktitut.
+The word #syllabics("inuk") #ipa("['inuk]") means 'person' in Inuktitut.
 
-The place name #syllabics("nunavut") #ipa("[nu'" + "na.vut]") means 'our land'.
+The place name #syllabics("nunavut") #ipa("[nu.'na.vut]") means 'our land'.
 
 Long vowels are represented by distinct precomposed characters:
 #syllabics("ii") #ipa("i:"), #syllabics("uu") #ipa("u:"), #syllabics("aa") #ipa("a:"). #syllabics("")
+
+= Email test
+
+This is the _caught the walrus_ example you provided in your email.
+
+- In Nunavut: `#syllabics("aiviqtuq")` #sym.arrow #syllabics("aiviqtuq")
+- In Nunavik: `#syllabics("aiviqtuq", dialect: "nunavik")` #sym.arrow #syllabics("aiviqtuq", dialect: "nunavik")
+

@@ -28,8 +28,8 @@
 
 #let roman-to-syllabics(input, dialect: "nunavut") = {
   let tables = syllabics-data.at(dialect)
-  let cv      = tables.at("cv")
-  let finals  = tables.at("finals")
+  let cv = tables.at("cv")
+  let finals = tables.at("finals")
 
   // ── Pre-normalization ──────────────────────────────────────────────────────
   // Lowercase first: Inuktitut Roman has no case distinction
@@ -43,9 +43,9 @@
     .replace("qqii", "qkii")
     .replace("qquu", "qkuu")
     .replace("qqaa", "qkaa")
-    .replace("qqi",  "qki")
-    .replace("qqu",  "qku")
-    .replace("qqa",  "qka")
+    .replace("qqi", "qki")
+    .replace("qqu", "qku")
+    .replace("qqa", "qka")
 
   // In Nunavut and North Baffin, /h/ and /s/ are phonetic variants → same syllabics.
   // Nunavik has a distinct H series (U+1574–U+157B), so we skip this normalization there.
@@ -55,7 +55,7 @@
   let input = input.replace("bl", "vl")
 
   let chars = input.clusters()
-  let n     = chars.len()
+  let n = chars.len()
   let result = ""
   let i = 0
 
@@ -86,7 +86,7 @@
       }
     }
 
-    let j = i + cons-len  // position after consonant
+    let j = i + cons-len // position after consonant
 
     // ── 2. Try to match a vowel (longest match first) ──────────────────────
     let vowel = ""
@@ -136,8 +136,8 @@
 
 #let syllabics-to-roman(input, dialect: "nunavut") = {
   let tables = syllabics-data.at(dialect)
-  let cv      = tables.at("cv")
-  let finals  = tables.at("finals")
+  let cv = tables.at("cv")
+  let finals = tables.at("finals")
 
   // Build reverse lookup: Unicode char → Roman string
   let reverse = (:)
@@ -190,9 +190,7 @@
     if part.escaped {
       part.text
     } else {
-      text(font: ("Noto Sans Canadian Aboriginal", "Euphemia UCAS"),
-        roman-to-syllabics(part.text, dialect: dialect)
-      )
+      text(font: ("Noto Sans Canadian Aboriginal", "Euphemia UCAS"), roman-to-syllabics(part.text, dialect: dialect))
     }
   }
 }
