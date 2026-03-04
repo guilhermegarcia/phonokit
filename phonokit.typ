@@ -443,6 +443,7 @@ As of version `0.4.5`, the function `#vowels()` accepts a range of additional (o
             ("a", "I"),
             ("e", "I"),
             ("O", "I"),
+            ("o", "U"),
           ),
           arrow-color: blue.lighten(60%),
           curved: true,
