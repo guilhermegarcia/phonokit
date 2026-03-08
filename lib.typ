@@ -28,6 +28,7 @@
 #import "autosegmental.typ": *
 #import "multi-tier.typ": *
 #import "ex.typ": *
+#import "intonational.typ": *
 
 /// Initialize phonokit settings
 ///
@@ -820,3 +821,22 @@
 ///
 /// Example: `#extra[tion]` produces ⟨tion⟩
 #let extra = extra
+
+/// Place a ToBI intonation label above the current inline text position
+///
+/// Designed to be placed inline immediately after the syllable or word being annotated.
+/// The label floats above the text at the insertion point, optionally connected by
+/// a vertical stem.
+///
+/// Arguments:
+/// - label (string): ToBI label, e.g., "*L", "H%", "L+H*", "!H*"
+/// - line (boolean): draw a vertical stem connecting label to text (default: true)
+/// - height (length): stem length — controls how far above the text the label sits (default: 1.5em)
+/// - lift (length): gap between stem bottom and text baseline (default: 0.4em)
+///
+/// Example:
+/// ```
+/// #import "@preview/phonokit:0.4.5": *
+/// You're a were#int("*L")wolf?#int("H%", line: false)
+/// ```
+#let int = int
