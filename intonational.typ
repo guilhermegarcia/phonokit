@@ -21,10 +21,13 @@
   label,
   line: true,
   height: 1.5em,
-  lift: 0.4em,
+  lift: 0.7em,
 ) = {
-  box(width: 0pt, height: 0pt, {
-    // Label: bottom edge sits at (lift + height) above the text baseline
+  // baseline: 100% puts the typographic baseline at the bottom of the box,
+  // so the box extends (height + lift) above the text line — reserving the
+  // exact space the label needs without any manual #v() calls.
+  box(width: 0pt, height: height + lift, baseline: 100%, {
+    // Label: bottom edge at (lift + height) above the text baseline = top of box
     place(
       bottom + center,
       dy: -(lift + height),
