@@ -26,6 +26,14 @@
 #line(length: 100%)
 #v(0.5em)
 
+= Email test
+
+This is the _caught the walrus_ example you provided in your email.
+
+- In Nunavut: `#syllabics("aiviqtuq")` #sym.arrow #syllabics("aiviqtuq")
+- In Nunavik: `#syllabics("aiviqtuq", dialect: "nunavik")` #sym.arrow #syllabics("aiviqtuq", dialect: "nunavik")
+
+
 = Testing with a text
 
 This comes from #underline(link("https://www.gov.nu.ca/ikt/tuhaagahat/kavamatkut-nunavunmi-naunaihijut-inuktitut-titiraqhimajunun-uqaqtaujut-nipiliurutikkut")[this website]).
@@ -178,11 +186,4 @@ The place name #syllabics("nunavut") #ipa("[nu.'na.vut]") means 'our land'.
 
 Long vowels are represented by distinct precomposed characters:
 #syllabics("ii") #ipa("i:"), #syllabics("uu") #ipa("u:"), #syllabics("aa") #ipa("a:"). #syllabics("")
-
-= Email test
-
-This is the _caught the walrus_ example you provided in your email.
-
-- In Nunavut: `#syllabics("aiviqtuq")` #sym.arrow #syllabics("aiviqtuq")
-- In Nunavik: `#syllabics("aiviqtuq", dialect: "nunavik")` #sym.arrow #syllabics("aiviqtuq", dialect: "nunavik")
 
