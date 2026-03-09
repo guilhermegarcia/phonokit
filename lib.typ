@@ -837,6 +837,6 @@
 /// Example:
 /// ```
 /// #import "@preview/phonokit:0.4.5": *
-/// You're a were#int("*L")wolf?#int("H%", line: false)
+/// You're a were#int("L+H*")wolf?#int("L-L%", line: false)
 /// ```
 #let int = int
