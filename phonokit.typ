@@ -56,8 +56,8 @@
 #let logo = text(font: "Charis")[*phono*#kit]
 
 // Section tags:
-#let new-dot = text(fill: rgb("#27ae60"), size: 1.5em)[ ●]
-#let recent-dot = text(fill: rgb("#f39c12"), size: 1.5em)[ ●]
+#let new-dot = text(fill: rgb("#27ae60"), size: 1em)[ ●]
+#let recent-dot = text(fill: rgb("#f39c12"), size: 1em)[ ●]
 
 #set math.equation(numbering: "(1)")
 // #show raw.where(block: false): it => {
@@ -220,7 +220,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.4.5`]
+#let version = text(size: 0.8em)[`v 0.4.6`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -262,7 +262,8 @@ _A toolkit to create phonological representations in Typst_
 
 #heading(numbering: none)[Version history]
 
-`0.4.5` - #new[Vowel trapezoids accept arrows and shifted vowels] \
+`0.4.6` - #new[Inline ToBI function for intonational labels and titles for numbered examples] \
+`0.4.5` - Vowel trapezoids accept arrows and shifted vowels \
 `0.4.1` - Consonants table has abbreviation argument; alignment fix in `#consonants()`\
 `0.4.0` - Multi-tier representations; sorted MaxEnt candidates; helper functions for Greek letters\
 `0.3.7` - Font and prosodic symbols can now be chosen; aesthetic improvements to prosodic functions \
@@ -383,7 +384,7 @@ The user can either input a language#footnote[Available languages: Arabic, Engli
   consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true),
 ) <fig-consonants-custom>
 
-=== Vowels #new-dot <sec-vowels>
+=== Vowels #recent-dot <sec-vowels>
 
 
 Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed.
@@ -1097,10 +1098,43 @@ To create a tone that is underlyingly linked to more than one segment, we use th
 
 Autosegments are difficult to typeset because there are many degrees of freedom involved, which means functions start to become too convoluted for the benefit they provide (see @sec-multi). There is probably a sweet spot, a point beyond which a function of this type becomes impractical because there are simply too many arguments. `#autoseg()` attempts to be intuitive while covering spreading, delinking, one-to-many and many-to-one relationships, floating tones, and highlights with circles. I believe these cover the vast majority of scenarios with precision and symmetry. The function also provides convenient arguments for horizontal (`spacing`) and vertical (`baseline`) positioning, which can be handy in processes where you may want to adjust the position of the representation relative to an arrow or any other symbols you may want to add outside the function _per se_.
 
-Finally, the function does not and will not cover intonation, as its sole goal is to represent autosegmental phonology. In the future, an additional function might be added to cover intonational patterns and a wider range of tone-related representations.
+
+== #new[Prosody with ToBI] #new-dot <sec-tobi>
+
+Adding ToBI labels to strings can be achieved with the function `#int()`. One of its main arguments is `line`, which allows the user to "turn off" the vertical line (e.g., for boundary tones). The examples below are from #cite(form: "prose", <zsiga2013sounds>). By default, the font size of tones is set to `0.8em`.
+
+#grid(
+  columns: (2.2fr, 1fr),
+  gutter: 1em,
+  align: (center + horizon, left + top),
+  [
+    #figure(
+      caption: [ToBI labels],
+      supplement: "Code",
+      kind: "code",
+      ```typst
+      You're a we#int("*L")rewolf?#h(2em)#int("H%", line: false)
 
 
-== Multi-tier representations #recent-dot <sec-multi>
+      I'm a wer#int("*H")ewolf.#h(2em)#int("L%", line: false)
+      ```,
+    ) <fig-tobi>
+  ],
+  [
+    #set par(first-line-indent: 0em)
+    You're a we#int("*L")rewolf?#h(2em)#int("H%", line: false)
+
+    #v(0.8em)
+
+    I'm a wer#int("*H")ewolf.#h(2em)#int("L%", line: false)
+
+  ],
+)
+
+In the vast majority of cases, the strings in @fig-tobi will be in numbered examples that can be cross-referenced in the text. To see how `#int()` can work in those scenarios, see @sec-examples. Note that `#int()` is not meant to be used in numbered/unnumbered lists: you should always favour numbered examples instead.
+
+
+== Multi-tier representations <sec-multi>
 
 Thus far, the functions we've seen are single-purpose: `#syllable()` only creates syllables. The advantage of such an approach is that the function can offer minimal syntax, which makes it easy to use and very user-friendly. The disadvantage is that the user can only produce one type of output. Certain phonological structures, however, have too many degrees of freedom for a single-purpose function to be enough. This is why the function `#multi-tier()` exists: it gives you the freedom to create a wide range of non-linear structures. It is much more flexible, but that comes with more complicated syntax and more arguments, by definition.
 
@@ -1596,7 +1630,7 @@ Finally, let's see a more complex scenario (notice that diagrams are automatical
   ],
 )
 
-= Maximum Entropy grammars #recent-dot
+= Maximum Entropy grammars <sec-maxent>
 
 Last but not least, the package goes one step further and produces a MaxEnt tableau @goldwater2003learning @HayesWilson08 with the function `#maxent()`. @fig-tableau2 illustrates a scenario where the data in @fig-tableau1 are variable, i.e., all candidates in question have a non-zero probability of being observed given a specific input $x$. The column $h_i$ displays the harmony score of each candidate $i$, calculated as the weighted sum of all constraint violations. Next, the column $e^(-h_i)$ provides the unnormalized probability, which is the exponential of the negated harmony score (this has also been called the _MaxEnt score_). Finally, the actual predicted probability is shown in column $P_i$, which is obtained by dividing the unnormalized value of a candidate by $Z(x)$ (the sum of all unnormalized scores). The formal equation for this probability is provided in @maxent-prob.
 
@@ -1650,7 +1684,7 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
 #logo also has functions for harmonic grammars (`#hg()`) and noisy harmonic grammars (`#nhg()`). These functions are very similar to `#maxent()`, so their syntax will be familiar. The Noisy Harmonic Grammar function derives probabilities by simulating a number of evaluations (by default, 1000) given the constraints and violations provided by the user. It is possible to change the number of simulations and to omit the noise column from the tableau. The noise displayed is extracted from an additional simulation, so it is shown for illustrative purposes. For the most part, the functions discussed in this section are based on conventions in the literature, e.g., #cite(<flemming2021comparing>, form: "prose").
 
 
-= Numbered examples <sec-examples>
+= #new[Numbered examples] #new-dot<sec-examples>
 
 One important feature in any phonology paper is an environment for numbered examples. We could simply use the excellent `eggs` package for Typst @eggs, which does a great job for syntax examples. In phonology, however, we sometimes want examples to have arrows to show a process, and this creates an alignment issue when we have multiple instances in a single example or in multiple examples throughout. #logo has a function to deal with that: `#ex()`, which is accompanied by `#subex-label()`. The latter function allows us to add labels for each line inside an example.
 
@@ -1660,7 +1694,7 @@ One important feature in any phonology paper is an environment for numbered exam
 ]
 
 #grid(
-  columns: (1fr, 0.5fr),
+  columns: 1,
   gutter: 1em,
   align: (center + horizon, center + horizon),
   [
@@ -1669,29 +1703,29 @@ One important feature in any phonology paper is an environment for numbered exam
       kind: "code",
       caption: [Numbered example],
       ```typst
-      // #import "lib.typ": *
+      // #import "@preview/phonokit:0.4.6"
       // #show: ex-rules // <- this must be added to your doc
       // ...
-            #ex(caption: "A phonology example")[
-              #table(
-                columns: 4, // <- where we may specify widths
-                stroke: none,
-                align: left,
-                [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
-                [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
-              )
-            ] <phon-ex>
+      #ex(caption: "A phonology example")[
+        #table(
+          columns: (2em, 2em, 5em, 2em, 5em),
+          stroke: none,
+          align: left,
+          [#ex-num-label()], [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
+          [], [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
+        )
+      ] <phon-ex>
       ```,
     ) <code-example>
   ],
   [
     #ex(caption: "A phonology example")[
       #table(
-        columns: 4,
+        columns: (2em, 2em, 5em, 2em, 5em),
         stroke: none,
         align: left,
-        [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
-        [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
+        [#ex-num-label()], [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
+        [], [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
       )
     ] <phon-ex>
   ],
@@ -1701,11 +1735,10 @@ We can now refer to the example as a whole using `@phon-ex`, just like any other
 
 #ex(caption: "Another phonology example")[
   #table(
-    columns: (2em, 7em, 4em, 7em),
+    columns: (2em, 2em, 7em, 4em, 7em),
     stroke: none,
-    align: left,
-    [#subex-label()<ex-inbi>], [#ipa("/inbi/")], [#a-r], [#ipa("[imbi]")],
-    [#subex-label()<ex-inki>], [#ipa("/inki/")], [#a-r], [#ipa("[iNki]")],
+    [#ex-num-label()], [#subex-label()<ex-inbi>], [#ipa("/inbi/")], [#a-r], [#ipa("[imbi]")],
+    [], [#subex-label()<ex-inki>], [#ipa("/inki/")], [#a-r], [#ipa("[iNki]")],
   )
 ] <phon-ex2>
 
@@ -1714,15 +1747,62 @@ Another advantage of building a function on top of tables is that we can establi
 
 #ex(caption: "Yet another phonology example")[
   #table(
-    columns: (2em, 7em, 4em, 7em),
+    columns: (2em, 2em, 7em, 4em, 7em),
     stroke: none,
-    align: left,
-    [#subex-label()<ex-inbinbi>], [#ipa("/inbinbi/")], [#a-r], [#ipa("[imbimbi]")],
-    [#subex-label()<ex-inkinki>], [#ipa("/inkinki/")], [#a-r], [#ipa("[iNkiNki]")],
+    [#ex-num-label()], [#subex-label()<ex-inbinbi>], [#ipa("/inbinbi/")], [#a-r], [#ipa("[imbimbi]")],
+    [], [#subex-label()<ex-inkinki>], [#ipa("/inkinki/")], [#a-r], [#ipa("[iNkiNki]")],
   )
 ] <phon-ex3>
 
-You will notice that `caption` is one of the arguments in `#ex()`. This is not a typical caption (nothing is printed), since this is an example after all. Instead, this caption is there in the (unlikely) event we wish to create a table of contents _only for examples_ using the `#outline()` function.#footnote[While it is not very common to have such tables, `#ex()` gives you the possibility.] The outline below shows what the examples would look like in a table of contents --- see @code-outline.
+Let us now see how strings with ToBI (@sec-tobi) can be used in numbered examples.
+
+#grid(
+  columns: 1,
+  gutter: 1em,
+  align: (center + horizon, center + horizon),
+  [
+    #figure(
+      supplement: "Code",
+      kind: "code",
+      caption: [Numbered example with ToBI (notice table alignment)],
+      ```typst
+        // #import "@preview/phonokit:0.4.6"
+        // #show: ex-rules // <- this must be added to your doc
+        // ...
+        #ex(caption: "Some ToBI examples", title: [Autosegmental transcription of intonation in English @zsiga2013sounds])[
+        #table(
+          columns: (4em, 15em),
+          stroke: none,
+          align: left + bottom,
+        // NOTE: ESSENTIAL TO ADD "bottom" HERE
+          [#subex-label()<ex-tobi1>], [You're a we#int("*L")rewolf?#h(1em)#int("H%", line: false)],
+          [#subex-label()<ex-tobi2>], [I'm a wer#int("*H")ewolf.#h(1em)#int("L%", line: false)],
+        )
+      ] <tobi-ex>
+      ```,
+    ) <code-tobi>
+  ],
+  [
+    #ex(
+      caption: "Some ToBI examples",
+      title: [Autosegmental transcription of intonation in English @zsiga2013sounds],
+    )[
+      #table(
+        columns: (4em, 15em),
+        stroke: none,
+        align: left + bottom,
+        // NOTE: ESSENTIAL TO ADD "bottom" HERE
+        [#subex-label()<ex-tobi1>], [You're a we#int("*L")rewolf?#h(1em)#int("H%", line: false)],
+        [#subex-label()<ex-tobi2>], [I'm a wer#int("*H")ewolf.#h(1em)#int("L%", line: false)],
+      )
+    ] <tobi-ex>
+  ],
+)
+
+In @code-tobi, which generates @tobi-ex, you will notice that the alignment of the table element must be  specified as `bottom` (here, it's `left + bottom`). This ensures that the letters of each subexample are aligned with the string, not the tones. As usual, you can refer to @ex-tobi1 and @ex-tobi2. As of version `0.4.6`, a `title` argument is also available for examples. This is also shown in @code-tobi and displayed in @tobi-ex.
+
+
+You will notice that `caption` is one of the arguments in `#ex()`. This is not a typical caption (nothing is printed), since this is an example after all. Instead, this caption is there in the (unlikely) event we wish to create a table of contents _only for examples_ using the `#outline()` function.#footnote[While it is not very common to have such tables, `#ex()` gives you the possibility. If you want to exclude a given example from the outline, do not use the `caption` argument.] The outline below shows what the examples would look like in a table of contents --- see @code-outline.
 
 #outline(
   title: [List of Examples],

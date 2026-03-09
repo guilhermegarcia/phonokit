@@ -40,7 +40,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.4.5": *
+/// #import "@preview/phonokit:0.4.6": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -854,7 +854,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.4.5": *
-/// You're a were#int("L+H*")wolf?#int("L-L%", line: false)
+/// #import "@preview/phonokit:0.4.6": *
+/// You're a we#int("*L")rewolf?#h(2em)#int("H%", line: false)
 /// ```
 #let int = int

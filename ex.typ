@@ -82,6 +82,7 @@
   figure(
     content,
     caption: if caption != none { caption } else { none },
+    outlined: caption != none,
     kind: "linguistic-example",
     supplement: none,
     numbering: "(1)",
@@ -107,18 +108,13 @@
 //     )
 //   ]
 #let ex-num-label() = {
-  figure(
-    box(baseline: 0pt, context {
-      set par(first-line-indent: 0em)
-      // Counter was stepped before this point (by ex()'s silent step),
-      // so get() returns the post-step value — no +1 needed.
-      let n = example-counter.get().first()
-      [(#n)]
-    }),
-    kind: "linguistic-exnum",
-    supplement: none,
-    numbering: none,
-  )
+  // No figure wrapper — a plain box behaves consistently with subex-label()
+  // in table cells without requiring explicit bottom alignment.
+  box(baseline: 0pt, context {
+    set par(first-line-indent: 0em)
+    let n = example-counter.get().first()
+    [(#n)]
+  })
 }
 
 // Create a sub-example label for use in tables
@@ -187,13 +183,6 @@
           let letter = letters.at(letter-num)
           [(#parent-num#letter)]
         })
-      } else if el.kind == "linguistic-exnum" {
-        // Reference to main example via ex-num-label(): same as linguistic-example
-        link(el.location(), context {
-          let loc = el.location()
-          let num = example-counter.at(loc).first()
-          [(#num)]
-        })
       } else {
         it
       }
@@ -203,8 +192,6 @@
   }
   // Hide captions in document (they still appear in outline)
   show figure.where(kind: "linguistic-example"): it => it.body
-  // Strip figure wrapper from sub-examples and inline number labels
   show figure.where(kind: "linguistic-subexample"): it => it.body
-  show figure.where(kind: "linguistic-exnum"): it => it.body
   doc
 }
