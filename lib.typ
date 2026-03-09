@@ -732,6 +732,24 @@
 /// ```
 #let subex-label = subex-label
 
+/// Display the current example number inside an ex() body.
+///
+/// Use as the first-column cell of a 3-column table when no title is provided,
+/// so the number shares bottom alignment with sub-example labels and sentence text.
+///
+/// ```
+/// #ex(caption: "Example")[
+///   #table(
+///     columns: 3,
+///     stroke: none,
+///     align: (left + bottom, left + bottom, left + top),
+///     [#ex-num-label()<ex-1>], [#subex-label()<ex-1a>], [sentence a],
+///     [],                      [#subex-label()<ex-1b>], [sentence b],
+///   )
+/// ]
+/// ```
+#let ex-num-label = ex-num-label
+
 /// Show rules for linguistic examples
 ///
 /// Apply this to enable proper reference formatting for ex() and subex-label().
