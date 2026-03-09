@@ -10,21 +10,27 @@
 // - body (content): The example content (typically a table)
 // - number-dy (length): Vertical offset for the number (optional; default: 0.4em)
 // - caption (string): Caption for outline (hidden in document; optional)
+// - title (content): Optional title shown on the same line as the number
 //
 // Returns: Numbered example that can be labeled and referenced
 //
-// Example:
+// With title (title aligns with number):
+//   #ex(caption: "A phonology example", title: [An example:])[
+//     #table(columns: 2, stroke: none, align: (left + bottom, left + top), ...)
+//   ] <ex-phon1>
+//
+// Without title (put ex-num-label() in the first column of the inner table):
 //   #ex(caption: "A phonology example")[
 //     #table(
 //       columns: 3,
 //       stroke: none,
-//       align: left,
-//       [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
-//       [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
+//       align: (left + bottom, left + bottom, left + top),
+//       [#ex-num-label()<ex-phon1>], [#subex-label()<ex-a>], [sentence a],
+//       [],                          [#subex-label()<ex-b>], [sentence b],
 //     )
-//   ] <ex-phon1>
+//   ]
 //
-//   See @ex-phon1.
+//   See @ex-phon1, @ex-a.
 
 // Counters
 #let example-counter = counter("linguistic-example")
@@ -37,21 +43,42 @@
 #let ex(
   number-dy: 0.4em,
   caption: none,
+  title: none,
   body,
 ) = {
-  let num = context {
-    // Reset subexample counter at start of each example
-    subex-counter.update(0)
-    example-counter.step()
-    [(#(example-counter.get().first() + 1))]
+  let content = if title != none {
+    // Title case: outer 2-row grid — (num | title) / ([] | body)
+    // Counter step happens inside num (first row), aligning number with title text.
+    let num = context {
+      subex-counter.update(0)
+      example-counter.step()
+      [(#(example-counter.get().first() + 1))]
+    }
+    grid(
+      columns: (auto, 1fr),
+      column-gutter: 0.75em,
+      row-gutter: 0.3em,
+      align: (left + top, left + top),
+      num, title,
+      [], body,
+    )
+  } else {
+    // No-title case: counter step fires silently; number is displayed via
+    // ex-num-label() in the body table's first column.
+    // The outer grid (with an invisible 0-width first column) forces full-width
+    // left-aligned layout, matching the title case.
+    let step = context {
+      subex-counter.update(0)
+      example-counter.step()
+      []
+    }
+    grid(
+      columns: (auto, 1fr),
+      column-gutter: 0pt,
+      align: (left + top, left + top),
+      step, body,
+    )
   }
-  let adjusted-num = move(dy: number-dy, num)
-  let content = grid(
-    columns: (auto, 1fr),
-    column-gutter: 0.75em,
-    align: (left + top, left + top),
-    adjusted-num, body,
-  )
   figure(
     content,
     caption: if caption != none { caption } else { none },
@@ -60,6 +87,37 @@
     numbering: "(1)",
     placement: none,
     gap: 0pt,
+  )
+}
+
+// Display the current example number inside an ex() body.
+//
+// Use as the first-column cell of a 3-column table (num | sub-label | content)
+// when no title is provided. Because it lives in the same table, it can share
+// bottom alignment with the sub-example labels and the sentence text.
+//
+// Example:
+//   #ex(caption: "Example")[
+//     #table(
+//       columns: 3,
+//       stroke: none,
+//       align: (left + bottom, left + bottom, left + top),
+//       [#ex-num-label()<ex-1>], [#subex-label()<ex-1a>], [sentence a],
+//       [],                      [#subex-label()<ex-1b>], [sentence b],
+//     )
+//   ]
+#let ex-num-label() = {
+  figure(
+    box(baseline: 0pt, context {
+      set par(first-line-indent: 0em)
+      // Counter was stepped before this point (by ex()'s silent step),
+      // so get() returns the post-step value — no +1 needed.
+      let n = example-counter.get().first()
+      [(#n)]
+    }),
+    kind: "linguistic-exnum",
+    supplement: none,
+    numbering: none,
   )
 }
 
@@ -129,6 +187,13 @@
           let letter = letters.at(letter-num)
           [(#parent-num#letter)]
         })
+      } else if el.kind == "linguistic-exnum" {
+        // Reference to main example via ex-num-label(): same as linguistic-example
+        link(el.location(), context {
+          let loc = el.location()
+          let num = example-counter.at(loc).first()
+          [(#num)]
+        })
       } else {
         it
       }
@@ -138,7 +203,8 @@
   }
   // Hide captions in document (they still appear in outline)
   show figure.where(kind: "linguistic-example"): it => it.body
-  // Strip figure wrapper from sub-examples
+  // Strip figure wrapper from sub-examples and inline number labels
   show figure.where(kind: "linguistic-subexample"): it => it.body
+  show figure.where(kind: "linguistic-exnum"): it => it.body
   doc
 }
