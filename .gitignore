@@ -16,6 +16,10 @@ inuit/
 # Typst build artifacts
 *.log
 
+# Branch-local dev files
+TESTING.typ
+TESTING.pdf
+
 # Generated badges
 zenodo-badge.svg
 
