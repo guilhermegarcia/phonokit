@@ -12,6 +12,7 @@
 // - Noisy Harmonic Grammar (NHG) tableaux with stochastic simulations
 // - Maximum Entropy (MaxEnt) grammar tableaux with probability calculations
 // - SPE-style feature matrices for phonological representations
+// - Feature-geometry trees (Clements & Hume 1995; Sagey 1986)
 
 // Import modules
 #import "_config.typ": phonokit-init
@@ -29,6 +30,7 @@
 #import "multi-tier.typ": *
 #import "ex.typ": *
 #import "intonational.typ": *
+#import "geom.typ": *
 
 /// Initialize phonokit settings
 ///
@@ -858,3 +860,121 @@
 /// You're a we#int("*L")rewolf?#h(2em)#int("H%", line: false)
 /// ```
 #let int = int
+
+/// Draw a feature-geometry tree for a consonant or vocoid
+///
+/// Produces a hierarchical diagram following Clements & Hume (1995)
+/// or Sagey (1986). All feature nodes are optional; parent nodes are inferred
+/// automatically from their children.
+///
+/// Use `ph` to load a built-in segment preset and optionally override individual
+/// features. The preset label (e.g. "/i/") is shown above the root unless
+/// `segment` is given.
+///
+/// Arguments:
+/// - ph (str): Segment preset key in tipa-style notation. Supported segments
+///   include common vowels (a e i o u E O I U y W 7 \o \oe 2 A 6 @ 1 0 \ae)
+///   and consonants (p b t d k g f v s z S Z n m N \N j h ? T D x G F B V M
+///   \:t \:d \:s \:z \:n r l J C \T). Wrap in slashes/brackets to override the
+///   auto segment label: `ph: "/a/"`.
+/// - model (str): `"ch"` (default) for Clements & Hume 1995 (aperture nodes for
+///   height); `"sagey"` for Sagey 1986 (dorsal sub-features for height/backness,
+///   `[round]` under labial). Affects preset vowels only; consonant presets are
+///   identical in both models.
+/// - root (array): Root matrix features, e.g. `("+son", "-vocoid")`.
+/// - laryngeal (bool): Show "laryngeal" class node explicitly.
+/// - nasal (bool, str): `[nasal]`. Values: `true` → `[nasal]`,
+///   `"+"` → `[+nasal]`, `"-"` → `[−nasal]`.
+/// - spread (bool): `[spread glottis]` under laryngeal.
+/// - constricted (bool): `[constricted glottis]` under laryngeal.
+/// - voice (bool, str): `[voice]` under laryngeal. Same sign convention as `nasal`.
+/// - continuant (bool, str): `[continuant]` under oral cavity. Same sign convention.
+///   Pass an array of two values for affricates: `continuant: ("-", "+")`.
+/// - labial (bool, array): `[labial]`. Array adds sub-features:
+///   `labial: ("round",)`.
+/// - coronal (bool, array): `[coronal]`. Array replaces `anterior`/`distributed`:
+///   `coronal: ("+ant", "-distr")`.
+/// - anterior (bool, str): `[anterior]` under coronal. Same sign convention.
+/// - distributed (bool): `[distributed]` under coronal.
+/// - dorsal (bool, array): `[dorsal]`. Array adds sub-features (Sagey-style):
+///   `dorsal: ("+hi", "-back")`.
+/// - radical (bool): `[rad]` (pharyngeal/radical place).
+/// - vocalic (bool): Show "vocalic" class node (vocoid branch).
+/// - vplace (bool): Show "V-place" under vocalic. Inferred automatically when
+///   vocalic is active and any place feature is supplied.
+/// - aperture (bool, array): "aperture" node under vocalic (CH model). Array of
+///   up to 3 values controls `[open1]`/`[open2]`/`[open3]`:
+///   `aperture: ("-", "+", "-")` → close-mid height.
+/// - tense (bool, str): `[tense]` under vocalic. Same sign convention as `nasal`.
+/// - scale (number): Uniform scale factor (default: 1.0).
+/// - position (array): Manual layout tweaks. Each entry: `("node-key", dx, dy)`.
+///   Node keys are bare argument names, e.g. `"continuant"`, `"oral-cavity"`.
+/// - delinks (array): Node keys whose line to their parent is replaced with a
+///   delink mark, e.g. `delinks: ("c-place",)`.
+/// - segment (content): Label shown above root. Defaults to the `ph` value
+///   wrapped in slashes when `ph` is set.
+/// - highlight (array): Node names to highlight; all others are dimmed.
+///
+/// Returns: CeTZ drawing of the feature-geometry tree
+///
+/// Examples:
+/// ```
+/// // Preset segment
+/// #geom(ph: "i")
+///
+/// // Manual consonant: voiceless alveolar stop
+/// #geom(root: ("-son", "-approx", "-vocoid"),
+///        coronal: true, anterior: "+", voice: "-", continuant: "-",
+///        segment: "/t/")
+///
+/// // Sagey-model vowel /y/
+/// #geom(ph: "y", model: "sagey", scale: 1.2)
+/// ```
+#let geom = geom
+
+/// Draw two or more feature-geometry trees side by side with optional inter-tree arrows
+///
+/// Each tree is specified as a spec dict (the same keys as `geom()`, all optional).
+/// The `model` and `scale` parameters apply uniformly to all trees.
+///
+/// Cross-tree arrows connect nodes by their anchor names. Node names are formed
+/// by lowercasing the argument name, replacing spaces with hyphens, and appending
+/// the 1-based tree index: `"labial1"`, `"oral-cavity2"`, `"c-place1"`.
+///
+/// Arguments:
+/// - ..trees (arguments): Positional spec dicts, one per tree. Each may include
+///   a `ph` key to load a preset, plus any `geom()` keys to override features.
+///   A per-tree `scale` key (number) scales that tree's coordinates and font
+///   size relative to the group `scale`.
+/// - arrows (array): Cross-tree arrows. Each entry is either `(from, to)` or a
+///   dict `(from: str, to: str, color: color, bend: number, ctrl: (number, number))`.
+///   - `bend`: single canvas-unit Y-lift applied symmetrically — positive arches
+///     upward, negative downward, `0` forces a straight line.
+///   - `ctrl`: two Y-lifts `(lift1, lift2)`, one per endpoint, for asymmetric
+///     curves and S-shapes. X-positions follow the same formula as `bend`.
+///     Same sign = asymmetric arc; opposite signs = S-curve.
+///     Overrides `bend` and `curved` when set.
+///   All keys except `from`/`to` are optional.
+/// - gap (number): Canvas-unit gap between trees (default: 1.5).
+/// - scale (number): Uniform scale factor for the whole group (default: 1.0).
+/// - model (str): `"ch"` (default) or `"sagey"`. Applies to all trees.
+/// - position (array): Layout tweaks. Each entry: `("node-key-with-index", dx, dy)`,
+///   e.g. `("continuant1", -0.2, 0.3)`. Arrows follow the adjusted positions.
+/// - delinks (array): Node anchor names (with tree index) whose parent line is
+///   replaced with a delink mark, e.g. `delinks: ("c-place1",)`.
+/// - curved (bool): Draw arrows as obstacle-avoiding Bézier curves (default: false).
+/// - highlight (array): Node anchor names to highlight; all others are dimmed.
+///
+/// Returns: CeTZ drawing of all trees in one canvas
+///
+/// Example:
+/// ```
+/// // Spreading: nasal spreading from n to a
+/// #geom-group(
+/// (ph: "a"),
+/// (ph: "n"),
+/// arrows: ((from: "nasal2", to: "root1", ctrl: (1.1, -1.5)),),
+/// curved: true,
+/// )
+/// ```
+#let geom-group = geom-group
