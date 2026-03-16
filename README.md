@@ -23,7 +23,7 @@
 <tr>
   <td align="center" width="33%">
     <a href="gallery/ipa_example.typ"><img src="gallery/ipa_example.png" width="100%"></a>
-    <br><sub>IPA transcription based on tipa</sub>
+    <br><sub>IPA transcription based on <code>tipa</code></sub>
   </td>
   <td align="center" width="33%">
     <a href="gallery/consonants_example.typ"><img src="gallery/consonants_example.png" width="100%"></a>
@@ -31,7 +31,7 @@
   </td>
   <td align="center" width="33%">
     <a href="gallery/vowels_example.typ"><img src="gallery/vowels_example.png" width="100%"></a>
-    <br><sub>Vowel trapezoids (with pre-defined languages)</sub>
+    <br><sub>Vowel trapezoids (with pre-defined languages and arrows)</sub>
   </td>
 </tr>
 <tr>
@@ -64,8 +64,8 @@
 </tr>
 <tr>
   <td align="center">
-    <a href="gallery/spe_example.typ"><img src="gallery/spe_example.png" width="100%"></a>
-    <br><sub>SPE-style feature matrix</sub>
+    <a href="gallery/feat_geom.typ"><img src="gallery/feat_geom.png" width="100%"></a>
+    <br><sub>Feature geometry</sub>
   </td>
   <td align="center">
     <a href="gallery/ot_example.typ"><img src="gallery/ot_example.png" width="100%"></a>
@@ -89,7 +89,7 @@ Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensi
 As of version `0.3.7`, the package allows the user to choose a global font for all functions. By default, Charis is used (Typst has a fallback font should you not have it installed). However, you can use whichever font you prefer with the following command:
 
 ```typst
-#import "@preview/phonokit:0.4.6": *
+#import "@preview/phonokit:0.5.0": *
 #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
 ```
 
@@ -112,6 +112,13 @@ As of version `0.3.7`, the package allows the user to choose a global font for a
 
 - **Features and tones**: Create autosegmental representation for both features and tones
 - **Support for common processes**: Easily add linking, delinking, floating tones, one-to-many relationships and highlighting. Additional options for spacing and annotation also available
+
+### Feature Geometry Module
+
+- **Create complex feature geometry representations**: Pre-defined phonemes are available for quick representations
+- **Intuitive arguments based on typical nodes**: Create custom representations with intuitive argument structure
+- **Support for arrows and delinking**: Represent processes with arrows, which may or may not curve. Obstacle avoidance is attempted when arrows curve, but you can also customize arrow path.
+- **Highlight nodes**: Easily highlight nodes with the `highlight` argument, which dims the whole representation *except* the nodes you need highlighted.
 
 ### SPE module
 

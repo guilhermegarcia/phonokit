@@ -387,6 +387,39 @@
   // ʃ/ʒ: coronal [-anterior], NOT dorsal
   "S": (root: ("-son", "-approx", "-vocoid"), coronal: true, anterior: "-", voice: "-", continuant: "+", segment: "S"),
   "Z": (root: ("-son", "-approx", "-vocoid"), coronal: true, anterior: "-", voice: "+", continuant: "+", segment: "Z"),
+  // Affricates — [-continuant] following standard SPE/Kenstowicz analysis
+  "ts": (
+    root: ("-son", "-approx", "-vocoid"),
+    coronal: true,
+    anterior: "+",
+    voice: "-",
+    continuant: ("-", "+"),
+    segment: "ts",
+  ),
+  "dz": (
+    root: ("-son", "-approx", "-vocoid"),
+    coronal: true,
+    anterior: "+",
+    voice: "+",
+    continuant: ("-", "+"),
+    segment: "dz",
+  ),
+  "tS": (
+    root: ("-son", "-approx", "-vocoid"),
+    coronal: true,
+    anterior: "-",
+    voice: "-",
+    continuant: ("-", "+"),
+    segment: "tS",
+  ),
+  "dZ": (
+    root: ("-son", "-approx", "-vocoid"),
+    coronal: true,
+    anterior: "-",
+    voice: "+",
+    continuant: ("-", "+"),
+    segment: "dZ",
+  ),
   "n": (
     root: ("+son", "-approx", "-vocoid"),
     vocalic: false,
@@ -497,6 +530,8 @@
   "C": (root: ("-son", "-approx", "-vocoid"), coronal: true, anterior: "-", voice: "-", continuant: "+", segment: "C"), // ç voiceless palatal fricative — NOTE: strident not modelled (cf. /ʃ/)
   // archiphoneme /T/: any stop — no place, no voice specified
   "\\T": (root: ("-son", "-approx", "-vocoid"), continuant: "-", segment: "\\T"),
+  "\\C": (root: ("±son", "±approx", "-vocoid"), segment: "\\C"),
+  "\\V": (root: ("+son", "+approx", "+vocoid"), segment: "\\V"),
 )
 
 // ── Segment presets (Sagey 1986) ─────────────────────────────────────────────
@@ -509,7 +544,7 @@
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("+hi", "-back"),
+    dorsal: ("+high", "-back"),
     segment: "i",
   ),
   "e": (
@@ -517,7 +552,7 @@
     vocalic: true,
     vplace: true,
     tense: "+",
-    dorsal: ("-hi", "-back"),
+    dorsal: ("-high", "-back"),
     segment: "e",
   ),
   "E": (
@@ -525,14 +560,14 @@
     vocalic: true,
     vplace: true,
     tense: "-",
-    dorsal: ("-hi", "-back"),
+    dorsal: ("-high", "-back"),
     segment: "E",
   ),
   "a": (
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("-hi", "+lo"),
+    dorsal: ("-high", "+lo"),
     segment: "a",
   ),
   "o": (
@@ -541,7 +576,7 @@
     vplace: true,
     tense: "+",
     labial: ("round",),
-    dorsal: ("-hi", "+back"),
+    dorsal: ("-high", "+back"),
     segment: "o",
   ),
   "O": (
@@ -550,7 +585,7 @@
     vplace: true,
     tense: "-",
     labial: ("round",),
-    dorsal: ("-hi", "+back"),
+    dorsal: ("-high", "+back"),
     segment: "O",
   ),
   "u": (
@@ -558,7 +593,7 @@
     vocalic: true,
     vplace: true,
     labial: ("round",),
-    dorsal: ("+hi", "+back"),
+    dorsal: ("+high", "+back"),
     segment: "u",
   ),
   "I": (
@@ -566,7 +601,7 @@
     vocalic: true,
     vplace: true,
     tense: "-",
-    dorsal: ("+hi", "-back"),
+    dorsal: ("+high", "-back"),
     segment: "I",
   ),
   "U": (
@@ -575,7 +610,7 @@
     vplace: true,
     tense: "-",
     labial: ("round",),
-    dorsal: ("+hi", "+back"),
+    dorsal: ("+high", "+back"),
     segment: "U",
   ),
   // Additional vowels — high confidence:
@@ -585,7 +620,7 @@
     vocalic: true,
     vplace: true,
     labial: ("round",),
-    dorsal: ("+hi", "-back"),
+    dorsal: ("+high", "-back"),
     segment: "y",
   ),
   "W": (
@@ -593,7 +628,7 @@
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("+hi", "+back"),
+    dorsal: ("+high", "+back"),
     segment: "W",
   ),
   "7": (
@@ -602,7 +637,7 @@
     vocalic: true,
     vplace: true,
     tense: "+",
-    dorsal: ("-hi", "+back"),
+    dorsal: ("-high", "+back"),
     segment: "7",
   ),
   "\\o": (
@@ -612,7 +647,7 @@
     vplace: true,
     tense: "+",
     labial: ("round",),
-    dorsal: ("-hi", "-back"),
+    dorsal: ("-high", "-back"),
     segment: "\\o",
   ),
   "\\oe": (
@@ -622,7 +657,7 @@
     vplace: true,
     tense: "-",
     labial: ("round",),
-    dorsal: ("-hi", "-back"),
+    dorsal: ("-high", "-back"),
     segment: "\\oe",
   ),
   "2": (
@@ -631,7 +666,7 @@
     vocalic: true,
     vplace: true,
     tense: "-",
-    dorsal: ("-hi", "+back"),
+    dorsal: ("-high", "+back"),
     segment: "2",
   ),
   "A": (
@@ -639,7 +674,7 @@
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("-hi", "+lo", "+back"),
+    dorsal: ("-high", "+lo", "+back"),
     segment: "A",
   ),
   "6": (
@@ -648,7 +683,7 @@
     vocalic: true,
     vplace: true,
     labial: ("round",),
-    dorsal: ("-hi", "+lo", "+back"),
+    dorsal: ("-high", "+lo", "+back"),
     segment: "6",
   ),
   // Flagged vowels — central/near-open: place analysis is theory-dependent.
@@ -657,7 +692,7 @@
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("-hi",),
+    dorsal: ("-high",),
     segment: "@",
   ),
   "1": (
@@ -665,7 +700,7 @@
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("+hi",),
+    dorsal: ("+high",),
     segment: "1",
   ),
   "0": (
@@ -674,7 +709,7 @@
     vocalic: true,
     vplace: true,
     labial: ("round",),
-    dorsal: ("+hi",),
+    dorsal: ("+high",),
     segment: "0",
   ),
   "\\ae": (
@@ -682,7 +717,7 @@
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
-    dorsal: ("-hi", "+lo", "-back"),
+    dorsal: ("-high", "+lo", "-back"),
     segment: "\\ae",
   ),
 )
@@ -884,6 +919,7 @@
   // Only apply root-level shifts when the root has multiple children.
   let has-laryngeal = nodes.any(e => e.label == "laryngeal")
   let has-nasal = nodes.any(e => e.label == "nasal" or e.label.ends-with("nasal"))
+  let has-open3 = nodes.any(e => e.label.ends-with("open3"))
   let has-lab = nodes.any(e => e.label == "labial")
   let has-cor = nodes.any(e => e.label == "coronal")
   let has-dor = nodes.any(e => e.label == "dorsal")
@@ -892,7 +928,7 @@
   let effective-oc-shift = if has-laryngeal and has-nasal { +0.10 } else if has-laryngeal or has-nasal {
     oc-shift
   } else { 0 }
-  let effective-lar-shift = if oc-sub.len() > 0 { lar-shift } else { 0 }
+  let effective-lar-shift = if oc-sub.len() > 0 { lar-shift + (if has-open3 { 0.60 } else { 0 }) } else { 0 }
   let effective-vp-extra = if vplace-sub.len() > 0 and apt-sub.len() > 0 { vp-extra } else { 0 }
   let effective-ap-extra = if vplace-sub.len() > 0 and apt-sub.len() > 0 { ap-extra } else { 0 }
 
@@ -914,7 +950,8 @@
     }
 
     if e.label.ends-with("continuant") {
-      (..e, x: base-x + 2.80, par: new-par)
+      let cont-nudge = if not has-lab and has-cor and has-dor { -0.40 } else { 0 }
+      (..e, x: base-x + 2.80 + cont-nudge, par: new-par)
     } else if e.label == "labial" {
       // Only nudge toward [cor] when [cor] is actually present.
       // Amount increases when [dor] is also there (three-way spread needs more room).
@@ -930,7 +967,7 @@
       }
     } else if e.label == "nasal" or e.label.ends-with("nasal") {
       // Full vocoid tree only (has laryngeal): nudge nasal right.
-      let nx = if has-laryngeal { e.x + 0.90 } else { e.x }
+      let nx = if has-laryngeal { e.x + 0.90 + (if has-open3 { 0.60 } else { 0 }) } else { e.x }
       (..e, x: nx, y: e.y - 0.30)
     } else {
       (..e, x: base-x, par: new-par)
@@ -1205,7 +1242,7 @@
 /// - radical (bool): Show `[rad]` (radical/pharyngeal) under C-place or V-place.
 /// - dorsal (bool, array): Show `[dorsal]` (under C-place or V-place).
 ///   Pass an array of feature strings to add sub-features (Sagey-style):
-///   `dorsal: ("+hi", "-back")` → `[dor]` with `[+hi]` and `[−back]` children.
+///   `dorsal: ("+high", "-back")` → `[dor]` with `[+hi]` and `[−back]` children.
 /// - labial (bool, array): Show `[labial]`. Array adds sub-features:
 ///   `labial: ("round",)` → `[lab]` with `[round]` child.
 /// - coronal (bool, array): Show `[coronal]`. Array provides children directly,
@@ -1232,6 +1269,8 @@
 /// - delinks (array): Node keys whose line *to their parent* is replaced with a
 ///   delink mark (two perpendicular bars). Keys follow the same convention as
 ///   `position`: bare argument name for `geom()`, e.g. `delinks: ("c-place",)`.
+/// - prefix (str): String prepended to the segment label. `"-"` is automatically converted to `"–"`. E.g. `prefix: "-"` → `–/a/`.
+/// - suffix (str): String appended to the segment label. `"-"` is automatically converted to `"–"`.
 /// - segment (content): Optional label centred above the root node, e.g. `"s"` or `$s$`.
 /// - ph (str): Pre-built segment preset. Supports `"a"`, `"e"`, `"i"`, `"o"`, `"u"`,
 ///   `"E"` (ɛ), `"O"` (ɔ). The segment label defaults to the `ph` value unless overridden
@@ -1267,8 +1306,36 @@
   position: (),
   delinks: (),
   segment: none,
+  prefix: "",
+  suffix: "",
   highlight: (),
+  timing: auto,
 ) = {
+  // Auto-detect length from ph: "iː" or "i:" → long (two timing slots)
+  // Strip the length mark so the preset lookup finds "i", not "iː"
+  // Keep the original for use as the segment label fallback.
+  let _is-long = ph != none and type(ph) == str and (ph.contains("ː") or ph.contains(":"))
+  let _ph-orig = ph
+  let ph = if ph != none and type(ph) == str { ph.replace("ː", "").replace(":", "") } else { ph }
+
+  // Resolve timing:
+  //   auto  → one × normally, two × when ph contains a length mark
+  //   false → no timing tier
+  //   string/symbol/array → explicit (normalized below)
+  let timing = if timing == false {
+    ()
+  } else if timing == auto {
+    if _is-long { ($times$, $times$) } else { ($times$,) }
+  } else {
+    // Coerce bare string/symbol to array, then normalize "mora"/"mu" → μ, "x"/"X" → ×
+    let t = if type(timing) == str or type(timing) == symbol { (timing,) } else { timing }
+    t.map(t => if type(t) == str {
+      let tl = lower(t)
+      if tl == "mora" or tl == "mu" { sym.mu } else if tl == "x" { $times$ } else { t }
+    } else { t })
+  }
+  let prefix = prefix.replace("-", "–")
+  let suffix = suffix.replace("-", "–")
   let scale-factor = scale
 
   // When ph is set, load the preset, then apply any explicitly-provided
@@ -1280,9 +1347,8 @@
     let preset-dict = if model == "sagey" and ph-key in _presets-sagey {
       _presets-sagey
     } else { _presets }
-    // If ph already has delimiters ("/a/", "[a]"), use it as segment directly.
-    // Otherwise auto-wrap in phonemic slashes.
-    let seg = if segment != none { segment } else if ph != ph-key { ph } else { "/" + ph + "/" }
+    // Use segment label exactly as provided by the user; fall back to the preset's own segment field.
+    let seg = if segment != none { prefix + segment + suffix } else { prefix + _ph-orig + suffix }
     let overrides = (:)
     if root != () { overrides.insert("root", root) }
     if laryngeal != false { overrides.insert("laryngeal", laryngeal) }
@@ -1321,7 +1387,9 @@
       vplace: vplace,
       aperture: aperture,
       tense: tense,
-      segment: segment,
+      segment: if segment != none { prefix + segment + suffix } else if prefix != "" or suffix != "" {
+        prefix + suffix
+      } else { none },
     )
   }
   let result = _build-tree(spec)
@@ -1337,7 +1405,7 @@
 
   // ── Render ────────────────────────────────────────────────────────────
   let _loff = 0.20
-  let _dim = luma(75%)
+  let _dim = luma(65%)
   let _norm = luma(15%)
   // Per-node color: dim everything not in the highlight set (when set is non-empty).
   let _nc = nname => if highlight.len() == 0 or nname in highlight { _norm } else { _dim }
@@ -1347,7 +1415,19 @@
 
   context {
     let em-in-cu = text.size / (scale-factor * 1cm)
-    let y-top = if spec.at("segment", default: none) != none {
+    let _timing-gap = 0.65 // vertical gap from root to timing tier
+    let _timing-y = 0.55 + _timing-gap // y-coordinate of timing nodes (root at 0)
+    let _t-spacing = 0.55 // horizontal gap between timing nodes
+    let seg-present = spec.at("segment", default: none) != none
+    let y-top = if timing.len() > 0 {
+      // timing nodes sit at _timing-y; segment label (if any) floats above them
+      let label-top = if seg-present {
+        _timing-y + 0.45 + text.size * 0.84 / (scale-factor * 1cm)
+      } else {
+        _timing-y + text.size * 0.35 / (scale-factor * 1cm)
+      }
+      label-top
+    } else if seg-present {
       0.55 + text.size * 0.84 / (scale-factor * 1cm)
     } else {
       text.size * 0.35 / (scale-factor * 1cm)
@@ -1364,13 +1444,18 @@
           let nname = _node-name(entry.label, entry.tidx)
           let is-delinked = nname.slice(0, -1) in delinks
           let nc = _nc(nname)
-          let line-paint = if highlight.len() == 0 { _norm } else { _dim }
-          let sw = (paint: line-paint, thickness: 0.016)
 
           if entry.par != none {
             let (px, py) = entry.par
             let (fx, fy) = (px, py - _loff)
             let (tx, ty) = (entry.x, entry.y + _loff)
+            let par-entry = nodes.find(e => e.x == px and e.y == py)
+            let par-nname = if par-entry != none { _node-name(par-entry.label, par-entry.tidx) } else { none }
+            let both-highlighted = (
+              highlight.len() > 0 and nname in highlight and par-nname != none and par-nname in highlight
+            )
+            let line-paint = if highlight.len() == 0 or both-highlighted { _norm } else { _dim }
+            let sw = (paint: line-paint, thickness: 0.016)
             line((fx, fy), (tx, ty), stroke: sw)
             if is-delinked { _draw-delink(fx, fy, tx, ty, sw) }
           }
@@ -1383,7 +1468,17 @@
             )
             if entry.feats.len() > 0 {
               let mat-x = entry.x + 0.25
-              let items = entry.feats.map(f => text(font: font, fill: nc, f.replace("-", "–")))
+              let items = entry.feats.map(f => {
+                let norm = f.replace("-", "−")
+                let (sign, base) = if norm.starts-with("±") { ("±", norm.slice("±".len())) } else if norm.starts-with(
+                  "+",
+                ) { ("+", norm.slice(1)) } else if norm.starts-with("−") { ("−", norm.slice("−".len())) } else {
+                  ("", norm)
+                }
+                text(font: font, fill: nc, if sign != "" { box(width: 0.65em, align(center, sign)) + base } else {
+                  norm
+                })
+              })
               content(
                 (mat-x, entry.y),
                 {
@@ -1412,18 +1507,41 @@
           }
         }
 
-        // Segment label — follows root node's highlight status
+        // Segment label — always full colour (never dimmed by highlight)
         let seg-label = spec.at("segment", default: none)
         if seg-label != none {
           let root-entry = nodes.find(e => e.kind == "root")
           if root-entry != none {
-            let root-nname = _node-name(root-entry.label, root-entry.tidx)
-            let seg-body = _seg(seg-label)
+            let label-y = if timing.len() > 0 {
+              root-entry.y + _timing-y + 0.45
+            } else {
+              root-entry.y + 0.55
+            }
             content(
-              (root-entry.x, root-entry.y + 0.55),
-              text(font: font, size: fsz * 1.2, fill: _nc(root-nname), seg-body),
+              (root-entry.x, label-y),
+              text(font: font, size: fsz * 1.2, fill: _norm, _seg(seg-label)),
               anchor: "south",
             )
+          }
+        }
+
+        // Timing tier (X-slots, morae, etc.)
+        if timing.len() > 0 {
+          let root-entry = nodes.find(e => e.kind == "root")
+          if root-entry != none {
+            let rx = root-entry.x
+            let ry = root-entry.y
+            let t-y = ry + _timing-y
+            let n = timing.len()
+            for (i, t) in timing.enumerate() {
+              let tx = if n == 1 { rx } else { rx + (i - (n - 1) / 2.0) * _t-spacing }
+              line(
+                (rx, ry + _loff),
+                (tx, t-y - _loff),
+                stroke: (paint: _norm, thickness: 0.016),
+              )
+              content((tx, t-y), text(font: font, size: fsz, fill: _norm, t))
+            }
           }
         }
       })
@@ -1454,17 +1572,14 @@
 /// ```typst
 /// arrows: (
 ///   ("labial1", "labial2"),                             // simple
-///   (from: "cor1", to: "cor2", color: blue, bend: 0.6), // arched, coloured
-///   (from: "dor1", to: "dor2", bend: -0.4),             // arching downward
+///   (from: "cor1", to: "cor2", color: blue),            // coloured
+///   (from: "dor1", to: "dor2", ctrl: (1.0, -0.5)),      // custom S-curve
 /// )
 /// ```
-/// `bend` is a canvas-unit lift for the Bézier control points: positive arches
-/// upward (over the trees), negative arches downward. Overrides the group
-/// `curved` flag for that arrow; `bend: 0` forces a straight line.
 ///
 /// - ..trees (arguments): Positional spec dicts, one per tree.
 /// - arrows (array): Cross-tree arrows. Each entry: `(from, to)` array or
-///   `(from: str, to: str, color: color, bend: number)` dict (all keys except
+///   `(from: str, to: str, color: color, ctrl: array)` dict (all keys except
 ///   `from`/`to` optional).
 /// - gap (number): Canvas-unit gap between trees (default: 1.5).
 /// - scale (number): Uniform scale factor (default: 1).
@@ -1506,8 +1621,16 @@
   // coordinates and font size relative to the group scale.
   let all-nodes = ()
   let x-cursor = 0.0
-  let seg-labels = () // (x, y, ts, text) for each tree that has a segment label
+  let seg-labels = () // (x, y, ts, text, root-nname, has-timing)
+  let timing-data = () // (root-x, ts, resolved-timing-array)
   for (idx, spec) in specs.enumerate() {
+    // Auto-detect length mark in ph; strip it so preset lookup works.
+    let ph-raw = spec.at("ph", default: none)
+    let _is-long = ph-raw != none and type(ph-raw) == str and (ph-raw.contains("ː") or ph-raw.contains(":"))
+    let spec = if _is-long {
+      (..spec, ph: ph-raw.replace("ː", "").replace(":", ""))
+    } else { spec }
+
     // Resolve preset if ph key is present; explicit spec keys override the preset.
     // Sagey model uses _presets-sagey for vowels; consonants fall back to _presets.
     let spec = if "ph" in spec and _ph-bare(spec.at("ph")) in _presets {
@@ -1517,20 +1640,39 @@
         _presets-sagey
       } else { _presets }
       let base = preset-dict.at(ph-key)
-      let seg = if "segment" in spec { spec.at("segment") } else if ph-val != ph-key { ph-val } else {
-        "/" + ph-val + "/"
-      }
+      let px = spec.at("prefix", default: "").replace("-", "–")
+      let sx = spec.at("suffix", default: "").replace("-", "–")
+      // Use original ph (with length mark) as segment label fallback
+      let seg-ph = if ph-raw != none { ph-raw } else { ph-val }
+      let seg = if "segment" in spec { px + spec.at("segment") + sx } else { px + seg-ph + sx }
       let overrides = (:)
       for pair in spec.pairs() {
-        if pair.at(0) != "ph" { overrides.insert(pair.at(0), pair.at(1)) }
+        if pair.at(0) not in ("ph", "prefix", "suffix") { overrides.insert(pair.at(0), pair.at(1)) }
       }
       (..base, segment: seg, ..overrides)
     } else { spec }
+
+    // Resolve timing for this tree (same logic as geom())
+    let timing-raw = spec.at("timing", default: auto)
+    let tree-timing = if timing-raw == false {
+      ()
+    } else if timing-raw == auto {
+      if _is-long { ($times$, $times$) } else { ($times$,) }
+    } else {
+      let t = if type(timing-raw) == str or type(timing-raw) == symbol { (timing-raw,) } else { timing-raw }
+      t.map(t => if type(t) == str {
+        let tl = lower(t)
+        if tl == "mora" or tl == "mu" { sym.mu } else if tl == "x" { $times$ } else { t }
+      } else { t })
+    }
+
     let result = _build-tree(spec)
     let tree = result.tree
     let is-vocoid = result.is-vocoid
     let ts = spec.at("scale", default: 1.0) // per-tree relative scale
-    let seg = spec.at("segment", default: none)
+    let px = spec.at("prefix", default: "").replace("-", "–")
+    let sx = spec.at("suffix", default: "").replace("-", "–")
+    let seg = if spec.at("segment", default: none) != none { px + spec.at("segment") + sx } else { none }
     let nodes = _layout(tree, 0.0, 0.0, none)
     let nodes = _apply-vocoid-nudge(nodes, is-vocoid)
     let nodes = _apply-general-nudge(nodes)
@@ -1549,12 +1691,16 @@
           tscale: ts,
         ))
     )
-    // Record segment label position (root is always the first node at x-offset centre)
+    let root-w = _tree-w(tree)
+    let root-x = x-cursor + root-w / 2 * ts
+    let root-nname = _node-name("root", tidx)
+    // Record segment label position
     if seg != none {
-      let root-w = _tree-w(tree)
-      let root-x = x-cursor + root-w / 2 * ts
-      let root-nname = _node-name("root", tidx)
-      seg-labels = seg-labels + ((root-x, 0.0, ts, seg, root-nname),)
+      seg-labels = seg-labels + ((root-x, 0.0, ts, seg, root-nname, tree-timing.len() > 0),)
+    }
+    // Record timing tier data
+    if tree-timing.len() > 0 {
+      timing-data = timing-data + ((root-x, ts, tree-timing),)
     }
     x-cursor = x-cursor + _tree-w(tree) * ts + gap
   }
@@ -1562,7 +1708,7 @@
 
   // ── Render ────────────────────────────────────────────────────────────
   let _loff = 0.20
-  let _dim = luma(75%)
+  let _dim = luma(65%)
   let _norm = luma(15%)
   let _nc = nname => if highlight.len() == 0 or nname in highlight { _norm } else { _dim }
 
@@ -1578,10 +1724,29 @@
 
   context {
     let em-in-cu-g = text.size / (scale-factor * 1cm)
-    let y-top-g = if seg-labels.len() > 0 {
-      0.55 + text.size * 0.84 / (scale-factor * 1cm)
-    } else {
-      text.size * 0.35 / (scale-factor * 1cm)
+    let _timing-gap = 0.65
+    let _timing-y = 0.55 + _timing-gap
+    let _t-spacing = 0.55
+    // y-top-g: highest point across all trees (timing + segment labels)
+    let y-top-g = {
+      let timing-tops = timing-data.map(td => {
+        let (rx, ts, tt) = td
+        let has-seg = seg-labels.any(sl => calc.abs(sl.at(0) - rx) < 0.001)
+        if has-seg {
+          (_timing-y + 0.45 + text.size * 0.84 / (scale-factor * 1cm)) * ts
+        } else {
+          (_timing-y + text.size * 0.35 / (scale-factor * 1cm)) * ts
+        }
+      })
+      let seg-tops = seg-labels
+        .filter(sl => not sl.at(5))
+        .map(sl => 0.55 * sl.at(2) + text.size * 0.84 / (scale-factor * 1cm))
+      let all-tops = timing-tops + seg-tops
+      if all-tops.len() > 0 {
+        all-tops.fold(text.size * 0.35 / (scale-factor * 1cm), calc.max)
+      } else {
+        text.size * 0.35 / (scale-factor * 1cm)
+      }
     }
     let bl-g = (em-in-cu-g + (-y-min-g)) / (2 * em-in-cu-g + y-top-g - y-min-g)
     let fsz = text.size * 0.70 * scale-factor
@@ -1598,13 +1763,18 @@
           let efsz = fsz * ts
           let eloff = _loff * ts
           let nc = _nc(nname)
-          let line-paint = if highlight.len() == 0 { _norm } else { _dim }
-          let sw = (paint: line-paint, thickness: 0.016)
 
           if entry.par != none {
             let (px, py) = entry.par
             let (fx, fy) = (px, py - eloff)
             let (tx, ty) = (entry.x, entry.y + eloff)
+            let par-entry = all-nodes.find(e => e.x == px and e.y == py)
+            let par-nname = if par-entry != none { _node-name(par-entry.label, par-entry.tidx) } else { none }
+            let both-highlighted = (
+              highlight.len() > 0 and nname in highlight and par-nname != none and par-nname in highlight
+            )
+            let line-paint = if highlight.len() == 0 or both-highlighted { _norm } else { _dim }
+            let sw = (paint: line-paint, thickness: 0.016)
             line((fx, fy), (tx, ty), stroke: sw)
             if nname in delinks { _draw-delink(fx, fy, tx, ty, sw) }
           }
@@ -1617,7 +1787,17 @@
             )
             if entry.feats.len() > 0 {
               let mat-x = entry.x + 0.25 * ts
-              let items = entry.feats.map(f => text(font: font, fill: nc, f.replace("-", "–")))
+              let items = entry.feats.map(f => {
+                let norm = f.replace("-", "−")
+                let (sign, base) = if norm.starts-with("±") { ("±", norm.slice("±".len())) } else if norm.starts-with(
+                  "+",
+                ) { ("+", norm.slice(1)) } else if norm.starts-with("−") { ("−", norm.slice("−".len())) } else {
+                  ("", norm)
+                }
+                text(font: font, fill: nc, if sign != "" { box(width: 0.65em, align(center, sign)) + base } else {
+                  norm
+                })
+              })
               content(
                 (mat-x, entry.y),
                 {
@@ -1646,14 +1826,32 @@
           }
         }
 
-        // Segment labels — follow each tree's root node highlight status
-        for (sx, sy, ts, seg, root-nname) in seg-labels {
+        // Segment labels — always full colour (never dimmed by highlight)
+        for (sx, sy, ts, seg, root-nname, has-timing) in seg-labels {
+          let label-y = sy + (if has-timing { (_timing-y + 0.45) * ts } else { 0.55 * ts })
           let seg-body = _seg(seg)
           content(
-            (sx, sy + 0.55 * ts),
-            text(font: font, size: fsz * ts * 1.2, fill: _nc(root-nname), seg-body),
+            (sx, label-y),
+            text(font: font, size: fsz * ts * 1.2, fill: _norm, seg-body),
             anchor: "south",
           )
+        }
+
+        // Timing tiers
+        for (rx, ts, tt) in timing-data {
+          let ry = 0.0
+          let t-y = ry + _timing-y * ts
+          let n = tt.len()
+          let loff = 0.20 * ts
+          for (i, t) in tt.enumerate() {
+            let tx = if n == 1 { rx } else { rx + (i - (n - 1) / 2.0) * _t-spacing * ts }
+            line(
+              (rx, ry + loff),
+              (tx, t-y - loff),
+              stroke: (paint: _norm, thickness: 0.016),
+            )
+            content((tx, t-y), text(font: font, size: fsz * ts, fill: _norm, t))
+          }
         }
 
         // Draw cross-tree arrows.
@@ -1667,18 +1865,15 @@
 
         for arrow in arrows {
           // Accept both positional arrays ("from", "to") / ("from", "to", color)
-          // and dicts (from: "...", to: "...", color: ..., bend: ...).
+          // and dicts (from: "...", to: "...", color: ..., ctrl: ...).
           let is-dict = type(arrow) == dictionary
           let from-name = if is-dict { arrow.at("from") } else { arrow.at(0) }
           let to-name = if is-dict { arrow.at("to") } else { arrow.at(1) }
           let paint = if is-dict { arrow.at("color", default: luma(15%)) } else if arrow.len() >= 3 {
             arrow.at(2)
           } else { luma(15%) }
-          // bend: canvas-unit lift for control points. Positive = arch up, negative = arch down.
-          // none = use group-level `curved` with auto lift.
-          let bend-val = if is-dict { arrow.at("bend", default: none) } else { none }
-          // ctrl: two-element array ((dx1,dy1), (dx2,dy2)) — offsets from each endpoint.
-          // When set, bypasses bend/curved entirely.
+          // ctrl: two-element array (lift1, lift2) — Y-offsets from each endpoint.
+          // When set, bypasses curved entirely.
           let ctrl-val = if is-dict { arrow.at("ctrl", default: none) } else { none }
 
           if from-name in name-to-pos and to-name in name-to-pos {
@@ -1691,29 +1886,32 @@
             // EXCEPT for root nodes which have no parent — they connect at the BOTTOM
             // (facing their children) to avoid landing near the segment label above.
             let fy = if from-name.starts-with("root") { fy - f-loff } else { fy + f-loff }
-            let ty = if to-name.starts-with("root") { ty - t-loff } else { ty + t-loff }
+            let ty = ty - t-loff
             let dx = tx - fx
             let dy = ty - fy
             let len = calc.sqrt(dx * dx + dy * dy)
 
             // ── Control points ─────────────────────────────────────────────
-            // Priority: ctrl > bend > curved.
-            // ctrl: explicit offsets from each endpoint → cubic Bézier, any shape.
-            // bend: symmetric arc lift → simple arc.
-            // curved: auto arc-lift scaled by length.
+            // Priority: ctrl > curved.
+            // ctrl: explicit Y-offsets from each endpoint → cubic Bézier, any shape.
+            // curved: auto S-curve scaled by distance.
             let (ctrl1, ctrl2) = if ctrl-val != none {
-              // ctrl: (lift1, lift2) — Y-offsets from each endpoint; X follows bend formula.
+              // ctrl: (lift1, lift2) — Y-offsets from each endpoint.
               (
                 (fx + dx * 0.30, fy + ctrl-val.at(0)),
                 (tx - dx * 0.30, ty + ctrl-val.at(1)),
               )
             } else {
-              let use-curved = if bend-val != none { bend-val != 0 } else { curved }
-              let arc-lift = if bend-val != none { bend-val } else { calc.max(len * 0.30, 0.40) }
-              if use-curved and len > 0 {
+              if curved and len > 0 {
+                let v-reach = calc.abs(dy)
+                let h-reach = calc.abs(dx)
+                // ctrl1: departs with upward bias, scaling with whichever reach dominates.
+                let lift1 = calc.max(v-reach * 0.50, h-reach * 0.20, 0.50)
+                // ctrl2: arrives from below target — dip scales with vertical distance.
+                let dip2 = calc.max(v-reach * 0.25, 0.40)
                 (
-                  (fx + dx * 0.30, fy + arc-lift),
-                  (tx - dx * 0.30, ty + arc-lift),
+                  (fx + dx * 0.30, fy + lift1),
+                  (tx - dx * 0.10, ty - dip2),
                 )
               } else { (none, none) }
             }

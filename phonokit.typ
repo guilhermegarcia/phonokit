@@ -114,6 +114,17 @@
   ),
   numbering: "1 of 1",
   number-align: center,
+  background: context {
+    if here().page() == 2 {
+      let pw = page.width
+      let ph = page.height
+      place(left + horizon, dy: -3cm, image("gallery/word_example.png", width: 50%, fit: "contain"))
+      place(right + horizon, dy: -7cm, image("gallery/multi-tier_example.png", width: 50%, fit: "contain"))
+      place(center + horizon, dy: 6cm, image("gallery/feat_geom.png", width: 85%, fit: "contain"))
+      // White overlay dims the images to ~13% visibility (images have white bg)
+      place(top + left, rect(width: pw, height: ph, fill: white.transparentize(6%)))
+    }
+  },
   footer: context {
     let abspage = locate(here()).page()
     if abspage != 1 {
@@ -220,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.4.6`]
+#let version = text(size: 0.8em)[`v 0.5.0`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -244,10 +255,10 @@ _A toolkit to create phonological representations in Typst_
   ],
 )
 
-#v(3em)
+#v(10em)
 
 #abstract[
-  Creating high-quality phonological representations in academic documents is often time-consuming and requires juggling multiple tools and #LaTeX packages (most notably `TikZ`). This vignette introduces #logo, an open-source Typst package designed to streamline the creation of phonological structures while maintaining typographical precision. The package provides intuitive functions for IPA transcription (supporting `tipa` input conventions), prosodic representations (syllables, moras, feet, prosodic words, metrical grids), sonority profiles, IPA vowel charts and consonant tables with built-in language inventories, autosegmental phonology (feature spreading, tone, delinking), multi-tier representations for complex non-linear structures such as Government Phonology, CV phonology, SPE feature matrices, Optimality Theory tableaux, Harmonic Grammar, Noisy Harmonic Grammar, Maximum Entropy grammars, and Hasse diagrams for constraint rankings. The package also includes numbered linguistic examples and a collection of helper symbols for Greek letters and arrows. All functions prioritize minimal input syntax while automatically handling typographical challenges such as dynamic spacing and proper alignment. The font used by the package can be customized globally. #logo aims to reduce cognitive load in document preparation, allowing phonologists to focus on content rather than formatting. The package is freely available through Typst's package repository and is under active development.
+  Creating high-quality phonological representations in academic documents is often time-consuming and requires juggling multiple tools and #LaTeX packages (most notably `TikZ`). This vignette introduces #logo, an open-source Typst package designed to streamline the creation of phonological structures while maintaining typographical precision. The package provides intuitive functions for IPA transcription (supporting `tipa` input conventions), prosodic representations (syllables, moras, feet, prosodic words, metrical grids), sonority profiles, IPA vowel charts and consonant tables with built-in language inventories, autosegmental phonology (feature spreading, tone, delinking), multi-tier representations for complex non-linear structures such as Government Phonology and CV phonology, feature geometry, SPE feature matrices, Optimality Theory tableaux, Harmonic Grammar, Noisy Harmonic Grammar, Maximum Entropy grammars, and Hasse diagrams for constraint rankings. The package also includes numbered linguistic examples and a collection of helper symbols for Greek letters and arrows. All functions prioritize minimal input syntax while automatically handling typographical challenges such as dynamic spacing and proper alignment. The font used by the package can be customized globally. #logo aims to reduce cognitive load in document preparation, allowing phonologists to focus on content rather than formatting. The package is freely available through Typst's package repository and is under active development.
 ]
 
 #v(3em)
@@ -257,12 +268,26 @@ _A toolkit to create phonological representations in Typst_
 
   #new-dot = new feature #h(1.5em) #recent-dot = recent update or change])
 
-#v(3em)
 
 
-#heading(numbering: none)[Version history]
+#pagebreak()
 
-`0.4.6` - #new[Inline ToBI function for intonational labels and titles for numbered examples] \
+#heading(numbering: none, outlined: false)[Questions, suggestions, bugs]
+
+Any questions, comments or suggestions should be posted to the repository below (issues). All the bugs you find will help improve the package! Simply #link("https://github.com/guilhermegarcia/phonokit/issues")[open an issue].
+
+#v(2em)
+
+#fa-earth-americas() #link("https://gdgarcia.ca/phonokit")[`gdgarcia.ca/phonokit`]
+
+#fa-github() #link("https://github.com/guilhermegarcia/phonokit")[`guilhermegarcia/phonokit`]
+
+#fa-bug() #link("https://github.com/guilhermegarcia/phonokit/issues")[`guilhermegarcia/phonokit/issues`]
+
+#heading(numbering: none, outlined: false)[Version history: what's new?]
+
+`0.5.0` - #new[Feature geometry with support for arrows, delinking, and highlights] \
+`0.4.6` - Inline ToBI function for intonational labels and titles for numbered examples \
 `0.4.5` - Vowel trapezoids accept arrows and shifted vowels \
 `0.4.1` - Consonants table has abbreviation argument; alignment fix in `#consonants()`\
 `0.4.0` - Multi-tier representations; sorted MaxEnt candidates; helper functions for Greek letters\
@@ -318,7 +343,7 @@ Alternatively, if you want the most up-to-date version and this version is ahead
 
 You may need to create a symlink depending on how you structure your files. See @app-packages for more information on Typst packages in general, as they work slightly differently from what you may be used to if you use #LaTeX.
 
-= Font <sec-font>
+== Font <sec-font>
 
 All functions in #logo require the Charis font @charis_sil to work as intended out of the box. Thus, if you don't have the font, you will need to install it (unless you're ok with the fallback option in Typst). However, as of version `0.3.7`, the user can set a global font to be used by the package throughout the document. @code-font shows how to set New Computer Modern as the main font for the package.
 
@@ -545,6 +570,55 @@ As is often the case, a figure can quickly become too crowded. Once we start add
     ) <fig-trapezoid-2>
   ],
 )
+
+= SPE
+
+Rewrite rules can be very complex, and an excellent package already exists to deal with their complexity in Typst #cite(<linphon>, supplement: [#link("https://typst.app/universe/package/linphon")[`linphon`]]). The problem is that, like autosegmental representations, too many degrees of freedom exist in SPE-like representations, not to mention the variation across scholars when it comes to symbols, brackets, etc. On the plus side, you can do a lot simply by employing primitives that already exist (e.g., matrices and arrows), so SPE rules are not as challenging to typeset as some other non-linear structures in phonology (at least simpler rules...). For that reason, #logo only has two primitive functions to help create feature matrices, which in turn can be combined to form SPE-style rules @chomsky1968spe.
+
+
+#figure(
+  gap: 1em,
+  caption: [Generating matrices for the phonemes in "patchy", shown in @fig-max-feat],
+  supplement: "Code",
+  kind: "code",
+  `#feat-matrix("p") #feat-matrix("\\ae") #feat-matrix("\\t tS") #feat-matrix("i")`,
+) <feat-matrix>
+
+
+The first function is `#feat-matrix()`, shown in @feat-matrix. It outputs the maximal feature matrix for a given phoneme (with the option for 0 values if `all: true`). This can be useful in introductory courses, where students are introduced to the notion of distinctive features. The function is not able to compute _minimal_ matrices, i.e., it can't figure out that feature A entails feature B given inventory I,#footnote[But see the #link("https://gdgarcia.ca/fonology")[Fonology] package for R @fonology.] but it can be used in sequence to represent matrices for a given word, for example --- see @fig-max-feat. The user is free to adjust the inventory of features and their values, since there's variation in the literature. The function is based on the features in #cite(<hayes2009introductory>, form: "prose").
+
+#figure(
+  gap: 2em,
+  // placement: auto,
+  caption: [Matrices for the phonemes in the word "patchy"],
+  [#feat-matrix("p") #feat-matrix("\\ae") #feat-matrix("\\t tS") #feat-matrix("i")],
+) <fig-max-feat>
+
+
+
+Next, the function `#feat()` creates a matrix given a set of features. This is the function used in a rewrite rule, for example. The assimilation rule in @fig-spe is achieved with the code shown in @fig-spe-code --- notice that `alpha` notation requires a specific syntax, i.e., `X + "feat"` or `X + [#smallcaps("feat")]` if you prefer to use small caps. A helper function, `#blank()`, adds a long underline for the context of application in the rule. Likewise, `#a-r` adds an arrow using New Computer Modern (other arrows are available, such as `#a-l` #a-l, `#a-u` #a-u, `#a-d` #a-d, `#a-lr` #a-lr, `#a-sr` #a-sr); see @sec-arrows.
+
+#figure(
+  caption: [Nasal place assimilation using `#feat()`],
+  supplement: "Code",
+  kind: "code",
+  ```typst
+  #feat("+son", "–approx") #a-r
+    #feat(sym.alpha + [#smallcaps("place")]) / #blank()\]#sub[#sym.sigma]
+    #feat("–son", "–cont", "–del rel", sym.alpha + [#smallcaps("place")])
+  ```,
+) <fig-spe-code>
+
+#figure(
+  // placement: auto,
+  caption: [A nasal place assimilation rule],
+  [#feat("+son", "–approx") #a-r
+    #feat(sym.alpha + [#smallcaps("place")]) / #blank()\]#sub[#sym.sigma]
+    #feat("–son", "–cont", "–del rel", sym.alpha + [#smallcaps("place")])],
+) <fig-spe>
+
+
+
 
 = Prosody module <sec-prosody>
 
@@ -792,7 +866,7 @@ The function `#met-grid()` allows you to create a metrical grid using $times$ to
 
 
 
-== Autosegmental phonology <sec-auto>
+= Autosegmental phonology <sec-auto>
 
 Another key function in #logo is `#autoseg()`, introduced in version 0.3.5. The function allows you to represent either features or tones on a separate tier. More importantly, the function is able to show linking and delinking, floating tones, as well as contour tones. @fig-nasal-spreading demonstrates how `#autoseg()` works in a simple scenario of feature spreading.
 
@@ -1099,7 +1173,7 @@ To create a tone that is underlyingly linked to more than one segment, we use th
 Autosegments are difficult to typeset because there are many degrees of freedom involved, which means functions start to become too convoluted for the benefit they provide (see @sec-multi). There is probably a sweet spot, a point beyond which a function of this type becomes impractical because there are simply too many arguments. `#autoseg()` attempts to be intuitive while covering spreading, delinking, one-to-many and many-to-one relationships, floating tones, and highlights with circles. I believe these cover the vast majority of scenarios with precision and symmetry. The function also provides convenient arguments for horizontal (`spacing`) and vertical (`baseline`) positioning, which can be handy in processes where you may want to adjust the position of the representation relative to an arrow or any other symbols you may want to add outside the function _per se_.
 
 
-== #new[Prosody with ToBI] #new-dot <sec-tobi>
+== Prosody with ToBI #recent-dot <sec-tobi>
 
 Adding ToBI labels to strings can be achieved with the function `#int()`. One of its main arguments is `line`, which allows the user to "turn off" the vertical line (e.g., for boundary tones). The examples below are from #cite(form: "prose", <zsiga2013sounds>). By default, the font size of tones is set to `0.8em`.
 
@@ -1383,55 +1457,275 @@ Finally, let's reproduce another figure, this time adapted from #cite(<carvalho2
   ],
 )
 
-// @
+= #new[Feature geometry] #new-dot <geometry>
 
-= SPE
+Feature geometry is a natural progression from functions that cover autosegmental phonology and multi-tier representations. It presents some important challenges, including the user interface: as already mentioned, if too many degrees of freedom are available, a function becomes too convoluted, which compromises its use. Below I describe two special functions that are dedicated to feature geometry: `#geom()`, which takes care of any given representation, and `#geom-group()`, designed to represent multiple trees and processes.
 
-Rewrite rules can be very complex, and an excellent package already exists to deal with their complexity in Typst #cite(<linphon>, supplement: [#link("https://typst.app/universe/package/linphon")[`linphon`]]). The problem is that, like autosegmental representations, too many degrees of freedom exist in SPE-like representations, not to mention the variation across scholars when it comes to symbols, brackets, etc. On the plus side, you can do a lot simply by employing primitives that already exist (e.g., matrices and arrows), so SPE rules are not as challenging to typeset as some other non-linear structures in phonology (at least simpler rules...). For that reason, #logo only has two primitive functions to help create feature matrices, which in turn can be combined to form SPE-style rules @chomsky1968spe.
+== Single trees <geom>
+
+Let us begin by reproducing the full representation for consonants presented in #cite(<Clements1995>, supplement: "p. 292", form: "prose"). If you inspect @code-geom1, you will notice that the arguments of the `#geom()` function are fairly straightforward: if you know what nodes you need to add, you can almost guess what the argument will be called. Note that if you add a node $n$, the function automatically builds any parent node $n-1$ needed. For example, by adding `voice: true`, `laryngeal` is added; and by adding `anterior: true`, `coronal` ([cor]) is also added, so the code in question didn't need to specify `coronal: true`.
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 1em,
+  align: (center + horizon, center + horizon),
+  [
+    #figure(
+      caption: [Code to create @fig-geom1],
+      supplement: "Code",
+      kind: "code",
+      ```typst
+      #geom(
+        root: ("±son", "±approx", "-vocoid"),
+        spread: true,
+        constricted: true,
+        nasal: true,
+        voice: true,
+        labial: true,
+        coronal: true, // <- implied
+        anterior: true,
+        distributed: true,
+        dorsal: true,
+        continuant: true,
+      )
+      ```,
+    ) <code-geom1>
+  ],
+  [
+    #figure(
+      caption: [Consonants],
+      geom(
+        root: ("±son", "±approx", "-vocoid"),
+        spread: true,
+        constricted: true,
+        nasal: true,
+        voice: true,
+        labial: true,
+        coronal: true,
+        anterior: true,
+        distributed: true,
+        dorsal: true,
+        continuant: true,
+      ),
+    ) <fig-geom1>
+
+  ],
+)
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 1em,
+  align: (center + horizon, center + horizon),
+  [
+    #figure(
+      caption: [Code to create @fig-geom2],
+      supplement: "Code",
+      kind: "code",
+      ```typst
+      #geom(
+        root: ("+son", "+approx", "+vocoid"),
+        spread: true,
+        constricted: true,
+        nasal: true,
+        vplace: true, // <- implied
+        labial: true,
+        aperture: (true, true, true),
+        coronal: true,
+        anterior: "-",
+        distributed: true,
+        dorsal: true,
+        continuant: true,
+        scale: 0.9,
+      )
+      ```,
+    ) <code-geom2>
+  ],
+  [
+    #figure(
+      caption: [Vocoids],
+      geom(
+        root: ("+son", "+approx", "+vocoid"),
+        spread: true,
+        constricted: true,
+        nasal: true,
+        vplace: true, // <- implied
+        // labial: true,
+        aperture: (true, true, true),
+        coronal: true,
+        anterior: "-",
+        distributed: true,
+        dorsal: true,
+        continuant: true,
+        scale: 0.9,
+      ),
+    ) <fig-geom2>
+
+  ],
+)
+
+Arguments accept both boolean and string values. Thus, `nasal: true` simply adds [nasal], while `nasal: "+"` adds [+nasal]. In general, longer labels are abbreviated in the output, but arguments are never abbreviated, so the `anterior` argument generates [ant] in the actual representation.
+
+@fig-geom2 reproduces the full representation for vocoids, again based on #cite(<Clements1995>, supplement: "p. 292", form: "prose"). The argument `vplace: true` tells the function that place-related arguments should be attached to V-place, not C-place. Alternatively, the argument `vocalic: true` has the same effect, and so does `aperture` (so, technically, `vplace` is redundant in @code-geom2). Finally, notice the `scale` argument, which lets you easily adjust the overall size of your representation.
+
+Thus far, we have seen that the arguments of `#geom()` are fairly straightforward: if you know what nodes you need, you know how to add them with the function. However, the goal of #logo is to have minimal syntax and be as user-friendly as possible. For that reason, several phonemes come pre-built in `#geom()`: you simply need to use the `ph` argument and give it a phoneme (same conventions used in `#ipa()` discussed in @sec-ipa-trans).#footnote[You can inspect `geom.typ` to see which phonemes are available. The list includes most symbols already available in the `#ipa()` function, including archiphonemes `N` and `T`, as well as placeholders `C` and `V` --- just remember you need `\\` before each one of these. Note that you can use `/a/`, `[a]` or `a` as an argument for `ph`, depending on how you want to print the segment at the top of the representation. Finally, the root matrix always has three values by default, which will often be redundant, but you can easily override it by setting your own matrix with the `root` argument.] You can see some examples in @fig-geom-a -- @fig-geom-d, where you will also note timing units added by default ($times$). You can disable timing units by adding `timing: false`, or you can add morae instead (`timing: mora` or `timing: mu`). The `timing` argument also takes an array for long vowels: `timing: ("x", "x")`.
+
+#align(center)[
+  #grid(
+    columns: 4,
+    align: (bottom),
+    gutter: 0em,
+    [
+      #figure(
+        caption: [Low vowel],
+        geom(
+          ph: "a",
+        ),
+      ) <fig-geom-a>
+
+      ```typst
+      #geom(ph: "a")
+      ```
+    ],
+    [
+      #figure(
+        caption: [High vowel],
+        geom(
+          ph: "i:",
+        ),
+      ) <fig-geom-b>
+      ```typst
+      #geom(ph: "i:")
+      ```
+    ],
+    [
+      #figure(
+        caption: [Plosive],
+        geom(
+          ph: "k",
+        ),
+      ) <fig-geom-c>
+      ```typst
+      #geom(ph: "k")
+      ```
+    ],
+    [
+      #figure(
+        caption: [Affricate],
+        geom(
+          ph: "tS",
+        ),
+      ) <fig-geom-d>
+      ```typst
+      #geom(ph: "tS")
+      ```
+    ],
+  )
+]
+
+As you can see, `ph` allows for the most minimal syntax possible, but the function must also ensure that you're not locked to presets. Fortunately, you can easily override any node simply by passing the familiar arguments to the function. For example, let us suppose you want to create the representation for #ipa("/a/") in a language whose inventory only includes #ipa("/a \\s i \\s u/"). That would only require open 1 @Clements1995. Simple: `#geom(ph: "a", aperture: (true,))`. This code overrides the `aperture` argument while keeping all other arguments intact for the preset in question.
+
+== Multiple trees and processes <geom-group>
+
+If we can easily represent feature geometric trees, how can we represent _processes_ across trees? This is what `#geom-group()` does. It allows for multiple trees to be drawn as a "single object", which is important because we want to be able to draw arrows _across_ trees.
+
+Because `#geom-group()` works as a wrapper, you can think of it as a way to "glue" multiple `#geom()` together. As a result, you already know most of the syntax involved. But `#geom-group()` introduces three key arguments: `arrows`, `curved`, and `delinks`. These are all self-explanatory, so let's jump into an example: the spreading of [nasal], shown in @fig-geom3.
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 1em,
+  align: (center + bottom, center + bottom),
+  [
+    #figure(
+      caption: [Code to create @fig-geom3],
+      supplement: "Code",
+      kind: "code",
+      ```typst
+      #geom-group(
+        (ph: "/a/"),
+        (ph: "/n/"),
+        arrows: (
+          (from: "nasal2",
+           to: "root1",
+           ctrl: (1.1, -1.5)),
+           ),
+        curved: true, // <- implied
+        gap: 1,
+      )
+      ```,
+    ) <code-geom3>
+  ],
+  [
+    #figure(
+      caption: [Nasalization example],
+      geom-group(
+        (ph: "/a/"),
+        (ph: "/n/"),
+        arrows: (
+          (from: "nasal2", to: "root1", ctrl: (1.1, -1.3)),
+        ),
+        curved: true,
+        gap: 1,
+      ),
+    ) <fig-geom3>
+
+  ],
+)
+
+The way `arrows` works is straightforward: you refer to the nodes you want to connect and add a number that corresponds to the tree. In @fig-geom3, the arrow goes from `nasal` in tree 2 (hence `nasal2`) to `root` in tree 1 (hence `root1`). Because the argument `curved` is set to `true`, the arrow will try to avoid any obstacles, but there are too many variables involved, so you will often want to adjust the arrow yourself to make sure you like its position. That's why `ctrl` exists inside `arrow`: you modify the *start* and *end* points of the arrow by providing two numbers. Here, `ctrl` is `1.1` and `-1.5`, which means it starts out going up (north) and arrives at its destination from the south (negative number). In most situations, you won't need `ctrl` because the arrow will curve well enough. But it's essential to be able to adjust it in case you don't like its default position (if `ctrl` is provided, `curved: true` is assumed). Finally, `gap` allows you to specify the gap between the trees (defaults to 1.5).
+
+Let us now turn to another example: metaphony. This is a good moment to discuss another argument in both `#geom()` and `#geom-group()`: `model`. By default, these functions use #cite(<Clements1995>, form: "prose"). But you may not want to assume `aperture` for vowels, for example. If you set `model: sagey`, the function will instead assume the more typical height features @Sagey1986. It should be noted that a lot has been said about what feature geometry should look like, and these functions will not do justice to the long debate in the literature because they introduce too many variables (hence the importance of offering some level of customization to the user). That being said, if you have any suggestions, please open an issue#footnote[There is a good chance presets will have errors, because they were generated in bulk and it's easy to miss something when proofreading feature specifications. If you find any issues, please flag them so that I can fix them as soon as possible.] on the #link("https://github.com/guilhermegarcia/phonokit/issues")[package's repository].
+
+@fig-geom4 shows a typical example of metaphony where #ipa("/e/") #a-r #ipa("[i]") / #blank() C#sub[0] #ipa("–/u/")\#. Suppose that we want three trees, where the second tree is a placeholder for any consonant. Here, we also use the `highlight` argument, which allows the user to dim the representation and only highlight certain nodes. The curve is customized again, but you may want to remove the `ctrl` argument to see how the function automatically curves the arrow.
 
 
-#figure(
-  gap: 1em,
-  caption: [Generating matrices for the phonemes in "patchy", shown in @fig-max-feat],
-  supplement: "Code",
-  kind: "code",
-  `#feat-matrix("p") #feat-matrix("\\ae") #feat-matrix("\\t tS") #feat-matrix("i")`,
-) <feat-matrix>
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (center + bottom, center + bottom),
+    [
+      #figure(
+        caption: [Metaphony using vocalic features in #cite(<Sagey1986>, form: "prose"). `highlight` to focus on process],
+        geom-group(
+          (ph: "/e/"),
+          (ph: "\\C"),
+          (ph: "/u/", prefix: "-"),
+          arrows: (
+            (from: "high3", to: "dorsal1", ctrl: (2.3, -1.5)),
+          ),
+          delinks: ("high1",),
+          highlight: ("high1", "dorsal1", "high3"),
+          gap: 1.5,
+          model: "sagey",
+        ),
+      ) <fig-geom4>
 
+    ],
+    [
+      #figure(
+        caption: [Code to create @fig-geom4],
+        supplement: "Code",
+        kind: "code",
+        ```typst
+        #geom-group(
+          (ph: "/e/"),
+          (ph: "\\C"),
+          (ph: "/u/", prefix: "-"),
+          arrows: (
+            (from: "high3", to: "dorsal1", ctrl: (2.3, -1.5)),
+          ),
+          delinks: ("high1",),
+          highlight: ("high1", "dorsal1", "high3"),
+          gap: 1.5,
+          model: "sagey",
+        )
+        ```,
+      ) <code-geom4>
+    ],
+  )
+]
 
-The first function is `#feat-matrix()`, shown in @feat-matrix. It outputs the maximal feature matrix for a given phoneme (with the option for 0 values if `all: true`). This can be useful in introductory courses, where students are introduced to the notion of distinctive features. The function is not able to compute _minimal_ matrices, i.e., it can't figure out that feature A entails feature B given inventory I,#footnote[But see the #link("https://gdgarcia.ca/fonology")[Fonology] package for R @fonology.] but it can be used in sequence to represent matrices for a given word, for example --- see @fig-max-feat. The user is free to adjust the inventory of features and their values, since there's variation in the literature. The function is based on the features in #cite(<hayes2009introductory>, form: "prose").
-
-#figure(
-  gap: 2em,
-  // placement: auto,
-  caption: [Matrices for the phonemes in the word "patchy"],
-  [#feat-matrix("p") #feat-matrix("\\ae") #feat-matrix("\\t tS") #feat-matrix("i")],
-) <fig-max-feat>
-
-
-
-Next, the function `#feat()` creates a matrix given a set of features. This is the function used in a rewrite rule, for example. The assimilation rule in @fig-spe is achieved with the code shown in @fig-spe-code --- notice that `alpha` notation requires a specific syntax, i.e., `X + "feat"` or `X + [#smallcaps("feat")]` if you prefer to use small caps. A helper function, `#blank()`, adds a long underline for the context of application in the rule. Likewise, `#a-r` adds an arrow using New Computer Modern (other arrows are available, such as `#a-l` #a-l, `#a-u` #a-u, `#a-d` #a-d, `#a-lr` #a-lr, `#a-sr` #a-sr); see @sec-arrows.
-
-#figure(
-  caption: [Nasal place assimilation using `#feat()`],
-  supplement: "Code",
-  kind: "code",
-  ```typst
-  #feat("+son", "–approx") #a-r
-    #feat(sym.alpha + [#smallcaps("place")]) / #blank()\]#sub[#sym.sigma]
-    #feat("–son", "–cont", "–del rel", sym.alpha + [#smallcaps("place")])
-  ```,
-) <fig-spe-code>
-
-#figure(
-  // placement: auto,
-  caption: [A nasal place assimilation rule],
-  [#feat("+son", "–approx") #a-r
-    #feat(sym.alpha + [#smallcaps("place")]) / #blank()\]#sub[#sym.sigma]
-    #feat("–son", "–cont", "–del rel", sym.alpha + [#smallcaps("place")])],
-) <fig-spe>
-
-
+As can be seen in @code-geom4, the syntax of `#geom-group()` is minimal and intuitive, especially if the phonemes needed are pre-built. You should play around with all the available arguments in the function, and test the arrows (both curved and straight) in different scenarios.
 
 = Optimality theory
 
@@ -1684,7 +1978,7 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
 #logo also has functions for harmonic grammars (`#hg()`) and noisy harmonic grammars (`#nhg()`). These functions are very similar to `#maxent()`, so their syntax will be familiar. The Noisy Harmonic Grammar function derives probabilities by simulating a number of evaluations (by default, 1000) given the constraints and violations provided by the user. It is possible to change the number of simulations and to omit the noise column from the tableau. The noise displayed is extracted from an additional simulation, so it is shown for illustrative purposes. For the most part, the functions discussed in this section are based on conventions in the literature, e.g., #cite(<flemming2021comparing>, form: "prose").
 
 
-= #new[Numbered examples] #new-dot<sec-examples>
+= Numbered examples #recent-dot<sec-examples>
 
 One important feature in any phonology paper is an environment for numbered examples. We could simply use the excellent `eggs` package for Typst @eggs, which does a great job for syntax examples. In phonology, however, we sometimes want examples to have arrows to show a process, and this creates an alignment issue when we have multiple instances in a single example or in multiple examples throughout. #logo has a function to deal with that: `#ex()`, which is accompanied by `#subex-label()`. The latter function allows us to add labels for each line inside an example.
 
@@ -1703,7 +1997,7 @@ One important feature in any phonology paper is an environment for numbered exam
       kind: "code",
       caption: [Numbered example],
       ```typst
-      // #import "@preview/phonokit:0.4.6"
+      // #import "@preview/phonokit:0.5.0"
       // #show: ex-rules // <- this must be added to your doc
       // ...
       #ex(caption: "A phonology example")[
@@ -1766,7 +2060,7 @@ Let us now see how strings with ToBI (@sec-tobi) can be used in numbered example
       kind: "code",
       caption: [Numbered example with ToBI (notice table alignment)],
       ```typst
-        // #import "@preview/phonokit:0.4.6"
+        // #import "@preview/phonokit:0.5.0"
         // #show: ex-rules // <- this must be added to your doc
         // ...
         #ex(caption: "Some ToBI examples", title: [Autosegmental transcription of intonation in English @zsiga2013sounds])[
@@ -2474,38 +2768,4 @@ These render upright (non-italicized), unlike math-mode `$sigma$`.
 
 If you have any questions, visit #link("https://github.com/guilhermegarcia/phonokit")[`github.com/guilhermegarcia/phonokit`], where you will find all the code for the package. If you find a bug or typo, or if you'd like to suggest a feature, please open an issue in the repository --- this will help improve the package. This is an ongoing project that started in December 2025, so there is _a lot_ to be improved.
 
-// #pagebreak()
-
-// = Version history
-//
-// #figure(
-//   align(center)[
-//     #table(
-//       columns: 2,
-//       stroke: none,
-//       inset: (y: 0.63em),
-//       align: (left, left),
-//       table.hline(stroke: 0.8pt + black),
-//       [#smallcaps[version]], [#smallcaps[change]],
-//       table.hline(stroke: 0.4pt + black),
-//       [`0.4.0`],
-//       [New function on multi-tier representations; sorted candidates in MaxEnt tableaux; \
-//         additional helper functions for Greek letters],
-//
-//       [`0.3.7`],
-//       [Font and prosodic symbols can now be chosen; \
-//         aesthetic improvements to prosodic functions],
-//
-//       [`0.3.6`], [Improved IPA symbols, distances in `#syllable()`, and `README.md`],
-//       [`0.3.5`],
-//       [Numbered examples; minor improvements in IPA symbols;\
-//         several fixes in documentation],
-//       [`0.3.0`], [Autosegmental phonology],
-//       [`0.2.0`], [Sonority, tableaux and metrical grids],
-//       [`0.0.1`], [Initial release with prosodic representations and IPA module],
-//       table.hline(stroke: 0.8pt + black),
-//     )
-//   ],
-//   caption: [Summary of version history],
-// ) <versions>
 

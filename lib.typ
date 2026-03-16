@@ -42,7 +42,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.4.6": *
+/// #import "@preview/phonokit:0.5.0": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -856,7 +856,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.4.6": *
+/// #import "@preview/phonokit:0.5.0": *
 /// You're a we#int("*L")rewolf?#h(2em)#int("H%", line: false)
 /// ```
 #let int = int
@@ -947,13 +947,10 @@
 ///   A per-tree `scale` key (number) scales that tree's coordinates and font
 ///   size relative to the group `scale`.
 /// - arrows (array): Cross-tree arrows. Each entry is either `(from, to)` or a
-///   dict `(from: str, to: str, color: color, bend: number, ctrl: (number, number))`.
-///   - `bend`: single canvas-unit Y-lift applied symmetrically — positive arches
-///     upward, negative downward, `0` forces a straight line.
-///   - `ctrl`: two Y-lifts `(lift1, lift2)`, one per endpoint, for asymmetric
-///     curves and S-shapes. X-positions follow the same formula as `bend`.
-///     Same sign = asymmetric arc; opposite signs = S-curve.
-///     Overrides `bend` and `curved` when set.
+///   dict `(from: str, to: str, color: color, ctrl: (number, number))`.
+///   - `ctrl`: two Y-lifts `(lift1, lift2)`, one per endpoint. Positive lifts
+///     the departure upward; negative dips the arrival below the target.
+///     Overrides `curved` when set.
 ///   All keys except `from`/`to` are optional.
 /// - gap (number): Canvas-unit gap between trees (default: 1.5).
 /// - scale (number): Uniform scale factor for the whole group (default: 1.0).
