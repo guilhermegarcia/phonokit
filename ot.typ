@@ -1,5 +1,6 @@
 #import "ipa.typ": *
 #import "_config.typ": phonokit-font
+#import "prosody.typ": syllable, mora, foot, foot-mora, word, word-mora
 
 #let finger = text(size: 14pt)[☞]
 #let viol-sym = text(size: 1.2em)[#sym.ast]
@@ -34,6 +35,57 @@
   parts.join(h(1pt))
 }
 
+// --- Helper: Dispatch prosody function by name ---
+#let dispatch-prosody(func-name, arg, ps) = {
+  if func-name == "syllable" { syllable(arg, scale: ps) }
+  else if func-name == "mora" { mora(arg, scale: ps) }
+  else if func-name == "foot" { foot(arg, scale: ps) }
+  else if func-name == "foot-mora" { foot-mora(arg, scale: ps) }
+  else if func-name == "word" { word(arg, scale: ps) }
+  else if func-name == "word-mora" { word-mora(arg, scale: ps) }
+  else { ipa(arg) }
+}
+
+// --- Helper: Parse candidate string for prosodic function calls ---
+#let prosody-pattern = regex("#(syllable|mora|foot-mora|foot|word-mora|word)\\('([^']*)'\\)")
+
+#let parse-candidate(cand, ps) = {
+  if type(cand) != str { return cand }
+
+  let all-matches = cand.matches(prosody-pattern)
+
+  if all-matches.len() == 0 {
+    return ipa(cand)
+  }
+
+  let parts = ()
+  let pos = 0
+
+  for m in all-matches {
+    if m.start > pos {
+      let before = cand.slice(pos, m.start).trim()
+      if before != "" and before != "+" {
+        parts.push(ipa(before))
+      }
+    }
+
+    let func-name = m.captures.at(0)
+    let arg = m.captures.at(1)
+    parts.push(dispatch-prosody(func-name, arg, ps))
+
+    pos = m.end
+  }
+
+  if pos < cand.len() {
+    let after = cand.slice(pos).trim()
+    if after != "" and after != "+" {
+      parts.push(ipa(after))
+    }
+  }
+
+  parts.join()
+}
+
 // NOTE: --- The Main Function ---
 #let tableau(
   input: "Input",
@@ -44,6 +96,9 @@
   dashed-lines: (),
   scale: none,
   shade: true,
+  prosody-scale: 0.5,
+  letters: false,
+  gloss: none,
 ) = {
   // 1. Validation and Truncation
   assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed in tableau")
@@ -80,25 +135,47 @@
   }
 
   // 3. Prepare Input Content
+  let gloss-content = if gloss != none {
+    [ _#gloss.at(0)_ '#gloss.at(1)']
+  } else { [] }
   let input-content = if type(input) == str {
-    [/#ipa(input)/]
+    [/#ipa(input)/#gloss-content]
   } else {
-    input
+    [#input#gloss-content]
   }
 
   // 4. Grid Definitions
-  let col-defs = (auto, 2pt) + constraints.map(_ => auto)
-  let row-defs = (1.75em, 2pt) + candidates.map(_ => 1.75em)
+  let letter-labels = "abcdefghijklmnopqrstuvwxyz"
+  // Always: [prefix-col | cand-col | 2pt gap | constraints...]
+  // Col 0 = prefix (☞ and/or letter), no right border — merges with candidate column
+  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto)
+  let cons-start = 3  // first constraint column index
+  let has-prosody(c) = {
+    if type(c) == str { c.matches(prosody-pattern).len() > 0 }
+    else { type(c) == content }
+  }
+  let row-defs = (1.75em, 2pt) + candidates.map(c => if has-prosody(c) { auto } else { 1.75em })
 
   context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
-    align: (col, row) => (if col == 0 { right } else { center }) + horizon,
-    inset: 5pt,
+    align: (col, row) => {
+      if col <= 1 { right + horizon }
+      else { center + horizon }
+    },
+    inset: (col, row) => if col == 1 { (left: 10pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
 
     stroke: (col, row) => {
       let s = 0.4pt + black
-      let is-dashed = if col >= 2 { dashed-lines.contains(col - 1) } else { false }
+      if col == 0 {
+        // Prefix column: borders on left, top, bottom but NO right border
+        return (left: s, top: s, bottom: s, right: none)
+      }
+      if col == 1 {
+        // Candidate column: no left border (merges with prefix column)
+        return (left: none, top: s, bottom: s, right: s)
+      }
+      let is-dashed = if col >= 3 { dashed-lines.contains(col - 3) } else { false }
       (
         left: s,
         top: s,
@@ -108,19 +185,15 @@
     },
 
     fill: (col, row) => {
-      if not shade or row < 2 or col < 2 { return none }
+      if not shade or row < 2 or col < cons-start { return none }
       let cand-idx = row - 2
-      let cons-idx = col - 2
+      let cons-idx = col - cons-start
       if cand-idx < fatal-map.len() {
         let fatal-col = fatal-map.at(cand-idx)
         if cons-idx > fatal-col {
-          // Check if there's at least one solid line between fatal-col and cons-idx
-          // A cell is only shaded if the path from the fatal violation contains a solid line
           let has-solid-line = false
           for c in range(fatal-col, cons-idx) {
-            // The right border of constraint c is dashed if dashed-lines.contains(c + 1)
-            // (see stroke logic at line 99: dashed-lines.contains(col - 1) where col = c + 2)
-            if not dashed-lines.contains(c + 1) {
+            if not dashed-lines.contains(c) {
               has-solid-line = true
               break
             }
@@ -132,7 +205,8 @@
     },
 
     // --- Content ---
-    input-content, // Use the pre-calculated variable
+    [], // prefix column (empty for header)
+    input-content,
     [],
     ..constraints.map(c => format-constraint(c)),
 
@@ -144,10 +218,17 @@
       .enumerate()
       .map(((i, cand)) => {
         let cells = ()
-        let cand-content = if type(cand) == str { ipa(cand) } else { cand }
-        let prefix = if i == winner { scaled-finger + " " } else { "" }
+        let cand-content = parse-candidate(cand, prosody-scale)
 
-        cells.push(align(right)[#prefix #cand-content])
+        let finger = if i == winner { scaled-finger + " " } else { "" }
+        if letters {
+          let letter = letter-labels.at(calc.min(i, 25))
+          cells.push(align(right)[#finger #letter.])
+        } else {
+          cells.push(align(right)[#finger])
+        }
+        cells.push(align(right)[#cand-content])
+
         cells.push([])
 
         let row-viols = if i < violations.len() { violations.at(i) } else { () }
@@ -172,9 +253,11 @@
   weights: (),
   violations: (),
   scale: none,
+  letters: false,
 ) = {
   // 1. Validation and Truncation
   assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed")
+  let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
   // Truncate constraint names to 10 characters
   let constraints = constraints.map(c => {
@@ -204,33 +287,35 @@
   }
 
   // 3. GRID DEFINITIONS (simpler than maxent - only h(y) column)
-  let col-defs = (auto, 2pt) + constraints.map(_ => auto) + (2pt, auto)
+  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto)
 
   let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
 
   context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
-    align: (col, row) => (if col == 0 { right } else { center }) + horizon,
-    inset: 5pt,
+    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
+    inset: (col, row) => if col == 1 { (left: 10pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
 
     // --- STROKE LOGIC ---
     stroke: (col, row) => {
       // Row 0 (Weights): Always floating
       if row == 0 { return none }
 
-      // Standard borders for the main table
       let s = 0.4pt + black
+      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
       (left: s, top: s, bottom: s, right: s)
     },
 
     // --- ROW 0: WEIGHTS ---
-    [], [],
+    [], [], [],
     ..weights.map(w => text(size: 0.9em)[$w=#w$]),
     // Fill remaining columns: gap (2pt) + h(y) column
     [], [],
 
     // --- ROW 1: HEADERS ---
+    [],
     { if type(input) == str { [/#ipa(input)/] } else { input } },
     [],
     ..constraints.map(c => format-constraint(c)),
@@ -246,6 +331,13 @@
       .map(((i, cand)) => {
         let cells = ()
         let cand-content = if type(cand) == str { ipa(cand) } else { cand }
+
+        if letters {
+          let letter = letter-labels.at(calc.min(i, 25))
+          cells.push(align(right)[#letter.])
+        } else {
+          cells.push([])
+        }
         cells.push(align(right)[#cand-content])
         cells.push([])
 
@@ -279,9 +371,11 @@
   violations: (),
   probabilities: none, // optional: if provided, will display P(y) values
   scale: none,
+  letters: false,
 ) = {
   // 1. Validation and Truncation
   assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed")
+  let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
   // Truncate constraint names to 10 characters
   let constraints = constraints.map(c => {
@@ -334,7 +428,7 @@
   }
 
   // 3. GRID DEFINITIONS (h, ε, P columns)
-  let col-defs = (auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto)
+  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto)
   if probabilities != none {
     col-defs.push(auto) // Add P(y) column
   }
@@ -344,26 +438,28 @@
   context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
-    align: (col, row) => (if col == 0 { right } else { center }) + horizon,
-    inset: 5pt,
+    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
+    inset: (col, row) => if col == 1 { (left: 10pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
 
     // --- STROKE LOGIC ---
     stroke: (col, row) => {
       // Row 0 (Weights): Always floating
       if row == 0 { return none }
 
-      // Standard borders for the main table
       let s = 0.4pt + black
+      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
       (left: s, top: s, bottom: s, right: s)
     },
 
     // --- ROW 0: WEIGHTS (shown as w=value like maxent) ---
-    [], [],
+    [], [], [],
     ..weights.map(w => text(size: 0.9em)[$w=#w$]),
     // Fill remaining columns: gap + h + ε + (optional P)
     ..range(if probabilities != none { 4 } else { 3 }).map(_ => []),
 
     // --- ROW 1: HEADERS ---
+    [],
     { if type(input) == str { [/#ipa(input)/] } else { input } },
     [],
     ..constraints.map(c => format-constraint(c)),
@@ -381,6 +477,13 @@
       .map(((i, cand)) => {
         let cells = ()
         let cand-content = if type(cand) == str { ipa(cand) } else { cand }
+
+        if letters {
+          let letter = letter-labels.at(calc.min(i, 25))
+          cells.push(align(right)[#letter.])
+        } else {
+          cells.push([])
+        }
         cells.push(align(right)[#cand-content])
         cells.push([])
 
@@ -434,9 +537,11 @@
   seed: none,
   show-epsilon: true,
   scale: none,
+  letters: false,
 ) = {
   // 1. Validation and Truncation
   assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed")
+  let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
   // Truncate constraint names to 10 characters
   let constraints = constraints.map(c => {
@@ -539,7 +644,7 @@
   }
 
   // 6. GRID DEFINITIONS
-  let col-defs = (auto, 2pt) + constraints.map(_ => auto) + (2pt, auto)
+  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto)
   if show-epsilon {
     col-defs.push(auto) // epsilon column
   }
@@ -550,26 +655,28 @@
   context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
-    align: (col, row) => (if col == 0 { right } else { center }) + horizon,
-    inset: 5pt,
+    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
+    inset: (col, row) => if col == 1 { (left: 10pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
 
     // --- STROKE LOGIC ---
     stroke: (col, row) => {
       // Row 0 (Weights): Always floating
       if row == 0 { return none }
 
-      // Standard borders for the main table
       let s = 0.4pt + black
+      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
       (left: s, top: s, bottom: s, right: s)
     },
 
     // --- ROW 0: WEIGHTS ---
-    [], [],
+    [], [], [],
     ..weights.map(w => text(size: 0.9em)[$w=#w$]),
     // Fill remaining columns: gap + h + optional ε + P
     ..range(if show-epsilon { 4 } else { 3 }).map(_ => []),
 
     // --- ROW 1: HEADERS ---
+    [],
     { if type(input) == str { [/#ipa(input)/] } else { input } },
     [],
     ..constraints.map(c => format-constraint(c)),
@@ -587,6 +694,13 @@
       .map(((i, cand)) => {
         let cells = ()
         let cand-content = if type(cand) == str { ipa(cand) } else { cand }
+
+        if letters {
+          let letter = letter-labels.at(calc.min(i, 25))
+          cells.push(align(right)[#letter.])
+        } else {
+          cells.push([])
+        }
         cells.push(align(right)[#cand-content])
         cells.push([])
 
@@ -641,9 +755,11 @@
   visualize: true,
   sort: false,
   scale: none,
+  letters: false,
 ) = {
   // 1. Validation and Truncation
   assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed in maxent")
+  let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
   // Truncate constraint names to 10 characters
   let constraints = constraints.map(c => {
@@ -698,7 +814,7 @@
 
   // 4. GRID DEFINITIONS
   let bar-col-width = 3cm
-  let col-defs = (auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto, auto)
+  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto, auto)
   if visualize {
     col-defs.push(bar-col-width) // The Floating Column
   }
@@ -709,8 +825,8 @@
   let tbl = context text(size: font-size, font: phonokit-font.get())[#table(
     columns: col-defs,
     rows: row-defs,
-    align: (col, row) => (if col == 0 { right } else { center }) + horizon,
-    inset: 5pt,
+    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
+    inset: (col, row) => if col == 1 { (left: 10pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
 
     // --- STROKE LOGIC ---
     stroke: (col, row) => {
@@ -720,18 +836,21 @@
       // 2. Visual Column: STRIP ALL LINES to make it float
       if visualize and col == last-col-idx { return none }
 
-      // 3. Standard borders for the main table
+      // 3. Prefix/candidate column merge
       let s = 0.4pt + black
+      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
       (left: s, top: s, bottom: s, right: s)
     },
 
     // --- ROW 0: WEIGHTS ---
-    [], [],
+    [], [], [],
     ..weights.map(w => text(size: 0.9em)[$w=#w$]),
     // Fill remaining columns with empty cells
     ..range(if visualize { 5 } else { 4 }).map(_ => []),
 
     // --- ROW 1: HEADERS ---
+    [],
     { if type(input) == str { [/#ipa(input)/] } else { input } },
     [],
     ..constraints.map(c => format-constraint(c)),
@@ -743,12 +862,20 @@
     // --- ROW 2: GAP ---
     ..range(col-defs.len()).map(_ => []),
 
-    // --- ROWS 3+: CANDIDATES ---
+    // --- ROWS 3+: CANDIDATES (letters assigned AFTER sort)
     ..candidates
       .enumerate()
       .map(((i, cand)) => {
         let cells = ()
         let cand-content = if type(cand) == str { ipa(cand) } else { cand }
+
+        // Letters are assigned after sorting, so i reflects the sorted order
+        if letters {
+          let letter = letter-labels.at(calc.min(i, 25))
+          cells.push(align(right)[#letter.])
+        } else {
+          cells.push([])
+        }
         cells.push(align(right)[#cand-content])
         cells.push([])
 

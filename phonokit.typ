@@ -1729,7 +1729,7 @@ As can be seen in @code-geom4, the syntax of `#geom-group()` is minimal and intu
 
 = Optimality theory
 
-Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality>, form: "prose", supplement: "originally circulated in 1993")) are more predictable and constrained. They're also one of the easiest representations to typeset, but if you use #LaTeX they're still time-consuming to create (even though you can find tools online to streamline the task). #logo includes two constraint-related functions, the first of which is `#tableau()`, shown in @fig-tableau1. The function takes six arguments: `input`, `candidates`, `constraints`, `violations`, `winner`, and `dashed-lines`. The accompanying code shown in @fig-tableau1 provides an example of how each argument works. For example, the `violations` argument requires a nested structure. Likewise, `dashed-lines` requires a comma if you want a given column to have a dashed line. If no dashed lines are needed, you can simply specify `dashed-lines: ()`. The `winner` candidate counts from zero, so that is the index/position for the first candidate, as shown in the example. These conventions are the same as those presented for autosegmental representations in @sec-auto.
+Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality>, form: "prose", supplement: "originally circulated in 1993")) are more predictable and constrained. They're also one of the easiest representations to typeset, but if you use #LaTeX they're still time-consuming to create (even though you can find tools online to streamline the task). #logo includes two constraint-related functions, the first of which is `#tableau()`, shown in @fig-tableau1. The function takes six arguments: `input`, `candidates`, `constraints`, `violations`, `winner`, and `dashed-lines`. The accompanying code shown in @fig-tableau1 provides an example of how each argument works. For example, the `violations` argument requires a nested structure. Likewise, `dashed-lines` requires a comma if you want a given column to have a dashed line. If no dashed lines are needed, you can simply specify `dashed-lines: ()`. Both `winner` and `dashed-lines` count from zero, so `winner: 0` selects the first candidate and `dashed-lines: (0,)` dashes the line after the first constraint. These conventions are the same as those presented for autosegmental representations in @sec-auto.
 
 
 
@@ -1753,7 +1753,7 @@ Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality
           ("", "*!", ""),
         ),
         winner: 0, // <- Position of winning cand
-        dashed-lines: (1,) // <- Note the comma
+        dashed-lines: (0,) // <- Note the comma
         shade: true, // <- true by default
       )
       ```,
@@ -1775,17 +1775,85 @@ Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality
           ("", "*!", ""),
         ),
         winner: 0,
-        dashed-lines: (1,),
+        dashed-lines: (0,),
         shade: true,
       ),
     ) <fig-tableau1>
   ],
 )
 
-One nice feature of `#tableau()` is that the function automatically shades cells once a fatal violation is entered (`!`). Likewise, it adds the "#finger" symbol for the winner, whose position is extracted from the `winner` argument shown in the accompanying code next to @fig-tableau1.
+One nice feature of `#tableau()` is that the function automatically shades cells once a fatal violation is entered (`!`). Likewise, it adds the "#finger" symbol for the winner, whose position is extracted from the `winner` argument shown in the accompanying code next to @fig-tableau1. Candidates can also be labeled with letters (a., b., c., ...) by setting `letters: true`, as shown in @tab-letters. When letters are used, the ☞ symbol is placed to the left of the winning candidate's letter.
+
+#figure(
+  caption: [A tableau with candidate letters],
+  supplement: "Tableau",
+  kind: "tableau",
+  tableau(
+    input: "kraTa",
+    candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
+    constraints: ("Max", "Dep", "*Complex"),
+    violations: (
+      ("", "", "*"),
+      ("*!", "", ""),
+      ("", "*!", ""),
+    ),
+    winner: 0,
+    dashed-lines: (0,),
+    letters: true,
+  ),
+) <tab-letters>
+
+Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[This also applies to other constraint-based functions in the package, discussed later in this manual.] You can pass prosodic function calls as content using square brackets, e.g., `[#syllable("mat")]`. This is the recommended approach because it avoids conflicts with the single quote character, which is also used for stress marking in prosodic notation. @tab-prosody shows an example with `#word()` candidates. When passing content directly, you control the scale via the function's own `scale` argument (this is key because prosodic structures as often too large for a tableau). @tab-prosody also shows the `gloss` argument in case more information is needed for the input. This argument requires two strings (orthographic form and translation).
+
+
+#figure(
+  caption: [A tableau with prosodic candidates],
+  supplement: "Tableau",
+  kind: "tableau",
+  tableau(
+    input: "prato",
+    candidates: (
+      [#word("('pra.to)", scale: 0.8)],
+      [#word("('pa.to)", scale: 0.8)],
+    ),
+    constraints: ("Faith", "*Complex"),
+    violations: (
+      ("", "*!"),
+      ("", ""),
+    ),
+    winner: 0,
+    letters: true,
+    gloss: ("prato", "plate"),
+  ),
+) <tab-prosody>
+
+#figure(
+  caption: [Code to generate @tab-prosody],
+  supplement: "Code",
+  kind: "code",
+  ```typst
+  #tableau(
+    input: "prato",
+    candidates: (
+    // Notice that candidates aren't strings here
+      [#word("('pra.to)", scale: 0.8)],
+      [#word("('pa.to)", scale: 0.8)],
+    ),
+    constraints: ("Faith", "*Complex"),
+    violations: (
+      ("", "*!"),
+      ("", ""),
+    ),
+    winner: 0,
+    letters: true,
+    gloss: ("prato", "plate"),
+  )
+  ```,
+)
+
+
 
 It is often useful to present a ranking using a Hasse diagram. These diagrams can be generated in #logo using the `#hasse()` function. In a nutshell, the function takes tuples with $n$ elements. In the simplest case, $n = 1$, which produces a floating constraint. @hasse-1 shows a basic scenario. The third element in the first tuple indicates the "stratum" in the diagram --- this is especially important in more complex cases, which require better control over the vertical position of different constraints. Optional arguments exist to give the user more flexibility (e.g., `scale` and `node-spacing`).
-
 
 #grid(
   columns: (1fr, 1fr),
@@ -1948,6 +2016,7 @@ The function `#maxent()` calculates $h_i$, $e^(-h_i)$ and $P(y|x)$#footnote[Wher
     ),
     visualize: true, // Show probability bars (default)
     sort: true,
+    letters: true,
   ),
 ) <fig-tableau2>
 
@@ -1970,7 +2039,8 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
       (0, 1, 0),
     ),
     visualize: true, // Show probability bars (default)
-    sort: true // Sort candidates from most to least probable
+    sort: true, // Sort candidates from most to least probable
+    letters: true // Assigned after sorting when sort: true
   )
   ```,
 ) <code-maxent>
