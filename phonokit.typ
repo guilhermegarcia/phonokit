@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.0`]
+#let version = text(size: 0.8em)[`v 0.5.1`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -286,6 +286,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.1` - #new[Prosodic candidates in tableaux, candidate letters, gloss support, 0-indexed dashed lines] \
 `0.5.0` - #new[Feature geometry with support for arrows, delinking, and highlights] \
 `0.4.6` - Inline ToBI function for intonational labels and titles for numbered examples \
 `0.4.5` - Vowel trapezoids accept arrows and shifted vowels \
@@ -2067,7 +2068,7 @@ One important feature in any phonology paper is an environment for numbered exam
       kind: "code",
       caption: [Numbered example],
       ```typst
-      // #import "@preview/phonokit:0.5.0"
+      // #import "@preview/phonokit:0.5.1"
       // #show: ex-rules // <- this must be added to your doc
       // ...
       #ex(caption: "A phonology example")[
@@ -2130,7 +2131,7 @@ Let us now see how strings with ToBI (@sec-tobi) can be used in numbered example
       kind: "code",
       caption: [Numbered example with ToBI (notice table alignment)],
       ```typst
-        // #import "@preview/phonokit:0.5.0"
+        // #import "@preview/phonokit:0.5.1"
         // #show: ex-rules // <- this must be added to your doc
         // ...
         #ex(caption: "Some ToBI examples", title: [Autosegmental transcription of intonation in English @zsiga2013sounds])[
