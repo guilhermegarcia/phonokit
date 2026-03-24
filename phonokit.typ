@@ -286,7 +286,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.1` - #new[Prosodic candidates in tableaux, candidate letters, gloss support, 0-indexed dashed lines] \
+`0.5.1` - #new[Prosodic representation in tableaux, candidate letters, gloss support, 0-indexed dashed lines] \
 `0.5.0` - #new[Feature geometry with support for arrows, delinking, and highlights] \
 `0.4.6` - Inline ToBI function for intonational labels and titles for numbered examples \
 `0.4.5` - Vowel trapezoids accept arrows and shifted vowels \
@@ -814,7 +814,7 @@ Finally, we arrive at prosodic words (PWd), which bring together syllables and f
   ]],
 )
 
-=== Extreme scenarios
+// === Extreme scenarios
 
 It is worth noting that _all_ lines are straight in the prosody module (this is by design), so curved lines are not a possibility. Consequently, in extreme scenarios, e.g., where an unfooted syllable is _very_ far away from the head foot of a given PWd, the height of the representation will be adjusted accordingly to avoid line crossings. This will inevitably create taller figures, as already mentioned. @fig-extreme presents a hypothetical scenario to demonstrate how the function deals with extreme cases.
 
@@ -1808,7 +1808,7 @@ Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[
 
 
 #figure(
-  caption: [A tableau with prosodic candidates],
+  caption: [A tableau with prosodic representation],
   supplement: "Tableau",
   kind: "tableau",
   tableau(
