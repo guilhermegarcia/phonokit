@@ -947,7 +947,7 @@ Multiple links are easy to implement. @fig-metaphony shows an example of metapho
   ],
 )
 
-=== Tones
+== Tones
 
 One of the arguments in `#autoseg()` is `tone` (`true` or `false`). This allows us to "flip" the representation vertically to show tones above the segmental tier. Take a look at @fig-ebe, which shows a case of low tone spreading without delinking in Nupe @zsiga2013sounds. We can easily add multiple instances of the function to represent processes with relatively concise code.
 
