@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.1`]
+#let version = text(size: 0.8em)[`v 0.5.2`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -286,8 +286,9 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.2` - #new[Improved numbered examples with simpler code] \
 `0.5.1` - #new[Prosodic representation in tableaux, candidate letters, gloss support, 0-indexed dashed lines] \
-`0.5.0` - #new[Feature geometry with support for arrows, delinking, and highlights] \
+`0.5.0` - Feature geometry with support for arrows, delinking, and highlights \
 `0.4.6` - Inline ToBI function for intonational labels and titles for numbered examples \
 `0.4.5` - Vowel trapezoids accept arrows and shifted vowels \
 `0.4.1` - Consonants table has abbreviation argument; alignment fix in `#consonants()`\
@@ -1458,7 +1459,7 @@ Finally, let's reproduce another figure, this time adapted from #cite(<carvalho2
   ],
 )
 
-= #new[Feature geometry] #new-dot <geometry>
+= Feature geometry #new-dot <geometry>
 
 Feature geometry is a natural progression from functions that cover autosegmental phonology and multi-tier representations. It presents some important challenges, including the user interface: as already mentioned, if too many degrees of freedom are available, a function becomes too convoluted, which compromises its use. Below I describe two special functions that are dedicated to feature geometry: `#geom()`, which takes care of any given representation, and `#geom-group()`, designed to represent multiple trees and processes.
 
