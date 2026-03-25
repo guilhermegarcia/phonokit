@@ -21,7 +21,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.1": *
+/// #import "@preview/phonokit:0.5.2": *
 /// You're a were#int("*L")wolf?#h(1em)#int("H%", line: false)
 
 /// ```
