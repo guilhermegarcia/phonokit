@@ -2049,77 +2049,82 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
 #logo also has functions for harmonic grammars (`#hg()`) and noisy harmonic grammars (`#nhg()`). These functions are very similar to `#maxent()`, so their syntax will be familiar. The Noisy Harmonic Grammar function derives probabilities by simulating a number of evaluations (by default, 1000) given the constraints and violations provided by the user. It is possible to change the number of simulations and to omit the noise column from the tableau. The noise displayed is extracted from an additional simulation, so it is shown for illustrative purposes. For the most part, the functions discussed in this section are based on conventions in the literature, e.g., #cite(<flemming2021comparing>, form: "prose").
 
 
-= Numbered examples #recent-dot<sec-examples>
+= Numbered examples #new-dot<sec-examples>
 
-One important feature in any phonology paper is an environment for numbered examples. We could simply use the excellent `eggs` package for Typst @eggs, which does a great job for syntax examples. In phonology, however, we sometimes want examples to have arrows to show a process, and this creates an alignment issue when we have multiple instances in a single example or in multiple examples throughout. #logo has a function to deal with that: `#ex()`, which is accompanied by `#subex-label()`. The latter function allows us to add labels for each line inside an example.
+One important feature in any phonology paper is an environment for numbered examples. We could simply use the excellent `eggs` package for Typst @eggs, which does a great job for syntax examples. In phonology, however, we sometimes want examples to have arrows to show a process, and this creates an alignment issue when we have multiple instances in a single example or in multiple examples throughout. #logo has a function to deal with that: `#ex()`.
 
 #v(2em)
 #important(title: "Important.")[
   To use this function, add this line after importing the package: `#show: ex-rules`
 ]
 
-#grid(
-  columns: 1,
-  gutter: 1em,
-  align: (center + horizon, center + horizon),
-  [
-    #figure(
-      supplement: "Code",
-      kind: "code",
-      caption: [Numbered example],
-      ```typst
-      // #import "@preview/phonokit:0.5.1"
-      // #show: ex-rules // <- this must be added to your doc
-      // ...
-      #ex(caption: "A phonology example")[
-        #table(
-          columns: (2em, 2em, 5em, 2em, 5em),
-          stroke: none,
-          align: left,
-          [#ex-num-label()], [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
-          [], [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
-        )
-      ] <phon-ex>
-      ```,
-    ) <code-example>
-  ],
-  [
-    #ex(caption: "A phonology example")[
-      #table(
-        columns: (2em, 2em, 5em, 2em, 5em),
-        stroke: none,
-        align: left,
-        [#ex-num-label()], [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
-        [], [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
-      )
-    ] <phon-ex>
-  ],
-)
+The simplest use of `#ex()` is to wrap content directly. The example number is generated automatically. Use `&` to separate columns, just like in LaTeX tables. The number of columns is inferred from the number of `&` separators in each row.
 
-We can now refer to the example as a whole using `@phon-ex`, just like any other label, as in @phon-ex and @phon-ex2. Crucially, we can easily refer to sub-examples using their labels, as in @ex-anba and @ex-inki. Because `#ex()` is based on tables, it is easy to customize it with however many columns we need.
-
-#ex(caption: "Another phonology example")[
-  #table(
-    columns: (2em, 2em, 7em, 4em, 7em),
-    stroke: none,
-    [#ex-num-label()], [#subex-label()<ex-inbi>], [#ipa("/inbi/")], [#a-r], [#ipa("[imbi]")],
-    [], [#subex-label()<ex-inki>], [#ipa("/inki/")], [#a-r], [#ipa("[iNki]")],
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (center + horizon, center + horizon),
+    [
+      #figure(
+        supplement: "Code",
+        kind: "code",
+        caption: [Single-item numbered example],
+        ```typst
+        #ex[#ipa("/anba/") & #a-r & #ipa("[amba]")] <phon-single>
+        ```,
+      ) <code-single-ex>
+    ],
+    [
+      #ex[#ipa("/anba/") & #a-r & #ipa("[amba]")] <phon-single>
+    ],
   )
+]
+
+
+For sub-examples, use the list syntax (`-`). Each item is automatically lettered (`a.`, `b.`, etc.). The `labels` argument allows individual sub-examples to be referenced, as in @ex-anba and @ex-anka. The example as a whole can also be referenced, as in @phon-ex.
+
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (center + horizon, center + horizon),
+    [
+      #figure(
+        supplement: "Code",
+        kind: "code",
+        caption: [Numbered example with sub-examples],
+        ```typst
+        #ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>),
+          columns: (5em, 2em, 5em))[
+          - #ipa("/anba/") & #a-r & #ipa("[amba]")
+          - #ipa("/anka/") & #a-r & #ipa("[aNka]")
+        ] <phon-ex>
+        ```,
+      ) <code-example>
+    ],
+    [
+      #ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>), columns: (5em, 2em, 5em))[
+        - #ipa("/anba/") & #a-r & #ipa("[amba]")
+        - #ipa("/anka/") & #a-r & #ipa("[aNka]")
+      ] <phon-ex>
+    ],
+  )
+]
+
+Without `labels`, sub-examples are simply not referenceable individually --- only the example as a whole can be labeled and referenced. The `columns` argument is optional and specifies the width of each data column (the number and letter columns are always `2em`). If `columns` is omitted, all data columns default to `auto` width. Using explicit widths guarantees perfect alignment across different examples, as can be seen in @phon-ex2 and @phon-ex3.
+
+#ex(caption: "Another phonology example", labels: (<ex-inbi>, <ex-inki>), columns: (7em, 4em, 7em))[
+  - #ipa("/inbi/") & #a-r & #ipa("[imbi]")
+  - #ipa("/inki/") & #a-r & #ipa("[iNki]")
 ] <phon-ex2>
 
-
-Another advantage of building a function on top of tables is that we can establish spacing consistently across multiple examples by specifying the width of each column. If you look back at @code-example, you will notice that the argument `columns` specifies the number of columns needed for the example. Instead of using an integer, we can use an array with specific widths for each column. This is what is done for examples @phon-ex2 and @phon-ex3: `columns: (2em, 7em, 4em, 7em)`. This guarantees perfect alignment across different examples.
-
-#ex(caption: "Yet another phonology example")[
-  #table(
-    columns: (2em, 2em, 7em, 4em, 7em),
-    stroke: none,
-    [#ex-num-label()], [#subex-label()<ex-inbinbi>], [#ipa("/inbinbi/")], [#a-r], [#ipa("[imbimbi]")],
-    [], [#subex-label()<ex-inkinki>], [#ipa("/inkinki/")], [#a-r], [#ipa("[iNkiNki]")],
-  )
+#ex(caption: "Yet another phonology example", labels: (<ex-inbinbi>, <ex-inkinki>), columns: (7em, 4em, 7em))[
+  - #ipa("/inbinbi/") & #a-r & #ipa("[imbimbi]")
+  - #ipa("/inkinki/") & #a-r & #ipa("[iNkiNki]")
 ] <phon-ex3>
 
-Let us now see how strings with ToBI (@sec-tobi) can be used in numbered examples.
+Let us now see how strings with ToBI (@sec-tobi) can be used in numbered examples. The `title` argument (optional) places a title on the same line as the example number, with the sub-examples below. As usual, you can refer to @ex-tobi1 and @ex-tobi2.
 
 #grid(
   columns: 1,
@@ -2129,21 +2134,19 @@ Let us now see how strings with ToBI (@sec-tobi) can be used in numbered example
     #figure(
       supplement: "Code",
       kind: "code",
-      caption: [Numbered example with ToBI (notice table alignment)],
+      caption: [Numbered example with ToBI and `title`],
       ```typst
-        // #import "@preview/phonokit:0.5.1"
-        // #show: ex-rules // <- this must be added to your doc
-        // ...
-        #ex(caption: "Some ToBI examples", title: [Autosegmental transcription of intonation in English @zsiga2013sounds])[
-        #table(
-          columns: (4em, 15em),
-          stroke: none,
-          align: left + bottom,
-        // NOTE: ESSENTIAL TO ADD "bottom" HERE
-          [#subex-label()<ex-tobi1>], [You're a we#int("*L")rewolf?#h(1em)#int("H%", line: false)],
-          [#subex-label()<ex-tobi2>], [I'm a wer#int("*H")ewolf.#h(1em)#int("L%", line: false)],
-        )
-      ] <tobi-ex>
+        #ex(
+          caption: "Some ToBI examples",
+          title: [Autosegmental transcription of
+            intonation in English @zsiga2013sounds],
+          labels: (<ex-tobi1>, <ex-tobi2>),
+        )[
+          - You're a we#int("*L")rewolf?
+            #h(1em)#int("H%", line: false)
+          - I'm a wer#int("*H")ewolf.
+            #h(1em)#int("L%", line: false)
+        ] <tobi-ex>
       ```,
     ) <code-tobi>
   ],
@@ -2151,21 +2154,13 @@ Let us now see how strings with ToBI (@sec-tobi) can be used in numbered example
     #ex(
       caption: "Some ToBI examples",
       title: [Autosegmental transcription of intonation in English @zsiga2013sounds],
+      labels: (<ex-tobi1>, <ex-tobi2>),
     )[
-      #table(
-        columns: (4em, 15em),
-        stroke: none,
-        align: left + bottom,
-        // NOTE: ESSENTIAL TO ADD "bottom" HERE
-        [#subex-label()<ex-tobi1>], [You're a we#int("*L")rewolf?#h(1em)#int("H%", line: false)],
-        [#subex-label()<ex-tobi2>], [I'm a wer#int("*H")ewolf.#h(1em)#int("L%", line: false)],
-      )
+      - You're a we#int("*L")rewolf?#h(1em)#int("H%", line: false)
+      - I'm a wer#int("*H")ewolf.#h(1em)#int("L%", line: false)
     ] <tobi-ex>
   ],
 )
-
-In @code-tobi, which generates @tobi-ex, you will notice that the alignment of the table element must be  specified as `bottom` (here, it's `left + bottom`). This ensures that the letters of each subexample are aligned with the string, not the tones. As usual, you can refer to @ex-tobi1 and @ex-tobi2. As of version `0.4.6`, a `title` argument is also available for examples. This is also shown in @code-tobi and displayed in @tobi-ex.
-
 
 You will notice that `caption` is one of the arguments in `#ex()`. This is not a typical caption (nothing is printed), since this is an example after all. Instead, this caption is there in the (unlikely) event we wish to create a table of contents _only for examples_ using the `#outline()` function.#footnote[While it is not very common to have such tables, `#ex()` gives you the possibility. If you want to exclude a given example from the outline, do not use the `caption` argument.] The outline below shows what the examples would look like in a table of contents --- see @code-outline.
 
@@ -2206,8 +2201,6 @@ You will notice that `caption` is one of the arguments in `#ex()`. This is not a
   }
   ```,
 ) <code-align>
-
-
 
 = Final remarks
 
