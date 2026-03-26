@@ -284,6 +284,12 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #fa-bug() #link("https://github.com/guilhermegarcia/phonokit/issues")[`guilhermegarcia/phonokit/issues`]
 
+#heading(numbering: none, outlined: false)[Note on development]
+
+#logo was conceived, designed, and directed by the author. The implementation was produced with the assistance of Claude (Anthropic). All linguistic decisions, function design, and package architecture are the author's.
+
+
+
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
 `0.5.2` - #new[Improved numbered examples with simpler code] \
