@@ -65,7 +65,7 @@
 
             // 2. Feature/tone label with optional circle highlight
             // Check if this specific tone should be highlighted
-            let should_highlight = i in highlight or (i, j) in highlight
+            let should_highlight = tone and (i in highlight or (i, j) in highlight)
             let box_stroke = if should_highlight { 0.05em + black } else { none }
             content((feat_x, feat_y), padding: 0.1, anchor: feat_anchor_dir, box(
               stroke: box_stroke,
@@ -152,7 +152,7 @@
       }
 
       // Draw the tone at midpoint
-      let box_stroke = if tone_parsed.pos in highlight or (tone_parsed.pos, tone_parsed.sub) in highlight {
+      let box_stroke = if tone and (tone_parsed.pos in highlight or (tone_parsed.pos, tone_parsed.sub) in highlight) {
         0.05em + black
       } else {
         none

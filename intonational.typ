@@ -64,20 +64,18 @@
     text(font: phonokit-font.get(), size: 0.8em, label)
   }
   let lbl-w = measure(lbl-text).width
+  let lbl-h = measure(lbl-text).height
   let lbl = box(width: lbl-w, lbl-text)
   // baseline: 0pt places the box bottom at the text baseline,
   // so the box extends upward to reserve space for the annotation.
-  // stack(dir: btt) builds from the baseline upward:
-  //   lift gap → stem → gap → label (centered via move)
-  box(width: 0pt, baseline: 0pt, stack(
-    dir: btt,
-    v(lift),
+  // place() positions elements absolutely so surrounding alignment cannot shift them.
+  let stem-h = height - lift - gap
+  box(width: 0pt, height: height + lbl-h, baseline: 0pt, {
+    // Stem (anchored at bottom-left, offset upward by lift)
     if line {
-      rect(width: 0.05em, height: height - lift - gap, fill: black, stroke: none)
-    } else {
-      v(height - lift - gap)
-    },
-    v(gap),
-    move(dx: -lbl-w / 2, lbl),
-  ))
+      place(bottom + left, dy: -lift, rect(width: 0.05em, height: stem-h, fill: black, stroke: none))
+    }
+    // Label (anchored at top, centered horizontally via dx)
+    place(top + left, dx: -lbl-w / 2, lbl)
+  })
 }
