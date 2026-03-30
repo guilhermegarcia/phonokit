@@ -42,7 +42,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.2": *
+/// #import "@preview/phonokit:0.5.3": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -856,7 +856,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.2": *
+/// #import "@preview/phonokit:0.5.3": *
 /// You're a we#int("*L")rewolf?#h(2em)#int("H%", line: false)
 /// ```
 #let int = int

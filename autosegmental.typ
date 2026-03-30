@@ -15,6 +15,7 @@
   multilinks: (),
   baseline: 40%,
   gloss: "",
+  dash: "dashed",
 ) = {
   box(inset: 1.2em, baseline: baseline, cetz.canvas({
     import cetz.draw: *
@@ -117,8 +118,9 @@
       let start_anchor = get_anchor(src_parsed, "feat")
       let end_anchor = get_anchor(dest_parsed, "seg")
 
-      // Draw the main dashed line
-      line(start_anchor, end_anchor, stroke: (dash: "dashed", thickness: 0.05em))
+      // Draw the association line
+      let link-stroke = if dash == "solid" { (thickness: 0.05em) } else { (dash: dash, thickness: 0.05em) }
+      line(start_anchor, end_anchor, stroke: link-stroke)
 
       if arrow {
         // Arrow points from feature/tone toward segment

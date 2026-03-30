@@ -23,6 +23,6 @@ TESTING.pdf
 # Generated badges
 zenodo-badge.svg
 
-# intro-to-phonokit: only track the PDF
-intro-to-phonokit/*
-!intro-to-phonokit/*.pdf
+# Extras
+extras/*
+!extras/*.pdf

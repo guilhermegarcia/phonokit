@@ -140,14 +140,20 @@
   geminate-coda-text: none,
   geminate-onset-text: none,
   compact: false,
+  or-y: none,
+  n-y: none,
 ) = {
   import cetz.draw: *
 
+  // O/R and N/C level positions (defaults preserve original hardcoded offsets)
+  let or-level = if or-y == none { sigma-y - 0.75 } else { or-y }
+  let n-level = if n-y == none { sigma-y - 1.65 } else { n-y }
+
   // Choose offset values based on compact mode
   let (line-offset, text-offset) = if compact {
-    (0.70, 0.40)  // Compact: shorter lines, raised segments
+    (0.70, 0.40) // Compact: shorter lines, raised segments
   } else {
-    (0.30, 0)     // Standard: longer lines, lower segments
+    (0.30, 0) // Standard: longer lines, lower segments
   }
 
   let has-onset = syll.onset != ""
@@ -192,8 +198,8 @@
 
   // Branches from syllable
   if has-onset {
-    line((x-offset, sigma-y + 0.25), (onset-x, sigma-y - 0.45))
-    content((onset-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[O])
+    line((x-offset, sigma-y + 0.25), (onset-x, or-level + 0.30))
+    content((onset-x, or-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[O])
 
     // Branch to each onset segment
     let onset-segments = smart-clusters(syll.onset)
@@ -211,22 +217,26 @@
 
       if is-geminate {
         // Geminate: draw line to geminate position (text drawn separately in geminate section)
-        line((onset-x, sigma-y - 1.1), (geminate-onset-x, terminal-y + line-offset))
+        line((onset-x, or-level - 0.35), (geminate-onset-x, terminal-y + line-offset))
       } else {
         // Normal segment: draw line and text
-        line((onset-x, sigma-y - 1.1), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        line((onset-x, or-level - 0.35), (seg-x, terminal-y + line-offset))
+        content(
+          (seg-x, terminal-y + text-offset),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
   }
 
   // Rhyme branch
-  line((x-offset, sigma-y + 0.25), (rhyme-x, sigma-y - 0.45))
-  content((rhyme-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[R])
+  line((x-offset, sigma-y + 0.25), (rhyme-x, or-level + 0.30))
+  content((rhyme-x, or-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[R])
 
   // Nucleus
-  line((rhyme-x, sigma-y - 1.1), (nucleus-x, sigma-y - 1.35))
-  content((nucleus-x, sigma-y - 1.65), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[N])
+  line((rhyme-x, or-level - 0.35), (nucleus-x, n-level + 0.30))
+  content((nucleus-x, n-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[N])
 
   // Branch to each nucleus segment
   let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -234,14 +244,18 @@
 
   for (i, segment) in nucleus-segments.enumerate() {
     let seg-x = nucleus-start-x + i * segment-spacing
-    line((nucleus-x, sigma-y - 1.9), (seg-x, terminal-y + line-offset))
-    content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+    line((nucleus-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
+    content(
+      (seg-x, terminal-y + text-offset),
+      context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+      anchor: "north",
+    )
   }
 
   // Coda (if exists)
   if has-coda {
-    line((rhyme-x, sigma-y - 1.1), (coda-x, sigma-y - 1.35))
-    content((coda-x, sigma-y - 1.65), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[C])
+    line((rhyme-x, or-level - 0.35), (coda-x, n-level + 0.30))
+    content((coda-x, n-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[C])
 
     // Branch to each coda segment
     // Always draw all segments, but handle geminates specially
@@ -256,11 +270,15 @@
 
       if is-geminate {
         // Geminate: draw line to geminate position (text drawn separately in geminate section)
-        line((coda-x, sigma-y - 1.9), (geminate-coda-x, terminal-y + line-offset))
+        line((coda-x, n-level - 0.25), (geminate-coda-x, terminal-y + line-offset))
       } else {
         // Normal segment: draw line and text
-        line((coda-x, sigma-y - 1.9), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        line((coda-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
+        content(
+          (seg-x, terminal-y + text-offset),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
   }
@@ -268,7 +286,7 @@
 
 // Visualizes a single syllable's internal structure (On/Rh/Nu/Co)
 // Now accepts IPA-style input like "k a" or "'t a"
-#let syllable(input, scale: 1.0, symbol: ("σ",)) = {
+#let syllable(input, scale: 1.0, symbol: ("σ",), distance: none) = {
   // Check for syllable boundary markers
   if input.contains(".") {
     return text(fill: red, weight: "bold")[⚠ Warning: For more than one syllable, use \#foot() or \#word().]
@@ -332,9 +350,26 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
+    // Distance multiplier lookup (floor: 1.0 for all sub-syllable levels)
+    let dist-mult(level) = {
+      let result = 1.0
+      if distance != none {
+        for entry in distance {
+          if entry.at(0) == level {
+            result = calc.max(1.0, entry.at(1))
+          }
+        }
+      }
+      result
+    }
+
     let sigma-y = 0
-    let terminal-y = -3.5
     let x-offset = 0
+
+    // Sub-syllable level positions (0=σ→O/R, 1=O/R→N/C, 2=N/C→segments)
+    let or-level = sigma-y - 0.75 * dist-mult(0)
+    let n-level = or-level - 1.25 * dist-mult(1)
+    let terminal-y = n-level - 1.50 * dist-mult(2)
 
     // Standalone syllable spacing: Nu/Co positioned lower (halfway between Rh and segments)
     let line-offset = 0.70
@@ -379,30 +414,37 @@
     }
 
     // Syllable node
-    content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
+    content((x-offset, sigma-y + 0.54), context text(
+      size: 12 * diagram-scale * 1pt,
+      font: phonokit-font.get(),
+    )[#sym_syll])
 
     // Onset branches (if exists)
     if has-onset {
-      line((x-offset, sigma-y + 0.25), (onset-x, sigma-y - 0.45))
-      content((onset-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[O])
+      line((x-offset, sigma-y + 0.25), (onset-x, or-level + 0.30))
+      content((onset-x, or-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[O])
 
       let onset-total-width = (num-onset - 1) * segment-spacing
       let onset-start-x = onset-x - onset-total-width / 2
 
       for (i, segment) in onset-segments.enumerate() {
         let seg-x = onset-start-x + i * segment-spacing
-        line((onset-x, sigma-y - 1.1), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        line((onset-x, or-level - 0.35), (seg-x, terminal-y + line-offset))
+        content(
+          (seg-x, terminal-y + text-offset),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
 
     // Rhyme branch
-    line((x-offset, sigma-y + 0.25), (rhyme-x, sigma-y - 0.45))
-    content((rhyme-x, sigma-y - 0.75), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[R])
+    line((x-offset, sigma-y + 0.25), (rhyme-x, or-level + 0.30))
+    content((rhyme-x, or-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[R])
 
-    // Nucleus - positioned lower for standalone view (roughly halfway between Rh and segments)
-    line((rhyme-x, sigma-y - 1.1), (nucleus-x, sigma-y - 1.65))
-    content((nucleus-x, sigma-y - 2.0), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[N])
+    // Nucleus
+    line((rhyme-x, or-level - 0.35), (nucleus-x, n-level + 0.35))
+    content((nucleus-x, n-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[N])
 
     // Branch to each nucleus segment
     let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -410,22 +452,30 @@
 
     for (i, segment) in nucleus-segments.enumerate() {
       let seg-x = nucleus-start-x + i * segment-spacing
-      line((nucleus-x, sigma-y - 2.25), (seg-x, terminal-y + line-offset))
-      content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+      line((nucleus-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
+      content(
+        (seg-x, terminal-y + text-offset),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+        anchor: "north",
+      )
     }
 
-    // Coda (if exists) - also positioned lower
+    // Coda (if exists)
     if has-coda {
-      line((rhyme-x, sigma-y - 1.1), (coda-x, sigma-y - 1.65))
-      content((coda-x, sigma-y - 2.0), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[C])
+      line((rhyme-x, or-level - 0.35), (coda-x, n-level + 0.35))
+      content((coda-x, n-level), context text(size: 10 * diagram-scale * 1pt, font: phonokit-font.get())[C])
 
       let coda-total-width = (num-coda - 1) * segment-spacing
       let coda-start-x = coda-x - coda-total-width / 2
 
       for (i, segment) in coda-segments.enumerate() {
         let seg-x = coda-start-x + i * segment-spacing
-        line((coda-x, sigma-y - 2.25), (seg-x, terminal-y + line-offset))
-        content((seg-x, terminal-y + text-offset), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        line((coda-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
+        content(
+          (seg-x, terminal-y + text-offset),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
   }))
@@ -435,7 +485,7 @@
 // Onsets: non-moraic (connect directly to σ)
 // Nucleus: always moraic (connects to μ, which connects to σ)
 // Coda: optionally moraic (coda: false → connects to σ; coda: true → connects to μ)
-#let mora(input, coda: false, scale: 1.0, symbol: ("σ", "μ")) = {
+#let mora(input, coda: false, scale: 1.0, symbol: ("σ", "μ"), distance: none) = {
   // Check for syllable boundary markers
   if input.contains(".") {
     return text(fill: red, weight: "bold")[⚠ Warning: For more than one syllable, use \#foot() or \#word().]
@@ -493,12 +543,28 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
+    // Distance multiplier lookup (floor: 0.5 for all mora levels)
+    let dist-mult(level) = {
+      let result = 1.0
+      if distance != none {
+        for entry in distance {
+          if entry.at(0) == level {
+            result = calc.max(0.5, entry.at(1))
+          }
+        }
+      }
+      result
+    }
+
     let sigma-y = 0
     let segment-spacing = 0.35
     let x-offset = 0
 
     // Syllable node
-    content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
+    content((x-offset, sigma-y + 0.54), context text(
+      size: 12 * diagram-scale * 1pt,
+      font: phonokit-font.get(),
+    )[#sym_syll])
 
     // Calculate segment counts
     let onset-segments = if parsed.onset != "" { smart-clusters(parsed.onset) } else { () }
@@ -509,11 +575,10 @@
     let num-nucleus = nucleus-segments.len()
     let num-coda = coda-segments.len()
 
-    // Position calculations
-    // Increased σ-to-μ distance to avoid crossings with onset lines
-    let mora-y = sigma-y - 1.5
-    // Decreased μ-to-segment distance for tighter spacing
-    let terminal-y = mora-y - 1.2
+    // Position calculations (σ→μ = level 0, μ→segments = level 1)
+    let mora-base-gap = 1.62
+    let terminal-y = sigma-y + 0.35 - mora-base-gap * (dist-mult(0) + dist-mult(1))
+    let mora-y = sigma-y + 0.54 - mora-base-gap * 1.4 * dist-mult(0)
     let nucleus-mora-x = x-offset
 
     // Onset position (left of nucleus mora)
@@ -544,7 +609,11 @@
       for (i, segment) in onset-segments.enumerate() {
         let seg-x = onset-start-x + i * segment-spacing
         line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        content(
+          (seg-x, terminal-y),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
 
@@ -575,11 +644,18 @@
         // Lines from both morae converge to the segment
         line((mora1-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
         line((mora2-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        content(
+          (seg-x, terminal-y),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     } else {
       // Short vowel: one mora
-      content((nucleus-mora-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_mora])
+      content((nucleus-mora-x, mora-y), context text(
+        size: 12 * diagram-scale * 1pt,
+        font: phonokit-font.get(),
+      )[#sym_mora])
       line((x-offset, sigma-y + 0.25), (nucleus-mora-x, mora-y + 0.35))
 
       // Draw nucleus segments below mora
@@ -589,7 +665,11 @@
       for (i, segment) in nucleus-segments.enumerate() {
         let seg-x = nucleus-start-x + i * segment-spacing
         line((nucleus-mora-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        content(
+          (seg-x, terminal-y),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
 
@@ -614,7 +694,11 @@
           line((coda-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
 
           // Draw segment
-          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+          content(
+            (seg-x, terminal-y),
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            anchor: "north",
+          )
         }
       } else {
         // Non-moraic coda: connects directly to σ
@@ -624,7 +708,11 @@
         for (i, segment) in coda-segments.enumerate() {
           let seg-x = coda-start-x + i * segment-spacing
           line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+          content(
+            (seg-x, terminal-y),
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            anchor: "north",
+          )
         }
       }
     }
@@ -642,6 +730,7 @@
   geminate-coda-x: none,
   geminate-onset-x: none,
   mora-symbol: "μ",
+  mora-y-override: none,
 ) = {
   import cetz.draw: *
 
@@ -660,7 +749,7 @@
   let has-long-vowel = syll.nucleus.contains("ː")
 
   // Position calculations
-  let mora-y = sigma-y - 1.5
+  let mora-y = if mora-y-override != none { mora-y-override } else { 0.4 * (sigma-y + 0.54) + 0.6 * terminal-y }
   let nucleus-mora-x = x-offset
 
   // Adaptive onset position (same formula as draw-syllable-structure for uniform spacing)
@@ -697,7 +786,11 @@
       for (i, segment) in onset-segments.enumerate() {
         let seg-x = onset-start-x + i * segment-spacing
         line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-        content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+        content(
+          (seg-x, terminal-y),
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          anchor: "north",
+        )
       }
     }
   }
@@ -722,11 +815,18 @@
       let seg-x = nucleus-start-x + i * segment-spacing
       line((mora1-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
       line((mora2-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-      content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+      content(
+        (seg-x, terminal-y),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+        anchor: "north",
+      )
     }
   } else {
     // Short vowel: ONE mora
-    content((nucleus-mora-x, mora-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#mora-symbol])
+    content((nucleus-mora-x, mora-y), context text(
+      size: 12 * diagram-scale * 1pt,
+      font: phonokit-font.get(),
+    )[#mora-symbol])
     line((x-offset, sigma-y + 0.25), (nucleus-mora-x, mora-y + 0.35))
 
     let nucleus-total-width = (num-nucleus - 1) * segment-spacing
@@ -735,7 +835,11 @@
     for (i, segment) in nucleus-segments.enumerate() {
       let seg-x = nucleus-start-x + i * segment-spacing
       line((nucleus-mora-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-      content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+      content(
+        (seg-x, terminal-y),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+        anchor: "north",
+      )
     }
   }
 
@@ -758,7 +862,11 @@
         for (i, segment) in coda-segments.enumerate() {
           let seg-x = coda-start-x + i * segment-spacing
           line((coda-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
-          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+          content(
+            (seg-x, terminal-y),
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            anchor: "north",
+          )
         }
       }
     } else {
@@ -775,7 +883,11 @@
         for (i, segment) in coda-segments.enumerate() {
           let seg-x = coda-start-x + i * segment-spacing
           line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
-          content((seg-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment], anchor: "north")
+          content(
+            (seg-x, terminal-y),
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            anchor: "north",
+          )
         }
       }
     }
@@ -784,7 +896,7 @@
 
 // Visualizes foot and syllable levels
 // Now accepts IPA-style input like "k a.'v a.l o"
-#let foot(input, scale: 1.0, symbol: ("Σ", "σ")) = {
+#let foot(input, scale: 1.0, symbol: ("Σ", "σ"), distance: none) = {
   // Check for parentheses (foot should not have multiple feet)
   if input.contains("(") or input.contains(")") {
     return text(
@@ -877,6 +989,20 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
+    // Distance multiplier lookup (floor: 0.5 for levels 0–1, 1.0 for levels 2+)
+    let dist-mult(level) = {
+      let result = 1.0
+      if distance != none {
+        let floor = if level <= 1 { 0.5 } else { 1.0 }
+        for entry in distance {
+          if entry.at(0) == level {
+            result = calc.max(floor, entry.at(1))
+          }
+        }
+      }
+      result
+    }
+
     let segment-spacing = 0.35
     let min-gap-between-sylls = 0.8
     let default-spacing = 1.6
@@ -949,10 +1075,17 @@
 
     let foot-x = start-x + syllable-positions.at(head-idx)
 
-    // Calculate dynamic Ft height
-    let ft-height = -0.9 + (syllables.len() * 0.3)
+    // Vertical level positions
     let sigma-y = -2.4
-    let terminal-y = -5
+    let sigma-y-label = sigma-y + 0.54
+    let base-ft-height = -0.9 + (syllables.len() * 0.3)
+    let ft-sigma-gap = base-ft-height - sigma-y-label
+    let ft-height = sigma-y-label + ft-sigma-gap * dist-mult(0)
+
+    // Sub-syllable level positions
+    let or-y = sigma-y - 0.75 * dist-mult(1)
+    let n-y = or-y - 0.90 * dist-mult(2)
+    let terminal-y = n-y - 0.95 * dist-mult(3)
 
     // Draw Ft node above the head
     content((foot-x, ft-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
@@ -980,7 +1113,10 @@
       let x-offset = start-x + syllable-positions.at(i)
 
       // Syllable node
-      content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
+      content((x-offset, sigma-y + 0.54), context text(
+        size: 12 * diagram-scale * 1pt,
+        font: phonokit-font.get(),
+      )[#sym_syll])
 
       // Line from Ft to σ
       line((foot-x, ft-height - 0.25), (x-offset, sigma-y + 0.8))
@@ -1011,20 +1147,25 @@
         geminate-onset-x: gem-onset-x,
         geminate-coda-text: gem-coda-text,
         geminate-onset-text: gem-onset-text,
+        or-y: or-y,
+        n-y: n-y,
       )
     }
 
     // Draw geminate segments
     for gem in geminates {
-      let terminal-y = -5
-      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
+      content(
+        (gem.gem-x, terminal-y),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        anchor: "north",
+      )
     }
   }))
 }
 
 // Visualizes word, foot, and syllable levels
 // Now accepts IPA-style input like "(k a.'v a).l o"
-#let word(input, foot: "R", scale: 1.0, symbol: ("ω", "Σ", "σ")) = {
+#let word(input, foot: "R", scale: 1.0, symbol: ("ω", "Σ", "σ"), distance: none) = {
   // Convert IPA-style input to Unicode
   let converted = convert-prosody-input(input)
 
@@ -1149,6 +1290,32 @@
     let min-gap-between-sylls = 0.8
     let default-spacing = 1.6
 
+    // Distance multiplier lookup (floor: 0.5 for levels 0–1, 1.0 for levels 2–4)
+    let dist-mult(level) = {
+      let result = 1.0
+      if distance != none {
+        let floor = if level <= 1 { 0.5 } else { 1.0 }
+        for entry in distance {
+          if entry.at(0) == level {
+            result = calc.max(floor, entry.at(1))
+          }
+        }
+      }
+      result
+    }
+
+    // Vertical level positions (built top-down from σ)
+    let sigma-y = -2.4
+    let sigma-y-label = sigma-y + 0.54
+    let base-gap = 0.96
+    let foot-y = sigma-y-label + base-gap * dist-mult(1)
+
+    // Sub-syllable level positions
+    let or-y = sigma-y - 0.75 * dist-mult(2)
+    let n-y = or-y - 0.90 * dist-mult(3)
+    let terminal-y = n-y - 0.95 * dist-mult(4)
+
+
     // Calculate extents for each syllable
     let syllable-extents = ()
     for syll in syllables {
@@ -1231,10 +1398,8 @@
     }
 
     // Calculate minimum PWd height
-    let base-height = 0.5
-    let syllable-factor = 0.1
     let clearance-margin = 0.5
-    let min-pwd-height = base-height + (syllables.len() * syllable-factor)
+    let min-pwd-height = foot-y + base-gap * 1.5
 
     for (i, syll) in syllables.enumerate() {
       if i not in in-foot-set {
@@ -1260,7 +1425,7 @@
       }
     }
 
-    let pwd-height = min-pwd-height
+    let pwd-height = calc.max(min-pwd-height, min-pwd-height * dist-mult(0))
 
     content((pwd-x, pwd-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_word])
 
@@ -1286,10 +1451,11 @@
     for (i, syll) in syllables.enumerate() {
       if i not in in-foot-set {
         let x-offset = start-x + syllable-positions.at(i)
-        let sigma-y = -2.4
-        let terminal-y = -5
 
-        content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
+        content((x-offset, sigma-y + 0.54), context text(
+          size: 12 * diagram-scale * 1pt,
+          font: phonokit-font.get(),
+        )[#sym_syll])
         line((pwd-x, pwd-height - 0.3), (x-offset, sigma-y + 0.75))
 
         let gem-coda-x = none
@@ -1317,6 +1483,8 @@
           geminate-onset-x: gem-onset-x,
           geminate-coda-text: gem-coda-text,
           geminate-onset-text: gem-onset-text,
+          or-y: or-y,
+          n-y: n-y,
         )
       }
     }
@@ -1332,17 +1500,18 @@
 
       let foot-x = start-x + syllable-positions.at(head-idx)
 
-      content((foot-x, -0.9), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
-      line((pwd-x, pwd-height - 0.3), (foot-x, -0.65))
+      content((foot-x, foot-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
+      line((pwd-x, pwd-height - 0.3), (foot-x, foot-y + 0.25))
 
       for syll-idx in foot {
         let x-offset = start-x + syllable-positions.at(syll-idx)
         let syll = syllables.at(syll-idx)
-        let sigma-y = -2.4
-        let terminal-y = -5
 
-        content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
-        line((foot-x, -1.15), (x-offset, sigma-y + 0.8))
+        content((x-offset, sigma-y + 0.54), context text(
+          size: 12 * diagram-scale * 1pt,
+          font: phonokit-font.get(),
+        )[#sym_syll])
+        line((foot-x, foot-y - 0.25), (x-offset, sigma-y + 0.8))
 
         let gem-coda-x = none
         let gem-coda-text = none
@@ -1369,21 +1538,26 @@
           geminate-onset-x: gem-onset-x,
           geminate-coda-text: gem-coda-text,
           geminate-onset-text: gem-onset-text,
+          or-y: or-y,
+          n-y: n-y,
         )
       }
     }
 
     // Draw geminate segments
     for gem in geminates {
-      let terminal-y = -5
-      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
+      content(
+        (gem.gem-x, terminal-y),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        anchor: "north",
+      )
     }
   }))
 }
 
 // Visualizes foot with moraic structure
 // Now accepts IPA-style input like "k a.'v a.l o"
-#let foot-mora(input, coda: false, scale: 1.0, symbol: ("Σ", "σ", "μ")) = {
+#let foot-mora(input, coda: false, scale: 1.0, symbol: ("Σ", "σ", "μ"), distance: none) = {
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
@@ -1479,6 +1653,19 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
+    // Distance multiplier lookup (floor: 0.5 for all mora levels)
+    let dist-mult(level) = {
+      let result = 1.0
+      if distance != none {
+        for entry in distance {
+          if entry.at(0) == level {
+            result = calc.max(0.5, entry.at(1))
+          }
+        }
+      }
+      result
+    }
+
     let segment-spacing = 0.35
     let min-gap-between-sylls = 0.8 // Same as foot() to prevent overlap
     let default-spacing = 1.6 // Same as foot() to prevent overlap
@@ -1552,10 +1739,17 @@
 
     let foot-x = start-x + syllable-positions.at(head-idx)
 
-    // Calculate dynamic Ft height
-    let ft-height = -0.9 + (syllables.len() * 0.3)
+    // Vertical level positions
     let sigma-y = -2.4
-    let terminal-y = -5
+    let sigma-y-label = sigma-y + 0.54
+    let base-ft-height = -0.9 + (syllables.len() * 0.3)
+    let ft-sigma-gap = base-ft-height - sigma-y-label
+    let ft-height = sigma-y-label + ft-sigma-gap * dist-mult(0)
+
+    // Mora level positions (σ→μ = level 1, μ→segments = level 2)
+    let mora-base-gap = 1.57
+    let mora-y = sigma-y-label - mora-base-gap * 1.2 * dist-mult(1)
+    let terminal-y = mora-y - mora-base-gap * dist-mult(2)
 
     // Draw Ft node above the head
     content((foot-x, ft-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
@@ -1583,7 +1777,10 @@
       let x-offset = start-x + syllable-positions.at(i)
 
       // Syllable node
-      content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
+      content((x-offset, sigma-y + 0.54), context text(
+        size: 12 * diagram-scale * 1pt,
+        font: phonokit-font.get(),
+      )[#sym_syll])
 
       // Line from Ft to σ
       line((foot-x, ft-height - 0.25), (x-offset, sigma-y + 0.8))
@@ -1610,20 +1807,24 @@
         geminate-coda-x: gem-coda-x,
         geminate-onset-x: gem-onset-x,
         mora-symbol: sym_mora,
+        mora-y-override: mora-y,
       )
     }
 
     // Draw geminate segments
     for gem in geminates {
-      let terminal-y = -5
-      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
+      content(
+        (gem.gem-x, terminal-y),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        anchor: "north",
+      )
     }
   }))
 }
 
 // Visualizes word with moraic structure
 // Now accepts IPA-style input like "(k a.'v a).l o"
-#let word-mora(input, foot: "R", coda: false, scale: 1.0, symbol: ("ω", "Σ", "σ", "μ")) = {
+#let word-mora(input, foot: "R", coda: false, scale: 1.0, symbol: ("ω", "Σ", "σ", "μ"), distance: none) = {
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
@@ -1753,6 +1954,19 @@
 
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
+    // Distance multiplier lookup (floor: 0.5 for all mora levels)
+    let dist-mult(level) = {
+      let result = 1.0
+      if distance != none {
+        for entry in distance {
+          if entry.at(0) == level {
+            result = calc.max(0.5, entry.at(1))
+          }
+        }
+      }
+      result
+    }
+
     let segment-spacing = 0.35
     let min-gap-between-sylls = 0.6
     let default-spacing = 1.4
@@ -1842,16 +2056,20 @@
       pwd-x = start-x + syllable-positions.at(target-syll-idx)
     }
 
-    // Y-positions (fixed levels)
-    let ft-y = -0.9
+    // Vertical level positions
     let sigma-y = -2.4
-    let terminal-y = -5
+    let sigma-y-label = sigma-y + 0.54
+    let base-gap = 0.96
+    let ft-y = sigma-y-label + base-gap * dist-mult(1)
 
-    // Calculate minimum PWd height to avoid line crossings
-    let base-height = 0.5
-    let syllable-factor = 0.1
+    // Mora level positions (σ→μ = level 2, μ→segments = level 3)
+    let mora-base-gap = 1.57
+    let mora-y = sigma-y-label - mora-base-gap * 1.2 * dist-mult(2)
+    let terminal-y = mora-y - mora-base-gap * dist-mult(3)
+
+    // Calculate minimum PWd height
     let clearance-margin = 0.5
-    let min-pwd-height = base-height + (syllables.len() * syllable-factor)
+    let min-pwd-height = ft-y + base-gap * 1.5
 
     // Check geometric constraints for unfooted syllables
     for (i, syll) in syllables.enumerate() {
@@ -1881,7 +2099,7 @@
       }
     }
 
-    let pwd-y = min-pwd-height
+    let pwd-y = calc.max(min-pwd-height, min-pwd-height * dist-mult(0))
 
     // Draw PWd node
     content((pwd-x, pwd-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_word])
@@ -1939,7 +2157,10 @@
       let x-offset = start-x + syllable-positions.at(i)
 
       // Syllable node
-      content((x-offset, sigma-y + 0.54), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_syll])
+      content((x-offset, sigma-y + 0.54), context text(
+        size: 12 * diagram-scale * 1pt,
+        font: phonokit-font.get(),
+      )[#sym_syll])
 
       // Check for geminate
       let gem-coda-x = none
@@ -1963,13 +2184,17 @@
         geminate-coda-x: gem-coda-x,
         geminate-onset-x: gem-onset-x,
         mora-symbol: sym_mora,
+        mora-y-override: mora-y,
       )
     }
 
     // Draw geminate segments
     for gem in geminates {
-      let terminal-y = -5
-      content((gem.gem-x, terminal-y), context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text], anchor: "north")
+      content(
+        (gem.gem-x, terminal-y),
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        anchor: "north",
+      )
     }
   }))
 }

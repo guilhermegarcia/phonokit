@@ -1,6 +1,6 @@
 #import "ipa.typ": *
 #import "_config.typ": phonokit-font
-#import "prosody.typ": syllable, mora, foot, foot-mora, word, word-mora
+#import "prosody.typ": foot, foot-mora, mora, syllable, word, word-mora
 
 #let finger = text(size: 14pt)[☞]
 #let viol-sym = text(size: 1.2em)[#sym.ast]
@@ -35,15 +35,88 @@
   parts.join(h(1pt))
 }
 
+// --- Helper: Parse string with rich formatting ---
+// - _{...} or _x: subscript (not IPA-parsed)
+// - ^{...} or ^x: superscript (not IPA-parsed)
+// - {...}: raw text (not IPA-parsed)
+// - \\{ and \\}: literal brace characters
+// - \\,: literal comma (since , maps to secondary stress)
+// - everything else: IPA-parsed as usual
+#let parse-ot-string(s) = {
+  if type(s) != str { return s }
+
+  let clusters = s.clusters()
+  let parts = ()
+  let buf = ""
+  let i = 0
+  let len = clusters.len()
+
+  while i < len {
+    let ch = clusters.at(i)
+
+    if (
+      ch == "\\"
+        and i + 1 < len
+        and (clusters.at(i + 1) == "{" or clusters.at(i + 1) == "}" or clusters.at(i + 1) == ",")
+    ) {
+      if buf != "" {
+        parts.push(ipa(buf))
+        buf = ""
+      }
+      parts.push(clusters.at(i + 1))
+      i += 2
+    } else if (ch == "_" or ch == "^") and i + 1 < len {
+      if buf != "" {
+        parts.push(ipa(buf))
+        buf = ""
+      }
+      let is-sub = ch == "_"
+      i += 1
+      if clusters.at(i) == "{" {
+        i += 1
+        let group = ""
+        while i < len and clusters.at(i) != "}" {
+          group += clusters.at(i)
+          i += 1
+        }
+        if i < len { i += 1 }
+        if is-sub { parts.push(sub(group)) } else { parts.push(super(group)) }
+      } else {
+        let c = clusters.at(i)
+        i += 1
+        if is-sub { parts.push(sub(c)) } else { parts.push(super(c)) }
+      }
+    } else if ch == "{" {
+      if buf != "" {
+        parts.push(ipa(buf))
+        buf = ""
+      }
+      i += 1
+      let raw = ""
+      while i < len and clusters.at(i) != "}" {
+        raw += clusters.at(i)
+        i += 1
+      }
+      if i < len { i += 1 }
+      parts.push(raw)
+    } else {
+      buf += ch
+      i += 1
+    }
+  }
+
+  if buf != "" { parts.push(ipa(buf)) }
+  if parts.len() == 0 { return [] }
+  parts.join()
+}
+
 // --- Helper: Dispatch prosody function by name ---
 #let dispatch-prosody(func-name, arg, ps) = {
-  if func-name == "syllable" { syllable(arg, scale: ps) }
-  else if func-name == "mora" { mora(arg, scale: ps) }
-  else if func-name == "foot" { foot(arg, scale: ps) }
-  else if func-name == "foot-mora" { foot-mora(arg, scale: ps) }
-  else if func-name == "word" { word(arg, scale: ps) }
-  else if func-name == "word-mora" { word-mora(arg, scale: ps) }
-  else { ipa(arg) }
+  if func-name == "syllable" { syllable(arg, scale: ps) } else if func-name == "mora" { mora(arg, scale: ps) } else if (
+    func-name == "foot"
+  ) { foot(arg, scale: ps) } else if func-name == "foot-mora" { foot-mora(arg, scale: ps) } else if (
+    func-name == "word"
+  ) { word(arg, scale: ps) } else if func-name == "word-mora" { word-mora(arg, scale: ps) } else { ipa(arg) }
 }
 
 // --- Helper: Parse candidate string for prosodic function calls ---
@@ -55,7 +128,7 @@
   let all-matches = cand.matches(prosody-pattern)
 
   if all-matches.len() == 0 {
-    return ipa(cand)
+    return parse-ot-string(cand)
   }
 
   let parts = ()
@@ -65,7 +138,7 @@
     if m.start > pos {
       let before = cand.slice(pos, m.start).trim()
       if before != "" and before != "+" {
-        parts.push(ipa(before))
+        parts.push(parse-ot-string(before))
       }
     }
 
@@ -79,11 +152,15 @@
   if pos < cand.len() {
     let after = cand.slice(pos).trim()
     if after != "" and after != "+" {
-      parts.push(ipa(after))
+      parts.push(parse-ot-string(after))
     }
   }
 
   parts.join()
+}
+
+#let has-prosody(c) = {
+  if type(c) == str { c.matches(prosody-pattern).len() > 0 } else { type(c) == content }
 }
 
 // NOTE: --- The Main Function ---
@@ -101,11 +178,11 @@
   gloss: none,
 ) = {
   // 1. Validation and Truncation
-  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed in tableau")
+  assert(constraints.len() <= 20, message: "Maximum 20 constraints allowed in tableau")
 
-  // Truncate constraint names to 10 characters
+  // Truncate constraint names to 20 characters
   let constraints = constraints.map(c => {
-    if c.len() > 10 { c.slice(0, 10) } else { c }
+    if c.len() > 20 { c.slice(0, 20) } else { c }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -132,6 +209,14 @@
       }
       fatal-map.push(fatal-col)
     }
+    // Winner shading: shade after the rightmost fatal column among all losers
+    if winner != none and winner < fatal-map.len() {
+      let loser-fatals = fatal-map.enumerate().filter(((r, fc)) => r != winner and fc != 999)
+      if loser-fatals.len() > 0 {
+        let max-fatal = calc.max(..loser-fatals.map(((_, fc)) => fc))
+        fatal-map.at(winner) = max-fatal
+      }
+    }
   }
 
   // 3. Prepare Input Content
@@ -139,110 +224,147 @@
     [ _#gloss.at(0)_ '#gloss.at(1)']
   } else { [] }
   let input-content = if type(input) == str {
-    [/#ipa(input)/#gloss-content]
+    [#parse-ot-string(input)#gloss-content]
   } else {
     [#input#gloss-content]
   }
 
   // 4. Grid Definitions
   let letter-labels = "abcdefghijklmnopqrstuvwxyz"
-  // Always: [prefix-col | cand-col | 2pt gap | constraints...]
-  // Col 0 = prefix (☞ and/or letter), no right border — merges with candidate column
-  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto)
-  let cons-start = 3  // first constraint column index
-  let has-prosody(c) = {
-    if type(c) == str { c.matches(prosody-pattern).len() > 0 }
-    else { type(c) == content }
-  }
+  let cons-start = 3 // first constraint column index
   let row-defs = (1.75em, 2pt) + candidates.map(c => if has-prosody(c) { auto } else { 1.75em })
 
-  context text(size: font-size, font: phonokit-font.get())[#table(
-    columns: col-defs,
-    rows: row-defs,
-    align: (col, row) => {
-      if col <= 1 { right + horizon }
-      else { center + horizon }
-    },
-    inset: (col, row) => if col == 0 { (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt) } else if col == 1 { (left: 5pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
+  context {
+    let text-style(it) = text(size: font-size, font: phonokit-font.get(), it)
 
-    stroke: (col, row) => {
-      let s = 0.4pt + black
-      if col == 0 {
-        // Prefix column: borders on left, top, bottom but NO right border
-        return (left: s, top: s, bottom: s, right: none)
-      }
-      if col == 1 {
-        // Candidate column: no left border (merges with prefix column)
-        return (left: none, top: s, bottom: s, right: s)
-      }
-      let is-dashed = if col >= 3 { dashed-lines.contains(col - 3) } else { false }
-      (
-        left: s,
-        top: s,
-        bottom: s,
-        right: if is-dashed { (thickness: 0.4pt, dash: "dashed") } else { s },
-      )
-    },
+    // Measure input-content (it spans col 0 and 1)
+    // Inset for spanned cell: (left: 5pt, right: 10pt) -> 15pt total
+    let w-input = measure(text-style(input-content)).width + 15pt
 
-    fill: (col, row) => {
-      if not shade or row < 2 or col < cons-start { return none }
-      let cand-idx = row - 2
-      let cons-idx = col - cons-start
-      if cand-idx < fatal-map.len() {
-        let fatal-col = fatal-map.at(cand-idx)
-        if cons-idx > fatal-col {
-          let has-solid-line = false
-          for c in range(fatal-col, cons-idx) {
-            if not dashed-lines.contains(c) {
-              has-solid-line = true
-              break
+    // Measure Col 0 (Prefix/Finger)
+    // Inset for Col 0: (left: 5pt, right: 0pt) -> 5pt total
+    let w-col0-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let finger-content = if i == winner { scaled-finger + " " } else { "" }
+      let it = if letters {
+        let letter = letter-labels.at(calc.min(i, 25))
+        [#finger-content #letter.]
+      } else {
+        [#finger-content]
+      }
+      w-col0-max = calc.max(w-col0-max, measure(text-style(it)).width)
+    }
+    w-col0-max += 5pt
+
+    // Measure Col 1 (Candidate)
+    // Inset for Col 1: (left: 8pt, right: 10pt) -> 18pt total
+    let w-col1-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let cand-content = parse-candidate(cand, prosody-scale)
+      w-col1-max = calc.max(w-col1-max, measure(text-style(cand-content)).width)
+    }
+    w-col1-max += 18pt
+
+    // Distribution: if input is wider than col0+col1, stretch col0
+    let w0 = w-col0-max
+    let w1 = w-col1-max
+    if w-input > w0 + w1 {
+      w0 = w-input - w1
+    }
+
+    let col-defs = (w0, w1, 2pt) + constraints.map(_ => auto)
+
+    text-style[#table(
+      columns: col-defs,
+      rows: row-defs,
+      align: (col, row) => {
+        let v-align = bottom
+        if row >= 2 {
+          if col <= 1 {
+            if has-prosody(candidates.at(row - 2)) { v-align = horizon }
+          } else {
+            v-align = horizon
+          }
+        }
+        if col <= 1 { right + v-align } else { center + v-align }
+      },
+      inset: (col, row) => if col == 0 {
+        (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt)
+      } else if col == 1 {
+        (left: 8pt, top: 5pt, bottom: 5pt, right: 10pt)
+      } else { 5pt },
+
+      stroke: (col, row) => {
+        let s = 0.4pt + black
+        if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+        if col == 1 { return (left: none, top: s, bottom: s, right: s) }
+        let is-dashed = if col >= cons-start { dashed-lines.contains(col - cons-start) } else { false }
+        (
+          left: s,
+          top: s,
+          bottom: s,
+          right: if is-dashed { (thickness: 0.4pt, dash: "dashed") } else { s },
+        )
+      },
+
+      fill: (col, row) => {
+        if not shade or row < 2 or col < cons-start { return none }
+        let cand-idx = row - 2
+        let cons-idx = col - cons-start
+        if cand-idx < fatal-map.len() {
+          let fatal-col = fatal-map.at(cand-idx)
+          if cons-idx > fatal-col {
+            let has-solid-line = false
+            for c in range(fatal-col, cons-idx) {
+              if not dashed-lines.contains(c) {
+                has-solid-line = true
+                break
+              }
+            }
+            if has-solid-line { return luma(230) }
+          }
+        }
+        return none
+      },
+
+      // --- Content ---
+      table.cell(colspan: 2, inset: (left: 5pt, right: 10pt), align: right + bottom, input-content),
+      [],
+      ..constraints.map(c => format-constraint(c)),
+
+      // Gap Row
+      ..range(col-defs.len()).map(_ => []),
+
+      // Candidates
+      ..candidates
+        .enumerate()
+        .map(((i, cand)) => {
+          let cells = ()
+          let cand-content = parse-candidate(cand, prosody-scale)
+
+          let finger-content = if i == winner { scaled-finger + " " } else { "" }
+          if letters {
+            let letter = letter-labels.at(calc.min(i, 25))
+            cells.push([#finger-content #letter.])
+          } else {
+            cells.push([#finger-content])
+          }
+          cells.push([#cand-content])
+          cells.push([])
+
+          let row-viols = if i < violations.len() { violations.at(i) } else { () }
+          for j in range(constraints.len()) {
+            if j < row-viols.len() {
+              cells.push(format-viol(row-viols.at(j)))
+            } else {
+              cells.push([])
             }
           }
-          if has-solid-line { return luma(230) }
-        }
-      }
-      return none
-    },
-
-    // --- Content ---
-    [], // prefix column (empty for header)
-    input-content,
-    [],
-    ..constraints.map(c => format-constraint(c)),
-
-    // Gap Row
-    ..range(col-defs.len()).map(_ => []),
-
-    // Candidates
-    ..candidates
-      .enumerate()
-      .map(((i, cand)) => {
-        let cells = ()
-        let cand-content = parse-candidate(cand, prosody-scale)
-
-        let finger = if i == winner { scaled-finger + " " } else { "" }
-        if letters {
-          let letter = letter-labels.at(calc.min(i, 25))
-          cells.push(align(right)[#finger #letter.])
-        } else {
-          cells.push(align(right)[#finger])
-        }
-        cells.push(align(right)[#cand-content])
-
-        cells.push([])
-
-        let row-viols = if i < violations.len() { violations.at(i) } else { () }
-        for j in range(constraints.len()) {
-          if j < row-viols.len() {
-            cells.push(format-viol(row-viols.at(j)))
-          } else {
-            cells.push([])
-          }
-        }
-        return cells
-      })
-      .flatten()
-  )]
+          return cells
+        })
+        .flatten()
+    )]
+  }
 }
 
 // NOTE: --- HG TABLEAU FUNCTION ---
@@ -256,12 +378,12 @@
   letters: false,
 ) = {
   // 1. Validation and Truncation
-  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed")
+  assert(constraints.len() <= 20, message: "Maximum 20 constraints allowed")
   let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
-  // Truncate constraint names to 10 characters
+  // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 10 { c.slice(0, 10) } else { c }
+    if c.len() > 15 { c.slice(0, 15) } else { c }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -287,79 +409,126 @@
   }
 
   // 3. GRID DEFINITIONS (simpler than maxent - only h(y) column)
-  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto)
+  let row-defs = (auto, 1.75em, 2pt) + candidates.map(c => if has-prosody(c) { auto } else { 1.75em })
 
-  let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
+  context {
+    let text-style(it) = text(size: font-size, font: phonokit-font.get(), it)
+    let input-content = if type(input) == str { parse-ot-string(input) } else { input }
 
-  context text(size: font-size, font: phonokit-font.get())[#table(
-    columns: col-defs,
-    rows: row-defs,
-    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
-    inset: (col, row) => if col == 0 { (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt) } else if col == 1 { (left: 5pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
+    // Measure input-content (it spans col 0 and 1)
+    let w-input = measure(text-style(input-content)).width + 15pt
 
-    // --- STROKE LOGIC ---
-    stroke: (col, row) => {
-      // Row 0 (Weights): Always floating
-      if row == 0 { return none }
+    // Measure Col 0 (Prefix)
+    let w-col0-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let it = if letters {
+        let letter = letter-labels.at(calc.min(i, 25))
+        [#letter.]
+      } else {
+        []
+      }
+      w-col0-max = calc.max(w-col0-max, measure(text-style(it)).width)
+    }
+    w-col0-max += 5pt
 
-      let s = 0.4pt + black
-      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
-      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
-      (left: s, top: s, bottom: s, right: s)
-    },
+    // Measure Col 1 (Candidate)
+    let w-col1-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let cand-content = parse-candidate(cand, 0.5)
+      w-col1-max = calc.max(w-col1-max, measure(text-style(cand-content)).width)
+    }
+    w-col1-max += 18pt
 
-    // --- ROW 0: WEIGHTS ---
-    [], [], [],
-    ..weights.map(w => text(size: 0.9em)[$w=#w$]),
-    // Fill remaining columns: gap (2pt) + h(y) column
-    [], [],
+    // Distribution
+    let w0 = w-col0-max
+    let w1 = w-col1-max
+    if w-input > w0 + w1 {
+      w0 = w-input - w1
+    }
 
-    // --- ROW 1: HEADERS ---
-    [],
-    { if type(input) == str { [/#ipa(input)/] } else { input } },
-    [],
-    ..constraints.map(c => format-constraint(c)),
-    [],
-    [$h_i$],
+    let col-defs = (w0, w1, 2pt) + constraints.map(_ => auto) + (2pt, auto)
 
-    // --- ROW 2: GAP ---
-    ..range(col-defs.len()).map(_ => []),
+    text-style[#table(
+      columns: col-defs,
+      rows: row-defs,
+      align: (col, row) => {
+        let v-align = bottom
+        if row >= 3 {
+          if col <= 1 {
+            if has-prosody(candidates.at(row - 3)) { v-align = horizon }
+          } else {
+            v-align = horizon
+          }
+        }
+        if col <= 1 { right + v-align } else { center + v-align }
+      },
+      inset: (col, row) => if col == 0 {
+        (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt)
+      } else if col == 1 {
+        (left: 8pt, top: 5pt, bottom: 5pt, right: 10pt)
+      } else { 5pt },
 
-    // --- ROWS 3+: CANDIDATES ---
-    ..candidates
-      .enumerate()
-      .map(((i, cand)) => {
-        let cells = ()
-        let cand-content = if type(cand) == str { ipa(cand) } else { cand }
+      // --- STROKE LOGIC ---
+      stroke: (col, row) => {
+        if row == 0 { return none }
+        let s = 0.4pt + black
+        if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+        if col == 1 { return (left: none, top: s, bottom: s, right: s) }
+        (left: s, top: s, bottom: s, right: s)
+      },
 
-        if letters {
-          let letter = letter-labels.at(calc.min(i, 25))
-          cells.push(align(right)[#letter.])
-        } else {
+      // --- ROW 0: WEIGHTS
+      [], [], [],
+      ..weights.map(w => text(size: 0.9em)[$w=#w$]),
+      // Fill remaining columns: gap (2pt) + h(y) column
+      [], [],
+
+      // --- ROW 1: HEADERS ---
+      table.cell(colspan: 2, inset: (left: 5pt, right: 10pt), align: right + bottom, input-content),
+      [],
+      ..constraints.map(c => format-constraint(c)),
+      [],
+      [$h_i$],
+
+      // --- ROW 2: GAP ---
+      ..range(col-defs.len()).map(_ => []),
+
+      // --- ROWS 3+: CANDIDATES ---
+      ..candidates
+        .enumerate()
+        .map(((i, cand)) => {
+          let cells = ()
+          let cand-content = parse-candidate(cand, 0.5)
+
+          if letters {
+            let letter = letter-labels.at(calc.min(i, 25))
+            cells.push([#letter.])
+          } else {
+            cells.push([])
+          }
+          cells.push([#cand-content])
           cells.push([])
-        }
-        cells.push(align(right)[#cand-content])
-        cells.push([])
 
-        // Violations
-        let row-viols = if i < violations.len() { violations.at(i) } else { () }
-        for j in range(constraints.len()) {
-          if j < row-viols.len() { cells.push(text(size: 0.85em)[#str(row-viols.at(j))]) } else { cells.push([]) }
-        }
+          // Violations
+          let row-viols = if i < violations.len() { violations.at(i) } else { () }
+          for j in range(constraints.len()) {
+            if j < row-viols.len() { cells.push(text(size: 0.85em)[#str(row-viols.at(j))]) } else { cells.push([]) }
+          }
 
-        cells.push([])
+          cells.push([])
 
-        // Only h(y) column - no MaxEnt probabilities
-        if i < h-scores.len() {
-          cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
-        } else {
-          cells.push("-")
-        }
+          // Only h(y) column - no MaxEnt probabilities
+          if i < h-scores.len() {
+            cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
+          } else {
+            cells.push("-")
+          }
 
-        return cells
-      })
-      .flatten()
-  )]
+          return cells
+        })
+        .flatten()
+    )]
+  }
 }
 
 // NOTE: --- NHG DEMO TABLEAU (Pedagogical - shows symbolic noise) ---
@@ -374,12 +543,12 @@
   letters: false,
 ) = {
   // 1. Validation and Truncation
-  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed")
+  assert(constraints.len() <= 20, message: "Maximum 20 constraints allowed")
   let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
-  // Truncate constraint names to 10 characters
+  // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 10 { c.slice(0, 10) } else { c }
+    if c.len() > 15 { c.slice(0, 15) } else { c }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -428,102 +597,149 @@
   }
 
   // 3. GRID DEFINITIONS (h, ε, P columns)
-  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto)
-  if probabilities != none {
-    col-defs.push(auto) // Add P(y) column
-  }
+  let row-defs = (auto, 1.75em, 2pt) + candidates.map(c => if has-prosody(c) { auto } else { 1.75em })
 
-  let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
+  context {
+    let text-style(it) = text(size: font-size, font: phonokit-font.get(), it)
+    let input-content = if type(input) == str { parse-ot-string(input) } else { input }
 
-  context text(size: font-size, font: phonokit-font.get())[#table(
-    columns: col-defs,
-    rows: row-defs,
-    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
-    inset: (col, row) => if col == 0 { (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt) } else if col == 1 { (left: 5pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
+    // Measure input-content (it spans col 0 and 1)
+    let w-input = measure(text-style(input-content)).width + 15pt
 
-    // --- STROKE LOGIC ---
-    stroke: (col, row) => {
-      // Row 0 (Weights): Always floating
-      if row == 0 { return none }
+    // Measure Col 0 (Prefix)
+    let w-col0-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let it = if letters {
+        let letter = letter-labels.at(calc.min(i, 25))
+        [#letter.]
+      } else {
+        []
+      }
+      w-col0-max = calc.max(w-col0-max, measure(text-style(it)).width)
+    }
+    w-col0-max += 5pt
 
-      let s = 0.4pt + black
-      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
-      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
-      (left: s, top: s, bottom: s, right: s)
-    },
+    // Measure Col 1 (Candidate)
+    let w-col1-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let cand-content = parse-candidate(cand, 0.5)
+      w-col1-max = calc.max(w-col1-max, measure(text-style(cand-content)).width)
+    }
+    w-col1-max += 18pt
 
-    // --- ROW 0: WEIGHTS (shown as w=value like maxent) ---
-    [], [], [],
-    ..weights.map(w => text(size: 0.9em)[$w=#w$]),
-    // Fill remaining columns: gap + h + ε + (optional P)
-    ..range(if probabilities != none { 4 } else { 3 }).map(_ => []),
+    // Distribution
+    let w0 = w-col0-max
+    let w1 = w-col1-max
+    if w-input > w0 + w1 {
+      w0 = w-input - w1
+    }
 
-    // --- ROW 1: HEADERS ---
-    [],
-    { if type(input) == str { [/#ipa(input)/] } else { input } },
-    [],
-    ..constraints.map(c => format-constraint(c)),
-    [],
-    [$h_i$],
-    [$epsilon_i$],
-    ..(if probabilities != none { ([$P_i$],) } else { () }),
+    let col-defs = (w0, w1, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto)
+    if probabilities != none {
+      col-defs.push(auto) // Add P(y) column
+    }
 
-    // --- ROW 2: GAP ---
-    ..range(col-defs.len()).map(_ => []),
-
-    // --- ROWS 3+: CANDIDATES ---
-    ..candidates
-      .enumerate()
-      .map(((i, cand)) => {
-        let cells = ()
-        let cand-content = if type(cand) == str { ipa(cand) } else { cand }
-
-        if letters {
-          let letter = letter-labels.at(calc.min(i, 25))
-          cells.push(align(right)[#letter.])
-        } else {
-          cells.push([])
+    text-style[#table(
+      columns: col-defs,
+      rows: row-defs,
+      align: (col, row) => {
+        let v-align = bottom
+        if row >= 3 {
+          if col <= 1 {
+            if has-prosody(candidates.at(row - 3)) { v-align = horizon }
+          } else {
+            v-align = horizon
+          }
         }
-        cells.push(align(right)[#cand-content])
-        cells.push([])
+        if col <= 1 { right + v-align } else { center + v-align }
+      },
+      inset: (col, row) => if col == 0 {
+        (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt)
+      } else if col == 1 {
+        (left: 8pt, top: 5pt, bottom: 5pt, right: 10pt)
+      } else { 5pt },
 
-        // Violations
-        let row-viols = if i < violations.len() { violations.at(i) } else { () }
-        for j in range(constraints.len()) {
-          if j < row-viols.len() {
-            cells.push(text(size: 0.85em)[#str(row-viols.at(j))])
+      // --- STROKE LOGIC ---
+      stroke: (col, row) => {
+        if row == 0 { return none }
+        let s = 0.4pt + black
+        if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+        if col == 1 { return (left: none, top: s, bottom: s, right: s) }
+        (left: s, top: s, bottom: s, right: s)
+      },
+
+      // --- ROW 0: WEIGHTS
+      [], [], [],
+      ..weights.map(w => text(size: 0.9em)[$w=#w$]),
+      // Fill remaining columns: gap + h + ε + (optional P)
+      ..range(if probabilities != none { 4 } else { 3 }).map(_ => []),
+
+      // --- ROW 1: HEADERS ---
+      table.cell(colspan: 2, inset: (left: 5pt, right: 10pt), align: right + bottom, input-content),
+      [],
+      ..constraints.map(c => format-constraint(c)),
+      [],
+      [$h_i$],
+      [$epsilon_i$],
+      ..(if probabilities != none { ([$P_i$],) } else { () }),
+
+      // --- ROW 2: GAP ---
+      ..range(col-defs.len()).map(_ => []),
+
+      // --- ROWS 3+: CANDIDATES ---
+      ..candidates
+        .enumerate()
+        .map(((i, cand)) => {
+          let cells = ()
+          let cand-content = parse-candidate(cand, 0.5)
+
+          if letters {
+            let letter = letter-labels.at(calc.min(i, 25))
+            cells.push([#letter.])
           } else {
             cells.push([])
           }
-        }
+          cells.push([#cand-content])
+          cells.push([])
 
-        cells.push([])
+          // Violations
+          let row-viols = if i < violations.len() { violations.at(i) } else { () }
+          for j in range(constraints.len()) {
+            if j < row-viols.len() {
+              cells.push(text(size: 0.85em)[#str(row-viols.at(j))])
+            } else {
+              cells.push([])
+            }
+          }
 
-        // h(y) column
-        if i < h-scores.len() {
-          cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
-        } else {
-          cells.push("-")
-        }
+          cells.push([])
 
-        // ε(y) column (formula)
-        if i < epsilon-formulas.len() {
-          cells.push(text(size: 0.85em)[#epsilon-formulas.at(i)])
-        } else {
-          cells.push("-")
-        }
+          // h(y) column
+          if i < h-scores.len() {
+            cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
+          } else {
+            cells.push("-")
+          }
 
-        // P(y) column (if provided)
-        if probabilities != none and i < probabilities.len() {
-          cells.push(text(size: 0.85em)[#str(calc.round(probabilities.at(i), digits: 3))])
-        } else if probabilities != none {
-          cells.push("-")
-        }
+          // ε(y) column (formula)
+          if i < epsilon-formulas.len() {
+            cells.push(text(size: 0.85em)[#epsilon-formulas.at(i)])
+          } else {
+            cells.push("-")
+          }
 
-        return cells
-      })
-      .flatten()
-  )]
+          // P(y) column (if provided)
+          if probabilities != none and i < probabilities.len() {
+            cells.push(text(size: 0.85em)[#str(calc.round(probabilities.at(i), digits: 3))])
+          } else if probabilities != none {
+            cells.push("-")
+          }
+
+          return cells
+        })
+        .flatten()
+    )]
+  }
 }
 
 // NOTE: --- NHG TABLEAU (Smart - samples noise and calculates probabilities) ---
@@ -540,12 +756,12 @@
   letters: false,
 ) = {
   // 1. Validation and Truncation
-  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed")
+  assert(constraints.len() <= 20, message: "Maximum 20 constraints allowed")
   let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
-  // Truncate constraint names to 10 characters
+  // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 10 { c.slice(0, 10) } else { c }
+    if c.len() > 15 { c.slice(0, 15) } else { c }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -644,105 +860,152 @@
   }
 
   // 6. GRID DEFINITIONS
-  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto)
-  if show-epsilon {
-    col-defs.push(auto) // epsilon column
-  }
-  col-defs.push(auto) // P(y) column
+  let row-defs = (auto, 1.75em, 2pt) + candidates.map(c => if has-prosody(c) { auto } else { 1.75em })
 
-  let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
+  context {
+    let text-style(it) = text(size: font-size, font: phonokit-font.get(), it)
+    let input-content = if type(input) == str { parse-ot-string(input) } else { input }
 
-  context text(size: font-size, font: phonokit-font.get())[#table(
-    columns: col-defs,
-    rows: row-defs,
-    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
-    inset: (col, row) => if col == 0 { (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt) } else if col == 1 { (left: 5pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
+    // Measure input-content (it spans col 0 and 1)
+    let w-input = measure(text-style(input-content)).width + 15pt
 
-    // --- STROKE LOGIC ---
-    stroke: (col, row) => {
-      // Row 0 (Weights): Always floating
-      if row == 0 { return none }
+    // Measure Col 0 (Prefix)
+    let w-col0-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let it = if letters {
+        let letter = letter-labels.at(calc.min(i, 25))
+        [#letter.]
+      } else {
+        []
+      }
+      w-col0-max = calc.max(w-col0-max, measure(text-style(it)).width)
+    }
+    w-col0-max += 5pt
 
-      let s = 0.4pt + black
-      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
-      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
-      (left: s, top: s, bottom: s, right: s)
-    },
+    // Measure Col 1 (Candidate)
+    let w-col1-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let cand-content = parse-candidate(cand, 0.5)
+      w-col1-max = calc.max(w-col1-max, measure(text-style(cand-content)).width)
+    }
+    w-col1-max += 18pt
 
-    // --- ROW 0: WEIGHTS ---
-    [], [], [],
-    ..weights.map(w => text(size: 0.9em)[$w=#w$]),
-    // Fill remaining columns: gap + h + optional ε + P
-    ..range(if show-epsilon { 4 } else { 3 }).map(_ => []),
+    // Distribution
+    let w0 = w-col0-max
+    let w1 = w-col1-max
+    if w-input > w0 + w1 {
+      w0 = w-input - w1
+    }
 
-    // --- ROW 1: HEADERS ---
-    [],
-    { if type(input) == str { [/#ipa(input)/] } else { input } },
-    [],
-    ..constraints.map(c => format-constraint(c)),
-    [],
-    [$h_i$],
-    ..(if show-epsilon { ([$epsilon_i$],) } else { () }),
-    [$P_i$],
+    let col-defs = (w0, w1, 2pt) + constraints.map(_ => auto) + (2pt, auto)
+    if show-epsilon {
+      col-defs.push(auto) // epsilon column
+    }
+    col-defs.push(auto) // P(y) column
 
-    // --- ROW 2: GAP ---
-    ..range(col-defs.len()).map(_ => []),
-
-    // --- ROWS 3+: CANDIDATES ---
-    ..candidates
-      .enumerate()
-      .map(((i, cand)) => {
-        let cells = ()
-        let cand-content = if type(cand) == str { ipa(cand) } else { cand }
-
-        if letters {
-          let letter = letter-labels.at(calc.min(i, 25))
-          cells.push(align(right)[#letter.])
-        } else {
-          cells.push([])
+    text-style[#table(
+      columns: col-defs,
+      rows: row-defs,
+      align: (col, row) => {
+        let v-align = bottom
+        if row >= 3 {
+          if col <= 1 {
+            if has-prosody(candidates.at(row - 3)) { v-align = horizon }
+          } else {
+            v-align = horizon
+          }
         }
-        cells.push(align(right)[#cand-content])
-        cells.push([])
+        if col <= 1 { right + v-align } else { center + v-align }
+      },
+      inset: (col, row) => if col == 0 {
+        (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt)
+      } else if col == 1 {
+        (left: 8pt, top: 5pt, bottom: 5pt, right: 10pt)
+      } else { 5pt },
 
-        // Violations
-        let row-viols = if i < violations.len() { violations.at(i) } else { () }
-        for j in range(constraints.len()) {
-          if j < row-viols.len() {
-            cells.push(text(size: 0.85em)[#str(row-viols.at(j))])
+      // --- STROKE LOGIC ---
+      stroke: (col, row) => {
+        if row == 0 { return none }
+        let s = 0.4pt + black
+        if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+        if col == 1 { return (left: none, top: s, bottom: s, right: s) }
+        (left: s, top: s, bottom: s, right: s)
+      },
+
+      // --- ROW 0: WEIGHTS
+      [], [], [],
+      ..weights.map(w => text(size: 0.9em)[$w=#w$]),
+      // Fill remaining columns: gap + h + optional ε + P
+      ..range(if show-epsilon { 4 } else { 3 }).map(_ => []),
+
+      // --- ROW 1: HEADERS ---
+      table.cell(colspan: 2, inset: (left: 5pt, right: 10pt), align: right + bottom, input-content),
+      [],
+      ..constraints.map(c => format-constraint(c)),
+      [],
+      [$h_i$],
+      ..(if show-epsilon { ([$epsilon_i$],) } else { () }),
+      [$P_i$],
+
+      // --- ROW 2: GAP ---
+      ..range(col-defs.len()).map(_ => []),
+
+      // --- ROWS 3+: CANDIDATES ---
+      ..candidates
+        .enumerate()
+        .map(((i, cand)) => {
+          let cells = ()
+          let cand-content = parse-candidate(cand, 0.5)
+
+          if letters {
+            let letter = letter-labels.at(calc.min(i, 25))
+            cells.push([#letter.])
           } else {
             cells.push([])
           }
-        }
+          cells.push([#cand-content])
+          cells.push([])
 
-        cells.push([])
+          // Violations
+          let row-viols = if i < violations.len() { violations.at(i) } else { () }
+          for j in range(constraints.len()) {
+            if j < row-viols.len() {
+              cells.push(text(size: 0.85em)[#str(row-viols.at(j))])
+            } else {
+              cells.push([])
+            }
+          }
 
-        // h(y) column
-        if i < h-scores.len() {
-          cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
-        } else {
-          cells.push("-")
-        }
+          cells.push([])
 
-        // ε(y) column (sampled value) - only if show-epsilon
-        if show-epsilon {
-          if i < epsilon-values.len() {
-            cells.push(text(size: 0.85em)[#str(calc.round(epsilon-values.at(i), digits: 2))])
+          // h(y) column
+          if i < h-scores.len() {
+            cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
           } else {
             cells.push("-")
           }
-        }
 
-        // P(y) column (estimated from simulations)
-        if i < probabilities.len() {
-          cells.push(text(size: 0.85em)[#str(calc.round(probabilities.at(i), digits: 3))])
-        } else {
-          cells.push("-")
-        }
+          // ε(y) column (sampled value) - only if show-epsilon
+          if show-epsilon {
+            if i < epsilon-values.len() {
+              cells.push(text(size: 0.85em)[#str(calc.round(epsilon-values.at(i), digits: 2))])
+            } else {
+              cells.push("-")
+            }
+          }
 
-        return cells
-      })
-      .flatten()
-  )]
+          // P(y) column (estimated from simulations)
+          if i < probabilities.len() {
+            cells.push(text(size: 0.85em)[#str(calc.round(probabilities.at(i), digits: 3))])
+          } else {
+            cells.push("-")
+          }
+
+          return cells
+        })
+        .flatten()
+    )]
+  }
 }
 
 // NOTE: --- MAXENT TABLEAU FUNCTION ---
@@ -758,12 +1021,12 @@
   letters: false,
 ) = {
   // 1. Validation and Truncation
-  assert(constraints.len() <= 10, message: "Maximum 10 constraints allowed in maxent")
+  assert(constraints.len() <= 20, message: "Maximum 20 constraints allowed in maxent")
   let letter-labels = "abcdefghijklmnopqrstuvwxyz"
 
-  // Truncate constraint names to 10 characters
+  // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 10 { c.slice(0, 10) } else { c }
+    if c.len() > 15 { c.slice(0, 15) } else { c }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -814,112 +1077,156 @@
 
   // 4. GRID DEFINITIONS
   let bar-col-width = 3cm
-  let col-defs = (auto, auto, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto, auto)
-  if visualize {
-    col-defs.push(bar-col-width) // The Floating Column
-  }
+  let row-defs = (auto, 1.75em, 2pt) + candidates.map(c => if has-prosody(c) { auto } else { 1.75em })
 
-  let row-defs = (auto, 1.75em, 2pt) + candidates.map(_ => 1.75em)
-  let last-col-idx = col-defs.len() - 1
+  context {
+    let text-style(it) = text(size: font-size, font: phonokit-font.get(), it)
+    let input-content = if type(input) == str { parse-ot-string(input) } else { input }
 
-  let tbl = context text(size: font-size, font: phonokit-font.get())[#table(
-    columns: col-defs,
-    rows: row-defs,
-    align: (col, row) => (if col <= 1 { right } else { center }) + horizon,
-    inset: (col, row) => if col == 0 { (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt) } else if col == 1 { (left: 5pt, top: 5pt, bottom: 5pt, right: 10pt) } else { 5pt },
+    // Measure input-content (it spans col 0 and 1)
+    let w-input = measure(text-style(input-content)).width + 15pt
 
-    // --- STROKE LOGIC ---
-    stroke: (col, row) => {
-      // 1. Row 0 (Weights): Always floating
-      if row == 0 { return none }
+    // Measure Col 0 (Prefix)
+    let w-col0-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let it = if letters {
+        let letter = letter-labels.at(calc.min(i, 25))
+        [#letter.]
+      } else {
+        []
+      }
+      w-col0-max = calc.max(w-col0-max, measure(text-style(it)).width)
+    }
+    w-col0-max += 5pt
 
-      // 2. Visual Column: STRIP ALL LINES to make it float
-      if visualize and col == last-col-idx { return none }
+    // Measure Col 1 (Candidate)
+    let w-col1-max = 0pt
+    for (i, cand) in candidates.enumerate() {
+      let cand-content = parse-candidate(cand, 0.5)
+      w-col1-max = calc.max(w-col1-max, measure(text-style(cand-content)).width)
+    }
+    w-col1-max += 18pt
 
-      // 3. Prefix/candidate column merge
-      let s = 0.4pt + black
-      if col == 0 { return (left: s, top: s, bottom: s, right: none) }
-      if col == 1 { return (left: none, top: s, bottom: s, right: s) }
-      (left: s, top: s, bottom: s, right: s)
-    },
+    // Distribution
+    let w0 = w-col0-max
+    let w1 = w-col1-max
+    if w-input > w0 + w1 {
+      w0 = w-input - w1
+    }
 
-    // --- ROW 0: WEIGHTS ---
-    [], [], [],
-    ..weights.map(w => text(size: 0.9em)[$w=#w$]),
-    // Fill remaining columns with empty cells
-    ..range(if visualize { 5 } else { 4 }).map(_ => []),
+    let col-defs = (w0, w1, 2pt) + constraints.map(_ => auto) + (2pt, auto, auto, auto)
+    if visualize {
+      col-defs.push(bar-col-width) // The Floating Column
+    }
+    let last-col-idx = col-defs.len() - 1
 
-    // --- ROW 1: HEADERS ---
-    [],
-    { if type(input) == str { [/#ipa(input)/] } else { input } },
-    [],
-    ..constraints.map(c => format-constraint(c)),
-    [],
-    [$h_i$], [$e^(-h_i)$], [$P_i$],
-    // Add empty floating header if visualizing
-    ..(if visualize { ([],) } else { () }),
-
-    // --- ROW 2: GAP ---
-    ..range(col-defs.len()).map(_ => []),
-
-    // --- ROWS 3+: CANDIDATES (letters assigned AFTER sort)
-    ..candidates
-      .enumerate()
-      .map(((i, cand)) => {
-        let cells = ()
-        let cand-content = if type(cand) == str { ipa(cand) } else { cand }
-
-        // Letters are assigned after sorting, so i reflects the sorted order
-        if letters {
-          let letter = letter-labels.at(calc.min(i, 25))
-          cells.push(align(right)[#letter.])
-        } else {
-          cells.push([])
-        }
-        cells.push(align(right)[#cand-content])
-        cells.push([])
-
-        // Violations
-        let row-viols = if i < violations.len() { violations.at(i) } else { () }
-        for j in range(constraints.len()) {
-          if j < row-viols.len() { cells.push(text(size: 0.85em)[#str(row-viols.at(j))]) } else { cells.push([]) }
-        }
-
-        cells.push([])
-
-        if i < h-scores.len() {
-          cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
-          cells.push(text(size: 0.85em)[#str(calc.round(p-star-scores.at(i), digits: 3))])
-          let p-val = p-scores.at(i)
-          cells.push(text(size: 0.85em)[#str(calc.round(p-val, digits: 3))])
-
-          // --- FLOATING VISUAL BAR ---
-          if visualize {
-            cells.push(align(left + horizon)[
-              #box(width: 50%, height: 0.5em, stroke: 0.5pt + luma(100))[
-                #rect(
-                  width: p-val * 100%,
-                  height: 100%,
-                  fill: luma(100),
-                  stroke: 0.5pt + luma(100),
-                )
-              ]
-            ])
+    let tbl = text-style[#table(
+      columns: col-defs,
+      rows: row-defs,
+      align: (col, row) => {
+        let v-align = bottom
+        if row >= 3 {
+          if col <= 1 {
+            if has-prosody(candidates.at(row - 3)) { v-align = horizon }
+          } else {
+            v-align = horizon
           }
-        } else {
-          // Fallback
-          cells.push("-")
-          cells.push("-")
-          cells.push("-")
-          if visualize { cells.push([]) }
         }
+        if col <= 1 { right + v-align } else { center + v-align }
+      },
+      inset: (col, row) => if col == 0 {
+        (left: 5pt, top: 5pt, bottom: 5pt, right: 0pt)
+      } else if col == 1 {
+        (left: 8pt, top: 5pt, bottom: 5pt, right: 10pt)
+      } else { 5pt },
 
-        return cells
-      })
-      .flatten()
-  )]
+      // --- STROKE LOGIC ---
+      stroke: (col, row) => {
+        if row == 0 { return none }
+        if visualize and col == last-col-idx { return none }
+        let s = 0.4pt + black
+        if col == 0 { return (left: s, top: s, bottom: s, right: none) }
+        if col == 1 { return (left: none, top: s, bottom: s, right: s) }
+        (left: s, top: s, bottom: s, right: s)
+      },
 
-  if visualize { pad(right: -bar-col-width, tbl) } else { tbl }
+      // --- ROW 0: WEIGHTS
+      [], [], [],
+      ..weights.map(w => text(size: 0.9em)[$w=#w$]),
+      // Fill remaining columns with empty cells
+      ..range(if visualize { 5 } else { 4 }).map(_ => []),
+
+      // --- ROW 1: HEADERS ---
+      table.cell(colspan: 2, inset: (left: 5pt, right: 10pt), align: right + bottom, input-content),
+      [],
+      ..constraints.map(c => format-constraint(c)),
+      [],
+      [$h_i$], [$e^(-h_i)$], [$P_i$],
+      // Add empty floating header if visualizing
+      ..(if visualize { ([],) } else { () }),
+
+      // --- ROW 2: GAP ---
+      ..range(col-defs.len()).map(_ => []),
+
+      // --- ROWS 3+: CANDIDATES (letters assigned AFTER sort)
+      ..candidates
+        .enumerate()
+        .map(((i, cand)) => {
+          let cells = ()
+          let cand-content = parse-candidate(cand, 0.5)
+
+          // Letters are assigned after sorting, so i reflects the sorted order
+          if letters {
+            let letter = letter-labels.at(calc.min(i, 25))
+            cells.push([#letter.])
+          } else {
+            cells.push([])
+          }
+          cells.push([#cand-content])
+          cells.push([])
+
+          // Violations
+          let row-viols = if i < violations.len() { violations.at(i) } else { () }
+          for j in range(constraints.len()) {
+            if j < row-viols.len() { cells.push(text(size: 0.85em)[#str(row-viols.at(j))]) } else { cells.push([]) }
+          }
+
+          cells.push([])
+          if i < h-scores.len() {
+            cells.push(text(size: 0.85em)[#str(calc.round(h-scores.at(i), digits: 2))])
+            cells.push(text(size: 0.85em)[#str(calc.round(p-star-scores.at(i), digits: 3))])
+            let p-val = p-scores.at(i)
+            cells.push(text(size: 0.85em)[#str(calc.round(p-val, digits: 3))])
+
+            // --- FLOATING VISUAL BAR ---
+            if visualize {
+              cells.push(align(left + horizon)[
+                #box(width: 50%, height: 0.5em, stroke: 0.5pt + luma(100))[
+                  #rect(
+                    width: p-val * 100%,
+                    height: 100%,
+                    fill: luma(100),
+                    stroke: 0.5pt + luma(100),
+                  )
+                ]
+              ])
+            }
+          } else {
+            // Fallback
+            cells.push("-")
+            cells.push("-")
+            cells.push("-")
+            if visualize { cells.push([]) }
+          }
+
+          return cells
+        })
+        .flatten()
+    )]
+
+    if visualize { pad(right: -bar-col-width, tbl) } else { tbl }
+  }
+}
 }
 
 

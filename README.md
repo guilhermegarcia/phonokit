@@ -82,14 +82,14 @@
 
 ## Manual 🔍
 
-Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive demonstration of available functions and their usage. [**Here**](https://github.com/guilhermegarcia/phonokit/blob/main/intro-to-phonokit/intro-to-phonokit.pdf) you can also find a slide presentation done with Typst where most of the package's functions are illustrated.
+Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive demonstration of available functions and their usage. [**Here**](https://github.com/guilhermegarcia/phonokit/blob/main/extras/slides.pdf) you can also find a slide presentation done with Typst where most of the package's functions are illustrated.
 
 ## Fonts
 
 As of version `0.3.7`, the package allows the user to choose a global font for all functions. By default, Charis is used (Typst has a fallback font should you not have it installed). However, you can use whichever font you prefer with the following command:
 
 ```typst
-#import "@preview/phonokit:0.5.2": *
+#import "@preview/phonokit:0.5.3": *
 #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
 ```
 

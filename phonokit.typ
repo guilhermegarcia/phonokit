@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.2`]
+#let version = text(size: 0.8em)[`v 0.5.3`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -282,6 +282,8 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #fa-github() #link("https://github.com/guilhermegarcia/phonokit")[`guilhermegarcia/phonokit`]
 
+#fa-comment() #link("https://github.com/guilhermegarcia/phonokit/discussions")[`guilhermegarcia/phonokit/discussions`]
+
 #fa-bug() #link("https://github.com/guilhermegarcia/phonokit/issues")[`guilhermegarcia/phonokit/issues`]
 
 #heading(numbering: none, outlined: false)[Note on development]
@@ -292,8 +294,9 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.2` - #new[Improved numbered examples with simpler code] \
-`0.5.1` - #new[Prosodic representation in tableaux, candidate letters, gloss support, 0-indexed dashed lines] \
+`0.5.3` - #new[Custom spacing for prosody; improved IPA coverage; more flexible tableaux] \
+`0.5.2` - Improved numbered examples with simpler code \
+`0.5.1` - Prosodic representation in tableaux, candidate letters, gloss support, 0-indexed dashed lines \
 `0.5.0` - Feature geometry with support for arrows, delinking, and highlights \
 `0.4.6` - Inline ToBI function for intonational labels and titles for numbered examples \
 `0.4.5` - Vowel trapezoids accept arrows and shifted vowels \
@@ -628,7 +631,7 @@ Next, the function `#feat()` creates a matrix given a set of features. This is t
 
 
 
-= Prosody module <sec-prosody>
+= Prosody module #new-dot <sec-prosody>
 
 == Sonority
 
@@ -790,6 +793,8 @@ Extreme cases are important to test how adaptable the function is when it comes 
 
 Finally, we arrive at prosodic words (PWd), which bring together syllables and feet. This is where the user has more options, given the metrical parameters involved. Parentheses `()` are used to define feet, which means that any syllable _outside_ the foot will be linked directly to the PWd. Next, an apostrophe `'` symbolizing stress (both primary _and_ secondary) is used to indicate the head of each foot. Finally, the argument `foot: "R"` or `foot: "L"` is used to determine which foot in the PWd contains the primary stress in the word (in cases where more than one foot is present in a given PWd).
 
+
+
 #grid(
   columns: (1fr, 1fr),
   rows: 2,
@@ -829,6 +834,51 @@ It is worth noting that _all_ lines are straight in the prosody module (this is 
   caption: [Unfooted syllable far away from head foot],
   word("xa.(xa.xa)(xa.xa)(xa.xa)(xa.xa)", scale: 0.7),
 ) <fig-extreme>
+
+As of version 0.5.3, you can also adjust the vertical spacing between prosodic levels in the functions discussed above. While each function is designed to optimize vertical spacing, you might have your own preferences, so the argument `distance` allows for some adjustments in the form of an array where you specify the level you wish to target and the change in the spacing. Levels begin from 0 and from the top, so when using `#word()`, level 0 targets the prosodic word, level 1 targets the foot (if it's present), and so on. The distance is then relative to the defaults, such that `distance: ((0, 1.2),)` would increase the distance of the prosodic word level by 20%. Some dynamic lower bounds have been added to avoid obviously problematic choices, so negative numbers aren't allowed, for example.
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 1em,
+  align: (bottom + center, bottom + center),
+  [
+    #figure(
+      caption: [Code to generate @fig-pwd-space],
+      supplement: "Code",
+      kind: "code",
+    )[
+      ```typst
+      #word(
+        "(pa.ra)(pa.ra)",
+        distance: (
+          (0, 0.7), // PWd
+          (1, 0.9), // Ft
+          (2, 0.7), // Syl
+          (3, 1),   // OR
+          (4, 1),   // N
+        ),
+      )
+      ```
+    ]
+  ],
+  [
+    #figure(
+      caption: [Custom spacing between levels],
+      word(
+        "(pa.ra)(pa.ra)",
+        distance: (
+          (0, 0.7),
+          (1, 0.9),
+          (2, 0.7),
+          (3, 1),
+          (4, 1),
+        ),
+      ),
+    ) <fig-pwd-space>
+
+
+  ],
+)
 
 
 == Metrical grid
@@ -894,6 +944,7 @@ Another key function in #logo is `#autoseg()`, introduced in version 0.3.5. The 
           links: ((2, 1),),
           spacing: 1.0,
           arrow: false,
+          dash: "dashed", // default
         )
       ```,
     )
@@ -907,6 +958,7 @@ Another key function in #logo is `#autoseg()`, introduced in version 0.3.5. The 
           links: ((2, 1),),
           spacing: 1.0,
           arrow: false,
+          dash: "dashed", // default
         )
       ],
     ) <fig-nasal-spreading>
@@ -1905,22 +1957,22 @@ A more realistic scenario is shown in @hasse-2. Notice that constraint names are
 The top level of a diagram occupies position 0, which includes four partial rankings here. The second level (position 1) has two partial rankings in the diagram in question, namely #smallcaps[Max] $>>$ #smallcaps[NoCoda] and #smallcaps[Dep] $>>$ #smallcaps[Constraint]. You may want to play around with this position: change it from 1 to 2 and then to 3 to see how this affects the diagram --- you may need to manually adjust the `node-spacing` accordingly to avoid constraint overlapping.
 
 #grid(
-  columns: (1fr, 1fr),
+  columns: (1.2fr, 1fr),
   gutter: 1em,
   align: (center + horizon, center + horizon),
   [
     ```typst
     #hasse(
-        (
-          ("*Complex", "Max", 0),
-          ("*Complex", "Dep", 0),
-          ("Onset", "Max", 0),
-          ("Onset", "Dep", 0),
-          ("Max", "NoCoda", 1),
-          ("Dep", "Constraint[Feat]", 1, "dotted"),
-        ),
-        node-spacing: 3,
-      )
+      (
+        ("*Complex", "Max", 0),
+        ("*Complex", "Dep", 0),
+        ("Onset", "Max", 0),
+        ("Onset", "Dep", 0),
+        ("Max", "NoCoda", 1),
+        ("Dep", "Constraint[Feat]", 1, "dotted"),
+      ),
+      node-spacing: 3,
+    )
     ```
   ],
   [
@@ -2231,7 +2283,7 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 = IPA symbol reference <sec-ipa>
 
 #figure(
-  caption: [IPA Reference Guide],
+  caption: [IPA Reference Guide (*only main symbols shown*)],
   text(size: 9pt, table(
     columns: 16,
     inset: 4.6pt,
@@ -2619,13 +2671,118 @@ As of version `0.3.7`, users can decide which symbols are used for prosodic word
   ],
 ) <fig-symbol3>
 
+#pagebreak()
 
+
+#set page(flipped: true)
+= Wider tableaux <app-ot>
+
+As of version 0.5.3, you can have curly braces, commas, as well as superscript and subscript in input and output forms. Content inside `{...}` isn't parsed by the `#ipa()` function. Actual curly braces must be escaped: `\\{...\\}`. Constraint names can now have up to 20 characters. The number of characters allowed in constraint names, as well as the maximum number of constraints in a tableau, has been relaxed, so it's now up to the user to decide what a reasonable tableau should look like. See @code-wide.
+
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (center + horizon, center + horizon),
+    [
+      #figure(
+        caption: [Code to generate @fig-tableau-long],
+        supplement: "Code",
+        kind: "code",
+        ```typst
+        #tableau(
+          input: "kraTa_{sub}\\, \\s kraTa^{sup}\\, \\s \\{braces\\}",
+          candidates: ("long \\s candidate \\s \\A", "candidate \\s \\B", "candidate \\s \\C"),
+          constraints: (
+            "Constraint-1", "c2", "c3", "c4", "VeryLongConstraint", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15",
+        ),
+          violations: (
+            ("", "", "*", "", "", "", "", "", "", "", "*", "", "", "", "*"),
+            ("*!", "", "", "", "*", "", "", "", "", "*", "", "", "", "", ""),
+            ("", "*!", "", "", "", "", "**", "", "", "", "", "*", "", "", ""),
+          ),
+          winner: 0,
+          dashed-lines: (0,),
+          shade: true,
+          letters: true,
+        )
+        ```,
+      ) <code-wide>
+    ],
+    [
+      #figure(
+        caption: [A wide OT tableau],
+        supplement: "Tableau",
+        kind: "tableau",
+        tableau(
+          input: "kraTa_{sub}\\, \\s kraTa^{sup}\\, \\s \\{braces\\}",
+          candidates: ("long \\s candidate \\s \\A", "candidate \\s \\B", "candidate \\s \\C"),
+          constraints: (
+            "Constraint-1",
+            "c2",
+            "c3",
+            "c4",
+            "VeryLongConstraint",
+            "c6",
+            "c7",
+            "c8",
+            "c9",
+            "c10",
+            "c11",
+            "c12",
+            "c13",
+            "c14",
+            "c15",
+          ),
+          violations: (
+            ("", "", "*", "", "", "", "", "", "", "", "*", "", "", "", "*"),
+            ("*!", "", "", "", "*", "", "", "", "", "*", "", "", "", "", ""),
+            ("", "*!", "", "", "", "", "**", "", "", "", "", "*", "", "", ""),
+          ),
+          winner: 0,
+          dashed-lines: (0,),
+          shade: true,
+          letters: true,
+        ),
+      ) <fig-tableau-long>
+    ],
+  )
+]
+
+#pagebreak()
+
+#set page(flipped: false)
 
 = How can I use Typst offline? <app-editor>
 
 This vignette assumes that you know about Typst, but you may not be very familiar with it. That's why this section exists. For example, while the online app at #link("https://typst.app")[Typst.app] is very useful and practical, most of us prefer to work offline. *How can you use Typst offline then?*
 
 One of the best IDE options out there is to use VS Code with the extension Tinymist @tinymist --- the extension is therefore available for Positron, which is the successor to RStudio. Tinymist is also available as a plugin for NeoVim users. All these options work extremely well because Tinymist is great, and I haven't had any issues thus far: compilation is instantaneous, and `bib` files also work flawlessly.#footnote[Provided that they are clean and do not have any problems regarding fields, repeated entries, etc.]
+
+If you use Quarto, it is very easy to use #logo with your `qmd` files. You need to first declare `typst` as your format (see @code-quarto). Then, import the package inside a `typst` code block and you're done. Now you'll be able to use any function you want. Just remember you need the `{=typst}` suffix every time (which you can automate with a simple snippet in Positron, RStudio, etc.; see #link("https://gdgarcia.ca/posts/2026-03-28-typst_quarto/")[here]).
+
+#align(center)[
+  #figure(
+    caption: [Using #logo in a Quarto file],
+    supplement: "Code",
+    kind: "code",
+  )[
+    ````markdown
+    ---
+    title: "A Quarto document"
+    format: typst
+    ---
+
+    ```{=typst}
+    #import "@preview/phonokit:0.5.2": *
+    ```
+
+    Now you can use any function you want:
+
+    `#syllable("pat"){=typst}`
+    ````
+  ] <code-quarto>
+]
 
 = How do packages work in Typst? <app-packages>
 
@@ -2649,7 +2806,7 @@ Finally, Typst's repository contains sub-directories to keep track of each versi
 
 = Exporting representations as images <app-png>
 
-You may want to use #logo without necessarily adopting Typst. The easiest way to do this is go to to #link("https://typst.app")[Typst.app] to create the structure you need using the page set-up shown in @code-export-png. You can then download the output and voilà. You can later add to your #LaTeX or Word document --- this is similar to using #LaTeXiT.
+You may want to use #logo without necessarily adopting Typst. The easiest way to do this is go to to #link("https://typst.app")[Typst.app] to create the structure you need using the page set-up shown in @code-export-png. You can then download the output in PNG format and voilà. You can later add to your #LaTeX or Word document --- this is similar to using #LaTeXiT.
 
 Fortunately, it is also easy to automate this process if you want to do it off-line. First, make sure you install Typst compiler #link("https://typst.app/open-source/")[here]. Then, create a Typst file with your desired representation. One example is provided in @code-export-png, where we replicate @fig-tableau2. In the preamble of the file, notice that we load #logo and then adjust our page settings. You will notice that `fill` is set to `none`, which ensures that our resulting PNG file has transparent background. Finally, both `height` and `width` are set to `auto`, which sets the page size dynamically according to the size of the representation you wish to create. We will call this file `maxent.typ`.
 
@@ -2828,7 +2985,8 @@ These render upright (non-italicized), unlike math-mode `$sigma$`.
     table.hline(),
     [*Function*], [*Description*],
     table.hline(),
-    [`#blank()`], [Underline blank for fill-in exercises or SPE rules. Width is adjustable: `#blank(width: 4em)`],
+    [`#blank()`], [Underline blank for fill-in exercises or SPE rules],
+    [], [Width is adjustable: `#blank(width: 4em)`],
     [`#extra[...]`], [Wraps content in ⟨angle brackets⟩ for extrametricality: `#extra[tion]` #sym.arrow.r #extra[tion]],
     table.hline(),
   )
@@ -2837,6 +2995,28 @@ These render upright (non-italicized), unlike math-mode `$sigma$`.
 = More information, questions, suggestions
 
 
-If you have any questions, visit #link("https://github.com/guilhermegarcia/phonokit")[`github.com/guilhermegarcia/phonokit`], where you will find all the code for the package. If you find a bug or typo, or if you'd like to suggest a feature, please open an issue in the repository --- this will help improve the package. This is an ongoing project that started in December 2025, so there is _a lot_ to be improved.
+If you have any questions, visit #link("https://github.com/guilhermegarcia/phonokit")[`github.com/guilhermegarcia/phonokit`], where you will find all the code for the package. You will also find a #link("https://github.com/guilhermegarcia/phonokit/discussions")[discussion page]. If you find a bug or typo, or if you'd like to suggest a feature, please open an issue in the repository --- this will help improve the package. This is an ongoing project that started in December 2025, so there is _a lot_ to be improved.
 
+#pagebreak()
+
+= Testing
+
+#figure(
+  caption: [Testing tableau],
+  supplement: "Tableau",
+  kind: "Tableau",
+  tableau(
+    input: "An+_{NM}\\{dujn_{RAD}\\, \\s nujn_{NM}\\, \\s Dujn_{SM}\\}",
+    // input: "/test/",
+    candidates: ("An \\s dujn", "A \\s nujn", "An \\s Dujn"),
+    constraints: ("MutAgree", "Ident(nasal)"),
+    violations: (
+      ("*!", ""),
+      ("", "*"),
+      ("*!", ""),
+    ),
+    winner: 1,
+    letters: true,
+  ),
+) <tab>
 

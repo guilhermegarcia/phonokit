@@ -96,7 +96,7 @@
     "\\*w": "ʍ",
     "\\texththeng": "ɧ",
     "\\;H": "ʜ",
-    "\\textctz": "ʦ",
+    "\\textctz": "ʑ",
     "\\textbarrevglotstop": "ʢ",
     "\\barrevglotstop": "ʢ",
     // OTHER CONSONANTS - Approximant/Flap
@@ -171,6 +171,162 @@
     "\\X": "X",
     "\\Y": "Y",
     "\\Z": "Z",
+    // TIPA LONG-FORM ALTERNATIVES AND ADDITIONAL SYMBOLS
+    // A
+    "\\textturna": "ɐ",
+    "\\textscripta": "ɑ",
+    "\\textturnscripta": "ɒ",
+    "\\textsca": "ᴀ",
+    "\\;A": "ᴀ",
+    "\\textturnv": "ʌ",
+    // B
+    "\\texthtb": "ɓ",
+    "\\textscb": "ʙ",
+    "\\textcrb": "ƀ",
+    "\\textbarb": "ƀ",
+    "\\textbeta": "β",
+    "\\textsoftsign": "ь",
+    "\\texthardsign": "ъ",
+    // C
+    "\\textbarc": "ȼ",
+    "\\texthtc": "ƈ",
+    "\\v{c}": "č",
+    "\\textctc": "ɕ",
+    "\\textstretchc": "ʗ",
+    // D
+    "\\textcrd": "đ",
+    "\\textbard": "đ",
+    "\\texthtd": "ɗ",
+    "\\textrtaild": "ɖ",
+    "\\textctd": "ȡ",
+    "\\textdzlig": "ʣ",
+    "\\textdctzlig": "ʥ",
+    "\\textdyoghlig": "ʤ",
+    "\\dh": "ð",
+    // E
+    "\\textschwa": "ə",
+    "\\textrhookschwa": "ɚ",
+    "\\textreve": "ɘ",
+    "\\textsce": "ᴇ",
+    "\\;E": "ᴇ",
+    "\\textepsilon": "ɛ",
+    "\\textrevepsilon": "ɜ",
+    "\\textrhookrevepsilon": "ɝ",
+    "\\textcloserevepsilon": "ɞ",
+    // G
+    "\\textg": "ɡ",
+    "\\textbarg": "ǥ",
+    "\\textcrg": "ǥ",
+    "\\texthtg": "ɠ",
+    "\\textscg": "ɢ",
+    "\\texthtscg": "ʛ",
+    "\\textgamma": "ɣ",
+    "\\textbabygamma": "ɤ",
+    "\\textramshorns": "ɤ",
+    // H
+    "\\texthvlig": "ƕ",
+    "\\texthth": "ɦ",
+    "\\textturnh": "ɥ",
+    "4": "ɥ",
+    "\\textsch": "ʜ",
+    // I
+    "\\i": "ı",
+    "\\textbari": "ɨ",
+    "\\textiota": "ɩ",
+    "\\textlhti": "ɩ",
+    "\\textsci": "ɪ",
+    // J
+    "\\j": "ȷ",
+    "\\textctj": "ʝ",
+    "\\textscj": "ᴊ",
+    "\\;J": "ᴊ",
+    "\\v{\\j}": "ǰ",
+    "\\textObardotlessj": "ɟ",
+    "\\texthtbardotlessj": "ʄ",
+    // K
+    "\\texthtk": "ƙ",
+    "\\textturnk": "ʞ",
+    // L
+    "\\textltilde": "ɫ",
+    "\\textbarl": "ł",
+    "\\textrtaill": "ɭ",
+    "\\textOlyoghlig": "ɮ",
+    "\\textscl": "ʟ",
+    "\\textlambda": "λ",
+    "\\textcrlambda": "ƛ",
+    // M
+    "\\textltailm": "ɱ",
+    "\\textturnm": "ɯ",
+    // N
+    "\\textnrleg": "ƞ",
+    "\\ng": "ŋ",
+    "\\textrtailn": "ɳ",
+    "\\textctn": "ȵ",
+    "\\textscn": "ɴ",
+    // O
+    "\\textbullseye": "ʘ",
+    "\\textbaro": "ɵ",
+    "\\textscoelig": "ɶ",
+    "\\textopeno": "ɔ",
+    "\\textomega": "ω",
+    "\\textcloseomega": "ɷ",
+    // P
+    "\\textwynn": "ƿ",
+    "\\textthorn": "þ",
+    "\\th": "þ",
+    "\\texthtp": "ƥ",
+    "\\textphi": "ɸ",
+    // Q
+    "\\texthtq": "ʠ",
+    // R
+    "\\textfishhookr": "ɾ",
+    "\\textlonglegr": "ɼ",
+    "\\textrtailr": "ɽ",
+    "\\textturnr": "ɹ",
+    "\\textturnrrtail": "ɻ",
+    "\\textscr": "ʀ",
+    "\\textinvscr": "ʁ",
+    // S
+    "\\v{s}": "š",
+    "\\textrtails": "ʂ",
+    "\\textesh": "ʃ",
+    "\\textctesh": "ʆ",
+    // T
+    "\\texthtt": "ƭ",
+    "\\textlhookt": "ƫ",
+    "\\textrtailt": "ʈ",
+    "\\texttctclig": "ʨ",
+    "\\texttslig": "ʦ",
+    "\\texteshlig": "ʧ",
+    "\\textturnt": "ʇ",
+    "\\textctt": "ȶ",
+    "\\texttheta": "θ",
+    // U
+    "\\textbaru": "ʉ",
+    "\\textupsilon": "ʊ",
+    "\\textscu": "ᴜ",
+    "\\;U": "ᴜ",
+    // V
+    "\\textscriptv": "ʋ",
+    // W
+    "\\textturnw": "ʍ",
+    // X
+    "\\textchi": "χ",
+    // Y
+    "\\textturny": "ʎ",
+    "\\textscy": "ʏ",
+    // Z
+    "\\textcommatailz": "ʐ",
+    "\\v{z}": "ž",
+    "\\textrevyogh": "ʕ",
+    "\\textrtailz": "ʐ",
+    "\\textyogh": "ʒ",
+    "\\textctyogh": "ʓ",
+    "\\textcrtwo": "ƻ",
+    "\\textglotstop": "ʔ",
+    "\\textraiseglotstop": "ˀ",
+    "\\textinvglotstop": "ʖ",
+    "\\textrevglotstop": "ʕ",
   )
 
   // Define combining diacritics
@@ -190,6 +346,7 @@
     "\\velar": "ˠ",
     "\\palatal": "ʲ",
     "\\labial": "ʷ",
+    "\\ej": "ʼ", // modifier letter apostrophe (ejective)
   )
 
   // Split by spaces and process each token
