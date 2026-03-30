@@ -397,6 +397,7 @@ As can be seen in @fig-ipa-examples, symbols introduced by two backslashes `\\` 
   ),
 ) <fig-ipa-examples>
 
+See @sec-ipa for a reference table with the main IPA symbols available. For a more comprehensive list, visit the package's repository and download `ipa_reference.pdf` inside the `extras` directory.
 
 == Phonemic inventories
 
@@ -404,21 +405,48 @@ As can be seen in @fig-ipa-examples, symbols introduced by two backslashes `\\` 
 
 Two additional functions allow users to quickly create consonant tables and vowel trapezoids given a string of phonemes. @fig-consonants-it shows the consonant inventory for Italian, for example. The function mirrors the pulmonic consonants table in the IPA chart with some minor changes. For example, affricates are shown when `affricates: true`, and #ipa("/w/") is shown in the approximant row under both bilabial and velar columns (when #ipa("/ \\mw /") is not present, in which case #ipa("/w/") appears only under bilabial). The argument `abbreviate: true` shortens labels for both rows and columns.
 
-#figure(
-  caption: [Italian consonants - `#consonants("italian", affricates: true, abbreviate: true)`],
-  consonants("italian", affricates: true, abbreviate: true),
-) <fig-consonants-it>
-
 Aspirated consonants are shown when `aspirated: true`. In cases where neither `affricates` nor `aspirated` are set to `true`, the function will omit both groups and fewer rows will be printed.
 
 The user can either input a language#footnote[Available languages: Arabic, English, French, German, Italian, Japanese, Portuguese, Russian and Spanish (all language names are lowercase in the function). You can also use `all` to display all consonants. The same applies to the function `#vowels()`.] (see caption of @fig-consonants-it) or a string of consonants to create a custom inventory (@fig-consonants-custom) --- the input follows the same format used by the `#ipa()` function discussed in @sec-ipa-trans, so `#ipa("\\*r")` generates "#ipa("\\*r")". Note, however, that both affricates and aspirated consonants require curly braces around them as well as `affricates: true` and `aspirated: true`, as shown in the caption of @fig-consonants-custom. Finally, the function also allows for flexible sizing with the `scale` argument.
 
 
+#figure(
+  caption: [Italian consonants - `#consonants("italian", affricates: true, abbreviate: true)`],
+  consonants("italian", affricates: true, abbreviate: true),
+) <fig-consonants-it>
 
 #figure(
   caption: [`#consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true)`],
   consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true),
 ) <fig-consonants-custom>
+
+As of version 0.5.3, you can delete rows or columns to create a more minimal table. The relevant arguments are `delete-cols` and `delete-rows`. Both accept an array of positions (starting from 0). For example, you could create a minimal table for English consonants, shown in @fig-c-min.
+
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (top, top),
+    [
+      #figure(
+        caption: [Concise consonant table for English],
+        [
+          #consonants("english", affricates: true, delete-cols: (5, 8, 9), delete-rows: (2, 3, 5))
+        ],
+      ) <fig-c-min>
+    ],
+    [
+      #figure(
+        caption: [Code to generate @fig-c-min],
+        supplement: "Code",
+        kind: "code",
+        ```typst
+          #consonants("english", affricates: true, delete-cols: (5, 8, 9), delete-rows: (2, 3, 5))
+        ```,
+      )
+    ],
+  )
+]
 
 === Vowels #recent-dot <sec-vowels>
 
@@ -1804,7 +1832,7 @@ Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality
       kind: "code",
       ```typst
       #tableau(
-        input: "kraTa",
+        input: "/kraTa/",
         candidates: ("kra.Ta", "ka.Ta", "ka.ra.Ta"),
         constraints: ("Max", "Dep", "*Complex"),
         violations: (
@@ -1826,7 +1854,7 @@ Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality
       supplement: "Tableau",
       kind: "tableau",
       tableau(
-        input: "kraTa",
+        input: "/kraTa/",
         candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
         constraints: ("Max", "Dep", "*Complex"),
         violations: (
@@ -1849,7 +1877,7 @@ One nice feature of `#tableau()` is that the function automatically shades cells
   supplement: "Tableau",
   kind: "tableau",
   tableau(
-    input: "kraTa",
+    input: "/kraTa/",
     candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
     constraints: ("Max", "Dep", "*Complex"),
     violations: (
@@ -1863,6 +1891,7 @@ One nice feature of `#tableau()` is that the function automatically shades cells
   ),
 ) <tab-letters>
 
+
 Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[This also applies to other constraint-based functions in the package, discussed later in this manual.] You can pass prosodic function calls as content using square brackets, e.g., `[#syllable("mat")]`. This is the recommended approach because it avoids conflicts with the single quote character, which is also used for stress marking in prosodic notation. @tab-prosody shows an example with `#word()` candidates. When passing content directly, you control the scale via the function's own `scale` argument (this is key because prosodic structures as often too large for a tableau). @tab-prosody also shows the `gloss` argument in case more information is needed for the input. This argument requires two strings (orthographic form and translation).
 
 
@@ -1871,15 +1900,15 @@ Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[
   supplement: "Tableau",
   kind: "tableau",
   tableau(
-    input: "prato",
+    input: "/prato/",
     candidates: (
       [#word("('pra.to)", scale: 0.8)],
       [#word("('pa.to)", scale: 0.8)],
     ),
     constraints: ("Faith", "*Complex"),
     violations: (
-      ("", "*!"),
-      ("", ""),
+      ("", "*"),
+      ("*!", ""),
     ),
     winner: 0,
     letters: true,
@@ -2065,7 +2094,7 @@ The function `#maxent()` calculates $h_i$, $e^(-h_i)$ and $P(y|x)$#footnote[Wher
   supplement: "Tableau",
   kind: "Tableau",
   maxent(
-    input: "kraTa",
+    input: "/kraTa/",
     candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Tu]"),
     constraints: ("Max", "Dep", "*Complex"),
     weights: (2.5, 1.8, 1),
@@ -2089,7 +2118,7 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
   kind: "code",
   ```typst
   #maxent(
-    input: "kraTa",
+    input: "/kraTa/",
     candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
     constraints: ("Max", "Dep", "*Complex"),
     weights: (2.5, 1.8, 0.5),
@@ -2996,27 +3025,4 @@ These render upright (non-italicized), unlike math-mode `$sigma$`.
 
 
 If you have any questions, visit #link("https://github.com/guilhermegarcia/phonokit")[`github.com/guilhermegarcia/phonokit`], where you will find all the code for the package. You will also find a #link("https://github.com/guilhermegarcia/phonokit/discussions")[discussion page]. If you find a bug or typo, or if you'd like to suggest a feature, please open an issue in the repository --- this will help improve the package. This is an ongoing project that started in December 2025, so there is _a lot_ to be improved.
-
-#pagebreak()
-
-= Testing
-
-#figure(
-  caption: [Testing tableau],
-  supplement: "Tableau",
-  kind: "Tableau",
-  tableau(
-    input: "An+_{NM}\\{dujn_{RAD}\\, \\s nujn_{NM}\\, \\s Dujn_{SM}\\}",
-    // input: "/test/",
-    candidates: ("An \\s dujn", "A \\s nujn", "An \\s Dujn"),
-    constraints: ("MutAgree", "Ident(nasal)"),
-    violations: (
-      ("*!", ""),
-      ("", "*"),
-      ("*!", ""),
-    ),
-    winner: 1,
-    letters: true,
-  ),
-) <tab>
 

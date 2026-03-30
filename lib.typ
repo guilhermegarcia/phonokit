@@ -76,6 +76,8 @@
 ///
 /// Arguments:
 /// - word (string): Phonemic string in tipa-style (use "." for syllable boundaries)
+/// - syl (none): Legacy parameter, kept for API compatibility
+/// - stressed (int, optional): Index of stressed syllable (default: none)
 /// - box-size (float): Size of individual phoneme boxes (default: 0.8)
 /// - scale (float): Overall scale factor for the diagram (default: 1.0)
 /// - y-range (array): Vertical axis range for plotting (default: (0, 8))
@@ -104,6 +106,7 @@
 /// - input (string): A single syllable (e.g., "ka" or "'va")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (σ) (default: ("σ",))
+/// - distance (float, optional): Horizontal distance between segments (default: none)
 ///
 /// Returns: CeTZ drawing of syllable structure
 ///
@@ -120,6 +123,7 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (σ, μ) (default: ("σ", "μ"))
+/// - distance (float, optional): Horizontal distance between segments (default: none)
 ///
 /// Returns: CeTZ drawing of moraic structure
 ///
@@ -291,6 +295,8 @@
 /// - affricates (bool): Show affricate row after fricatives (default: false)
 /// - aspirated (bool): Show aspirated plosive/affricate rows (default: false)
 /// - abbreviate (bool): Use abbreviated place/manner labels (default: false)
+/// - delete-cols (array): 0-indexed column indices to remove (0=Bilabial ... 10=Glottal)
+/// - delete-rows (array): 0-indexed row indices to remove (0=Plosive ... 7=Lateral approximant)
 /// - cell-width (float): Width of each cell (default: 1.8)
 /// - cell-height (float): Height of each cell (default: 1.2)
 /// - label-width (float): Width of row labels (default: 3.5)
