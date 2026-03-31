@@ -293,6 +293,7 @@
   affricates: false,
   aspirated: false,
   abbreviate: false,
+  simplify: false,
   delete-cols: (),
   delete-rows: (),
   cell-width: 1.8,
@@ -384,6 +385,73 @@
       } else {
         // For custom input, use aspirated affricates extracted from braces
         aspirated-affricates-to-plot = custom-aspirated-affricates-string
+      }
+    }
+  }
+
+  // If simplify is true, auto-delete empty columns and rows
+  if simplify {
+    // Collect all used places and manners from the data to plot
+    let used-places = ()
+    let used-manners = ()
+
+    // Scan main consonants
+    for consonant in consonants-to-plot.clusters() {
+      if consonant in consonant-data {
+        let info = consonant-data.at(consonant)
+        if info.place not in used-places { used-places.push(info.place) }
+        if info.manner not in used-manners { used-manners.push(info.manner) }
+      }
+    }
+
+    // Special /w/ handling: also occupies velar column if /ɰ/ is absent
+    if consonants-to-plot.contains("w") and not consonants-to-plot.contains("ɰ") {
+      if 7 not in used-places { used-places.push(7) }
+    }
+
+    // Scan aspirated plosives
+    if aspirated {
+      for asp-plosive in aspirated-plosive-data.keys() {
+        if aspirated-plosives-to-plot.contains(asp-plosive) {
+          let info = aspirated-plosive-data.at(asp-plosive)
+          if info.place not in used-places { used-places.push(info.place) }
+          // Aspirated plosives share manner 0 (Plosive row)
+          if 0 not in used-manners { used-manners.push(0) }
+        }
+      }
+    }
+
+    // Scan affricates
+    if affricates {
+      let affricates-cleaned = affricates-to-plot.replace("͡", "")
+      for affricate in affricate-data.keys() {
+        if affricates-cleaned.contains(affricate) {
+          let info = affricate-data.at(affricate)
+          if info.place not in used-places { used-places.push(info.place) }
+          // Affricates have their own inserted row, no base manner to add
+        }
+      }
+    }
+
+    // Scan aspirated affricates
+    if aspirated and affricates {
+      for asp-affricate in aspirated-affricate-data.keys() {
+        if aspirated-affricates-to-plot.contains(asp-affricate) {
+          let info = aspirated-affricate-data.at(asp-affricate)
+          if info.place not in used-places { used-places.push(info.place) }
+        }
+      }
+    }
+
+    // Merge: add unused places/manners to delete lists
+    for i in range(places.len()) {
+      if i not in used-places and i not in delete-cols {
+        delete-cols.push(i)
+      }
+    }
+    for i in range(manners.len()) {
+      if i not in used-manners and i not in delete-rows {
+        delete-rows.push(i)
       }
     }
   }

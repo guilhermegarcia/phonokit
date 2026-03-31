@@ -420,7 +420,7 @@ The user can either input a language#footnote[Available languages: Arabic, Engli
   consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true),
 ) <fig-consonants-custom>
 
-As of version 0.5.3, you can delete rows or columns to create a more minimal table. The relevant arguments are `delete-cols` and `delete-rows`. Both accept an array of positions (starting from 0). For example, you could create a minimal table for English consonants, shown in @fig-c-min.
+As of version 0.5.3, you can delete rows or columns to create a more minimal table. The relevant arguments are `delete-cols` and `delete-rows`. Both accept an array of positions (starting from 0). For example, you could create a minimal table for English consonants, shown in @fig-c-min. You can also use `simplify: true` to remove all rows and columns without consonants in them.
 
 #align(center)[
   #grid(
@@ -442,6 +442,10 @@ As of version 0.5.3, you can delete rows or columns to create a more minimal tab
         kind: "code",
         ```typst
           #consonants("english", affricates: true, delete-cols: (5, 8, 9), delete-rows: (2, 3, 5))
+
+        // Alternatively, use the simplify argument:
+          #consonants("english", affricates: true, simplify: true)
+
         ```,
       )
     ],
