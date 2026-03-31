@@ -294,6 +294,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.4` - Minor bug fixes in tableaux after recent changes to 0-index\
 `0.5.3` - #new[Custom spacing for prosody; improved IPA coverage; more flexible tableaux] \
 `0.5.2` - Improved numbered examples with simpler code \
 `0.5.1` - Prosodic representation in tableaux, candidate letters, gloss support, 0-indexed dashed lines \
