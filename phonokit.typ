@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.3`]
+#let version = text(size: 0.8em)[`v 0.5.4`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
