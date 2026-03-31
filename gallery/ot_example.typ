@@ -12,6 +12,6 @@
     ("", "*!", ""),
   ),
   winner: 0,
-  dashed-lines: (1,),
+  dashed-lines: (0,),
 )
 
