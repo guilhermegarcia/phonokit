@@ -299,6 +299,8 @@
 /// Arguments:
 /// - consonant-string (string): Consonant symbols to plot, language name, or tipa-style IPA
 /// - lang (string, optional): Explicit language parameter (e.g., lang: "russian")
+/// - ui-lang (string): UI label language. Supported aliases: en/english, fr/french,
+///   pt/portuguese (default: "en")
 /// - affricates (bool): Show affricate row after fricatives (default: false)
 /// - aspirated (bool): Show aspirated plosive/affricate rows (default: false)
 /// - abbreviate (bool): Use abbreviated place/manner labels (default: false)
@@ -577,6 +579,8 @@
 /// Arguments:
 /// - segment (string): IPA symbol using Unicode or tipa-style notation
 /// - all (bool): Show all features including unspecified (0) values (default: false)
+/// - ui-lang (string): UI label language. Supported aliases: en/english, fr/french,
+///   pt/portuguese (default: "en")
 ///
 /// Returns: Complete feature matrix in SPE notation
 ///
@@ -911,6 +915,8 @@
 ///   height); `"sagey"` for Sagey 1986 (dorsal sub-features for height/backness,
 ///   `[round]` under labial). Affects preset vowels only; consonant presets are
 ///   identical in both models.
+/// - ui-lang (string): UI label language. Supported aliases: en/english, fr/french,
+///   pt/portuguese (default: "en")
 /// - root (array): Root matrix features, e.g. `("+son", "-vocoid")`.
 /// - laryngeal (bool): Show "laryngeal" class node explicitly.
 /// - nasal (bool, str): `[nasal]`. Values: `true` → `[nasal]`,
@@ -988,6 +994,8 @@
 ///   All keys except `from`/`to` are optional.
 /// - gap (number): Canvas-unit gap between trees (default: 1.5).
 /// - scale (number): Uniform scale factor for the whole group (default: 1.0).
+/// - ui-lang (string): UI label language. Supported aliases: en/english, fr/french,
+///   pt/portuguese (default: "en")
 /// - model (str): `"ch"` (default) or `"sagey"`. Applies to all trees.
 /// - position (array): Layout tweaks. Each entry: `("node-key-with-index", dx, dy)`,
 ///   e.g. `("continuant1", -0.2, 0.3)`. Arrows follow the adjusted positions.

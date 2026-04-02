@@ -3,6 +3,7 @@
 
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
+#import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-feature-label
 
 // Function for feature matrices in SPE notation
 /// Display feature matrix in SPE-style notation
@@ -2075,7 +2076,12 @@
 /// #feat-matrix("t \\t s")  // affricate using tipa notation
 /// #feat-matrix("i", all: true)  // show all features including 0
 /// ```
-#let feat-matrix(segment, all: false) = context {
+#let feat-matrix(segment, all: false, ui-lang: "en") = context {
+  let ui-locale = resolve-ui-lang(ui-lang)
+  if ui-locale == none {
+    return ui-lang-error(ui-lang)
+  }
+
   // Convert tipa notation to Unicode if needed
   let symbol = ipa-to-unicode(segment).trim()
 
@@ -2090,12 +2096,7 @@
   // Build feature list with readable names
   for (feature-name, value) in features {
     if all or value != "0" {
-      // Show all features or only specified ones
-      // Format feature names for display
-      let display-name = feature-name
-        .replace("spread_gl", "spread gl")
-        .replace("constr_gl", "constr gl")
-        .replace("delayed_release", "del rel")
+      let display-name = ui-feature-label(feature-name, ui-locale)
       feature-list.push(value + display-name)
     }
   }

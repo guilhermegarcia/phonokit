@@ -5,6 +5,7 @@
 #import "features.typ": feat
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
+#import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-geom-label
 
 // ── Layout constants ────────────────────────────────────────────────────────
 // Two gap sizes: tight for all-leaf sibling groups (e.g. spread/constricted),
@@ -21,19 +22,6 @@
 #let _nonleaf-stagger-dy = 0.38  // extra downward step per sibling in an all-non-leaf group
 // ── Label abbreviations ──────────────────────────────────────────────────────
 // Maps bare argument names → short display/anchor forms.
-#let _abbrev = (
-  "constricted": "constr",
-  "continuant": "cont",
-  "distributed": "distr",
-  "dorsal": "dor",
-  "coronal": "cor",
-  "labial": "lab",
-  "anterior": "ant",
-  "radical": "rad",
-  "high": "hi",
-)
-#let _short(lbl) = _abbrev.at(lbl, default: lbl)
-
 // Split a label into (sign, bare-base).  "+anterior" → ("+", "anterior").
 // "−" is U+2212 (3 UTF-8 bytes); check with starts-with, slice by byte length.
 #let _sign-base(lbl) = {
@@ -44,9 +32,9 @@
 
 // Display form: preserve sign, abbreviate bare base.
 // "+anterior" → "+ant",  "−voice" → "−voice",  "coronal" → "cor"
-#let _display(lbl) = {
+#let _display(lbl, ui-lang: "en") = {
   let (sign, base) = _sign-base(lbl)
-  sign + _short(base)
+  sign + ui-geom-label(base, ui-lang)
 }
 
 // Normalize a place-feature string from an array argument.
@@ -1284,6 +1272,7 @@
 /// -> content
 #let geom(
   ph: none,
+  ui-lang: "en",
   model: "ch",
   root: (),
   laryngeal: false,
@@ -1311,6 +1300,11 @@
   highlight: (),
   timing: auto,
 ) = {
+  let ui-locale = resolve-ui-lang(ui-lang)
+  if ui-locale == none {
+    return ui-lang-error(ui-lang)
+  }
+
   // Auto-detect length from ph: "iː" or "i:" → long (two timing slots)
   // Strip the length mark so the preset lookup finds "i", not "iː"
   // Keep the original for use as the segment label fallback.
@@ -1463,7 +1457,7 @@
           if entry.kind == "root" {
             content(
               (entry.x, entry.y),
-              text(font: font, size: fsz, fill: nc, [root]),
+              text(font: font, size: fsz, fill: nc, ui-geom-label("root", ui-locale)),
               name: nname,
             )
             if entry.feats.len() > 0 {
@@ -1495,9 +1489,9 @@
             }
           } else {
             let inner = if entry.kind == "feature" {
-              [\[#(_display(entry.label))\]]
+              [\[#(_display(entry.label, ui-lang: ui-locale))\]]
             } else {
-              [#(_display(entry.label))]
+              [#(_display(entry.label, ui-lang: ui-locale))]
             }
             content(
               (entry.x, entry.y),
@@ -1601,12 +1595,18 @@
   arrows: (),
   gap: 1.5,
   scale: 1.0,
+  ui-lang: "en",
   model: "ch",
   position: (),
   delinks: (),
   curved: false,
   highlight: (),
 ) = {
+  let ui-locale = resolve-ui-lang(ui-lang)
+  if ui-locale == none {
+    return ui-lang-error(ui-lang)
+  }
+
   let specs = args.pos()
   let scale-factor = scale
 
@@ -1783,7 +1783,7 @@
           if entry.kind == "root" {
             content(
               (entry.x, entry.y),
-              text(font: font, size: efsz, fill: nc, [root]),
+              text(font: font, size: efsz, fill: nc, ui-geom-label("root", ui-locale)),
               name: nname,
             )
             if entry.feats.len() > 0 {
@@ -1815,9 +1815,9 @@
             }
           } else {
             let inner = if entry.kind == "feature" {
-              [\[#(_display(entry.label))\]]
+              [\[#(_display(entry.label, ui-lang: ui-locale))\]]
             } else {
-              [#(_display(entry.label))]
+              [#(_display(entry.label, ui-lang: ui-locale))]
             }
             content(
               (entry.x, entry.y),

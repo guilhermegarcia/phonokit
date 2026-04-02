@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.4`]
+#let version = text(size: 0.8em)[`v 0.5.5`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -294,8 +294,9 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.5` - Improved alignment for numbered examples; UI language support for functions \
 `0.5.4` - Minor bug fixes in tableaux after recent changes to 0-index\
-`0.5.3` - #new[Custom spacing for prosody; improved IPA coverage; more flexible tableaux] \
+`0.5.3` - Custom spacing for prosody; improved IPA coverage; more flexible tableaux \
 `0.5.2` - Improved numbered examples with simpler code \
 `0.5.1` - Prosodic representation in tableaux, candidate letters, gloss support, 0-indexed dashed lines \
 `0.5.0` - Feature geometry with support for arrows, delinking, and highlights \
@@ -453,7 +454,37 @@ As of version 0.5.3, you can delete rows or columns to create a more minimal tab
   )
 ]
 
-=== Vowels #recent-dot <sec-vowels>
+Finally, as of version 0.5.5, you certain functions have a `ui-lang` parameter for localization. French and Portuguese are supported (defaults to English). This parameter is also available in the functions `#feat-matrix()` (@spe), `#geom()` and `#geom-group()` (@geometry).
+
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (top, top),
+    [
+      #figure(
+        caption: [Concise consonant table for Italian in a French document],
+        [
+          #consonants("italian", affricates: true, simplify: true, ui-lang: "fr")
+        ],
+      ) <fig-c-lang>
+    ],
+    [
+      #figure(
+        caption: [Code to generate @fig-c-lang],
+        supplement: "Code",
+        kind: "code",
+        ```typst
+          #consonants("italian", affricates: true, simplify: true, ui-lang: "fr")
+        ```,
+      )
+    ],
+  )
+]
+
+
+
+=== Vowels <sec-vowels>
 
 
 Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed.
@@ -615,7 +646,7 @@ As is often the case, a figure can quickly become too crowded. Once we start add
   ],
 )
 
-= SPE
+= SPE <spe>
 
 Rewrite rules can be very complex, and an excellent package already exists to deal with their complexity in Typst #cite(<linphon>, supplement: [#link("https://typst.app/universe/package/linphon")[`linphon`]]). The problem is that, like autosegmental representations, too many degrees of freedom exist in SPE-like representations, not to mention the variation across scholars when it comes to symbols, brackets, etc. On the plus side, you can do a lot simply by employing primitives that already exist (e.g., matrices and arrows), so SPE rules are not as challenging to typeset as some other non-linear structures in phonology (at least simpler rules...). For that reason, #logo only has two primitive functions to help create feature matrices, which in turn can be combined to form SPE-style rules @chomsky1968spe.
 
@@ -1550,7 +1581,7 @@ Finally, let's reproduce another figure, this time adapted from #cite(<carvalho2
   ],
 )
 
-= Feature geometry #new-dot <geometry>
+= Feature geometry #recent-dot <geometry>
 
 Feature geometry is a natural progression from functions that cover autosegmental phonology and multi-tier representations. It presents some important challenges, including the user interface: as already mentioned, if too many degrees of freedom are available, a function becomes too convoluted, which compromises its use. Below I describe two special functions that are dedicated to feature geometry: `#geom()`, which takes care of any given representation, and `#geom-group()`, designed to represent multiple trees and processes.
 

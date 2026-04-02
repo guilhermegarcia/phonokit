@@ -1,6 +1,7 @@
 #import "@preview/cetz:0.4.2": canvas, draw
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
+#import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-consonant-labels
 
 // Consonant data with place, manner, and voicing
 // place: 0=bilabial, 1=labiodental, 2=dental, 3=alveolar, 4=postalveolar
@@ -290,6 +291,7 @@
 #let consonants(
   consonant-string,
   lang: none,
+  ui-lang: "en",
   affricates: false,
   aspirated: false,
   abbreviate: false,
@@ -308,6 +310,12 @@
   let custom-aspirated-plosives-string = ""
   let custom-aspirated-affricates-string = ""
   let error-msg = none
+  let ui-locale = resolve-ui-lang(ui-lang)
+
+  if ui-locale == none {
+    return ui-lang-error(ui-lang)
+  }
+  let labels = ui-consonant-labels(ui-locale)
 
   // Check if consonant-string is actually a language name
   if consonant-string in language-consonants {
@@ -457,8 +465,8 @@
   }
 
   // Select label sets based on abbreviation setting
-  let place-labels = if abbreviate { places-short } else { places }
-  let manner-labels = if abbreviate { manners-short } else { manners }
+  let place-labels = if abbreviate { labels.places_short } else { labels.places }
+  let manner-labels = if abbreviate { labels.manners_short } else { labels.manners }
 
   // Filter deleted columns and build column remapping
   let kept-cols = range(places.len()).filter(i => i not in delete-cols)
@@ -484,7 +492,7 @@
 
     // Insert aspirated plosive row after Plosive (base 0)
     if base-row == 0 and aspirated {
-      let asp-label = if abbreviate { "Plos (asp)" } else { "Plosive (aspirated)" }
+      let asp-label = if abbreviate { labels.aspirated_plosive_short } else { labels.aspirated_plosive }
       display-manners.push(asp-label)
       aspirated-plosive-row = current-row
       current-row += 1
@@ -492,13 +500,13 @@
 
     // Insert affricate rows after Fricative (base 4)
     if base-row == 4 and affricates {
-      let affr-label = if abbreviate { "Affr" } else { "Affricate" }
+      let affr-label = if abbreviate { labels.affricate_short } else { labels.affricate }
       display-manners.push(affr-label)
       affricate-row = current-row
       current-row += 1
 
       if aspirated {
-        let asp-affr-label = if abbreviate { "Affr (asp)" } else { "Affricate (aspirated)" }
+        let asp-affr-label = if abbreviate { labels.aspirated_affricate_short } else { labels.aspirated_affricate }
         display-manners.push(asp-affr-label)
         aspirated-affricate-row = current-row
         current-row += 1
@@ -519,71 +527,90 @@
   let num-cols = display-places.len()
   let num-rows = display-manners.len()
 
-  canvas({
-    import draw: *
+  context {
+    let label-padding = 0.35 * scale
+    let column-widths = display-places.map(place => calc.max(
+      scaled-cell-width,
+      measure(text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), place)).width / 1cm + label-padding,
+    ))
+    let resolved-label-width = calc.max(
+      scaled-label-width,
+      calc.max(..display-manners.map(manner => measure(text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), manner)).width / 1cm)) + 0.35 * scale,
+    )
 
-    // Calculate total dimensions
-    let total-width = scaled-label-width + (num-cols * scaled-cell-width)
-    let total-height = scaled-label-height + (num-rows * scaled-cell-height)
-
-    // Draw column headers (places of articulation)
-    for (i, place) in display-places.enumerate() {
-      let x = scaled-label-width + (i * scaled-cell-width) + (scaled-cell-width / 2)
-      let y = total-height / 2 - (scaled-label-height * 0.65)
-
-      content((x, y), context text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), top-edge: "cap-height", bottom-edge: "baseline", place), anchor: "center")
+    let col-starts = ()
+    let x-cursor = resolved-label-width
+    for width in column-widths {
+      col-starts.push(x-cursor)
+      x-cursor += width
     }
 
-    // Draw row headers (manners of articulation)
-    for (i, manner) in display-manners.enumerate() {
-      let x = scaled-label-width - 0.2
-      let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height) - (scaled-cell-height / 2)
+    canvas({
+      import draw: *
 
-      content((x, y), context text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), manner), anchor: "east")
-    }
+      // Calculate total dimensions
+      let total-width = resolved-label-width + column-widths.sum()
+      let total-height = scaled-label-height + (num-rows * scaled-cell-height)
 
-    // Row indices for grid drawing (from the remapping built above)
-    let fricative-display-row = manner-to-row.at("4", default: -1)
+      // Draw column headers (places of articulation)
+      for (i, place) in display-places.enumerate() {
+        let col-width = column-widths.at(i)
+        let x = col-starts.at(i) + (col-width / 2)
+        let y = total-height / 2 - (scaled-label-height * 0.65)
 
-    // Draw grid lines
-    // Vertical lines
-    for i in range(num-cols + 1) {
-      let x = scaled-label-width + (i * scaled-cell-width)
-      let y1 = total-height / 2 - scaled-label-height
-      let y2 = -total-height / 2
-
-      // Check if this vertical line is at a dental-alveolar or alveolar-postalveolar boundary
-      let is-special = false
-      if i > 0 and i < num-cols {
-        let left-orig = kept-cols.at(i - 1)
-        let right-orig = kept-cols.at(i)
-        if (left-orig == 2 and right-orig == 3) or (left-orig == 3 and right-orig == 4) {
-          is-special = true
-        }
+        content((x, y), text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), top-edge: "cap-height", bottom-edge: "baseline", place), anchor: "center")
       }
 
-      if is-special {
-        // Draw line segments only for fricative and affricate rows
-        for row in range(num-rows) {
-          if row == fricative-display-row or row == affricate-row or row == aspirated-affricate-row {
-            let row-y1 = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
-            let row-y2 = row-y1 - scaled-cell-height
-            line((x, row-y1), (x, row-y2), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
+      // Draw row headers (manners of articulation)
+      for (i, manner) in display-manners.enumerate() {
+        let x = resolved-label-width - 0.2
+        let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height) - (scaled-cell-height / 2)
+
+        content((x, y), text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), manner), anchor: "east")
+      }
+
+      // Row indices for grid drawing (from the remapping built above)
+      let fricative-display-row = manner-to-row.at("4", default: -1)
+
+      // Draw grid lines
+      // Vertical lines
+      for i in range(num-cols + 1) {
+        let x = if i == num-cols { total-width } else { col-starts.at(i) }
+        let y1 = total-height / 2 - scaled-label-height
+        let y2 = -total-height / 2
+
+        // Check if this vertical line is at a dental-alveolar or alveolar-postalveolar boundary
+        let is-special = false
+        if i > 0 and i < num-cols {
+          let left-orig = kept-cols.at(i - 1)
+          let right-orig = kept-cols.at(i)
+          if (left-orig == 2 and right-orig == 3) or (left-orig == 3 and right-orig == 4) {
+            is-special = true
           }
         }
-      } else {
-        // Draw normal full-height vertical line for other columns
-        line((x, y1), (x, y2), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
-      }
-    }
 
-    // Horizontal lines
-    for i in range(num-rows + 1) {
-      let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height)
-      let x1 = scaled-label-width
-      let x2 = total-width
-      line((x1, y), (x2, y), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
-    }
+        if is-special {
+          // Draw line segments only for fricative and affricate rows
+          for row in range(num-rows) {
+            if row == fricative-display-row or row == affricate-row or row == aspirated-affricate-row {
+              let row-y1 = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
+              let row-y2 = row-y1 - scaled-cell-height
+              line((x, row-y1), (x, row-y2), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
+            }
+          }
+        } else {
+          // Draw normal full-height vertical line for other columns
+          line((x, y1), (x, y2), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
+        }
+      }
+
+      // Horizontal lines
+      for i in range(num-rows + 1) {
+        let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height)
+        let x1 = resolved-label-width
+        let x2 = total-width
+        line((x1, y), (x2, y), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
+      }
 
     // Gray out impossible consonant cells
     // Format: (display-row, orig-col, half) where half can be "full", "voiced", "voiceless"
@@ -639,29 +666,30 @@
         // Row or column was deleted, skip
       } else {
       let col = col-remap.at(str(orig-col))
-      let cell-x = scaled-label-width + (col * scaled-cell-width)
+      let col-width = column-widths.at(col)
+      let cell-x = col-starts.at(col)
       let cell-y = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
 
       if half == "full" {
         // Fill entire cell
         rect(
           (cell-x, cell-y),
-          (cell-x + scaled-cell-width, cell-y - scaled-cell-height),
+          (cell-x + col-width, cell-y - scaled-cell-height),
           fill: gray.lighten(70%),
           stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt),
         )
       } else if half == "voiced" {
         // Fill right half of cell (voiced side)
-        let mid-x = cell-x + (scaled-cell-width / 2)
+        let mid-x = cell-x + (col-width / 2)
         rect(
           (mid-x, cell-y),
-          (cell-x + scaled-cell-width, cell-y - scaled-cell-height),
+          (cell-x + col-width, cell-y - scaled-cell-height),
           fill: gray.lighten(70%),
           stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt),
         )
       } else if half == "voiceless" {
         // Fill left half of cell (voiceless side)
-        let mid-x = cell-x + (scaled-cell-width / 2)
+        let mid-x = cell-x + (col-width / 2)
         rect(
           (cell-x, cell-y),
           (mid-x, cell-y - scaled-cell-height),
@@ -772,9 +800,10 @@
         let col = col-remap.at(str(orig-col))
         let row = manner-to-row.at(str(orig-manner))
 
-        let cell-x = scaled-label-width + (col * scaled-cell-width)
+        let col-width = column-widths.at(col)
+        let cell-x = col-starts.at(col)
         let cell-y = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
-        let cell-center-x = cell-x + (scaled-cell-width / 2)
+        let cell-center-x = cell-x + (col-width / 2)
         let cell-center-y = cell-y - (scaled-cell-height / 2)
 
         // Check if this is a sonorant manner (not contrastive for voicing, should be centered)
@@ -796,7 +825,7 @@
           }
         } else {
           // Obstruents: use left/right positioning for voicing contrast
-          let offset = scaled-cell-width * 0.25
+          let offset = col-width * 0.25
 
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
@@ -821,12 +850,13 @@
           let col = col-remap.at(str(orig-col))
           let row = aspirated-plosive-row
 
-          let cell-x = scaled-label-width + (col * scaled-cell-width)
+          let col-width = column-widths.at(col)
+          let cell-x = col-starts.at(col)
           let cell-y = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
-          let cell-center-x = cell-x + (scaled-cell-width / 2)
+          let cell-center-x = cell-x + (col-width / 2)
           let cell-center-y = cell-y - (scaled-cell-height / 2)
 
-          let offset = scaled-cell-width * 0.25
+          let offset = col-width * 0.25
 
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
@@ -845,12 +875,13 @@
           let col = col-remap.at(str(orig-col))
           let row = affricate-row
 
-          let cell-x = scaled-label-width + (col * scaled-cell-width)
+          let col-width = column-widths.at(col)
+          let cell-x = col-starts.at(col)
           let cell-y = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
-          let cell-center-x = cell-x + (scaled-cell-width / 2)
+          let cell-center-x = cell-x + (col-width / 2)
           let cell-center-y = cell-y - (scaled-cell-height / 2)
 
-          let offset = scaled-cell-width * 0.25
+          let offset = col-width * 0.25
 
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
@@ -875,12 +906,13 @@
           let col = col-remap.at(str(orig-col))
           let row = aspirated-affricate-row
 
-          let cell-x = scaled-label-width + (col * scaled-cell-width)
+          let col-width = column-widths.at(col)
+          let cell-x = col-starts.at(col)
           let cell-y = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
-          let cell-center-x = cell-x + (scaled-cell-width / 2)
+          let cell-center-x = cell-x + (col-width / 2)
           let cell-center-y = cell-y - (scaled-cell-height / 2)
 
-          let offset = scaled-cell-width * 0.25
+          let offset = col-width * 0.25
 
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
@@ -890,6 +922,6 @@
         }
       }
     }
-  })
+    })
+  }
 }
-
