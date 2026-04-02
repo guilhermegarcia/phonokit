@@ -291,7 +291,7 @@
     }
   }
   figure(
-    content,
+    align(left, content),
     caption: if caption != none { caption } else { none },
     outlined: caption != none,
     kind: "linguistic-example",

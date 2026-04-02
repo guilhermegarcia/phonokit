@@ -2168,12 +2168,10 @@ The simplest use of `#ex()` is to wrap content directly. The example number is g
         ```,
       ) <code-single-ex>
     ],
-    [
-      #ex[#ipa("/anba/") & #a-r & #ipa("[amba]")] <phon-single>
-    ],
   )
 ]
 
+#ex[#ipa("/anba/") & #a-r & #ipa("[amba]")] <phon-single>
 
 For sub-examples, use the list syntax (`-`). Each item is automatically lettered (`a.`, `b.`, etc.). The `labels` argument allows individual sub-examples to be referenced, as in @ex-anba and @ex-anka. The example as a whole can also be referenced, as in @phon-ex.
 
@@ -2181,29 +2179,29 @@ For sub-examples, use the list syntax (`-`). Each item is automatically lettered
   #grid(
     columns: 1,
     gutter: 1em,
-    align: (center + horizon, center + horizon),
     [
-      #figure(
-        supplement: "Code",
-        kind: "code",
-        caption: [Numbered example with sub-examples],
-        ```typst
-        #ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>),
-          columns: (5em, 2em, 5em))[
-          - #ipa("/anba/") & #a-r & #ipa("[amba]")
-          - #ipa("/anka/") & #a-r & #ipa("[aNka]")
-        ] <phon-ex>
-        ```,
-      ) <code-example>
-    ],
-    [
-      #ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>), columns: (5em, 2em, 5em))[
-        - #ipa("/anba/") & #a-r & #ipa("[amba]")
-        - #ipa("/anka/") & #a-r & #ipa("[aNka]")
-      ] <phon-ex>
+      #align(center)[
+        #figure(
+          supplement: "Code",
+          kind: "code",
+          caption: [Numbered example with sub-examples],
+          ```typst
+          #ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>),
+            columns: (5em, 2em, 5em))[
+            - #ipa("/anba/") & #a-r & #ipa("[amba]")
+            - #ipa("/anka/") & #a-r & #ipa("[aNka]")
+          ] <phon-ex>
+          ```,
+        ) <code-example>
+      ]
     ],
   )
 ]
+
+#ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>), columns: (5em, 2em, 5em))[
+  - #ipa("/anba/") & #a-r & #ipa("[amba]")
+  - #ipa("/anka/") & #a-r & #ipa("[aNka]")
+] <phon-ex>
 
 Without `labels`, sub-examples are simply not referenceable individually --- only the example as a whole can be labeled and referenced. The `columns` argument is optional and specifies the width of each data column (the number and letter columns are always `2em`). If `columns` is omitted, all data columns default to `auto` width. Using explicit widths guarantees perfect alignment across different examples, as can be seen in @phon-ex2 and @phon-ex3.
 
