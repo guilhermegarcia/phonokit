@@ -107,6 +107,8 @@
 /// Arguments:
 /// - vowels (string): Tipa-style/IPA vowel string or a built-in language name
 ///   such as `"english"`
+/// - source (array, optional): Tabular data from `csv(...)` with required
+///   columns `vowel`, `f1`, and `f2`
 /// - sd (float): Spread of synthetic tokens in Hz
 /// - sd2 (float, optional): Optional separate F2 spread in Hz
 /// - n (int): Number of tokens per vowel (default: 10)
@@ -119,13 +121,14 @@
 /// - point-color (color or auto): Override token color (default: auto)
 /// - point-alpha (ratio): Token transparency (default: 20%)
 /// - vowel-color (color): Color of vowel labels (default: black)
-/// - vowel-size (length): Font size of vowel labels (default: 12pt)
+/// - vowel-size (length): Font size of vowel labels (default: 20pt)
 /// - axis-size (length): Font size of axis labels and tick labels (default: 10pt)
 /// - scale (float): Overall scale factor for the figure (default: 1.0)
 ///
 /// Example:
 /// ```
-/// #formants("i ɪ e ɛ æ a ə ɔ o ʊ u", sd: 80)
+/// #formants("aeiou")
+/// #formants(source: csv("extras/formants_sample.csv"))
 /// ```
 #let formants = formants
 

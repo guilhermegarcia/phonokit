@@ -3,6 +3,8 @@
 #import "_config.typ": phonokit-font
 #import "vowels.typ": language-vowels
 
+#let formants-default-vowel-size = 18pt
+
 #let phonetic-vowel-presets = (
   "i": (f1: 280, f2: 2290),
   "y": (f1: 310, f2: 1990),
@@ -66,6 +68,15 @@
   seen
 }
 
+#let _index-of(items, target) = {
+  for (idx, item) in items.enumerate() {
+    if item == target {
+      return idx
+    }
+  }
+  none
+}
+
 #let _normalize-vowel-string(vowels) = {
   let cleaned = vowels
   if cleaned in language-vowels {
@@ -79,9 +90,7 @@
     .replace(";", " ")
     .replace("|", " ")
 
-  let split-tokens = normalized
-      .split(" ")
-      .filter(token => token != "")
+  let split-tokens = normalized.split(" ").filter(token => token != "")
   if split-tokens.len() > 0 {
     let expanded = ()
     for token in split-tokens {
@@ -152,16 +161,85 @@
   })
 }
 
+#let _mean(values) = values.sum() / values.len()
+
+#let _sd(values) = {
+  if values.len() <= 1 { return 0.0 }
+  let mean = _mean(values)
+  let variance = values.map(value => calc.pow(value - mean, 2)).sum() / values.len()
+  calc.sqrt(variance)
+}
+
+#let _csv-tokens(source) = {
+  if type(source) != array {
+    return (error: [*Error:* `source` must be tabular data from `csv(..., row-type: dictionary)`], tokens: ())
+  }
+  if source.len() == 0 {
+    return (error: [*Error:* `source` is empty], tokens: ())
+  }
+
+  let first = source.at(0)
+  let tokens = ()
+  if type(first) == dictionary {
+    if not ("vowel" in first and "f1" in first and "f2" in first) {
+      return (error: [*Error:* CSV source must contain columns `"vowel"`, `"f1"`, and `"f2"`], tokens: ())
+    }
+    for row in source {
+      if type(row) != dictionary or not ("vowel" in row and "f1" in row and "f2" in row) {
+        return (error: [*Error:* Every CSV row must contain `"vowel"`, `"f1"`, and `"f2"`], tokens: ())
+      }
+      let vowel = ipa-to-unicode(str(row.at("vowel")))
+      let f1 = float(row.at("f1"))
+      let f2 = float(row.at("f2"))
+      tokens.push((vowel: vowel, f1: f1, f2: f2))
+    }
+  } else if type(first) == array {
+    if first.len() < 3 {
+      return (error: [*Error:* CSV source must contain columns `"vowel"`, `"f1"`, and `"f2"`], tokens: ())
+    }
+    let headers = first.map(value => str(value))
+    let vowel-idx = _index-of(headers, "vowel")
+    let f1-idx = _index-of(headers, "f1")
+    let f2-idx = _index-of(headers, "f2")
+    if vowel-idx == none or f1-idx == none or f2-idx == none {
+      return (error: [*Error:* CSV source must contain columns `"vowel"`, `"f1"`, and `"f2"`], tokens: ())
+    }
+    for row in source.slice(1) {
+      if type(row) != array or calc.max(vowel-idx, f1-idx, f2-idx) >= row.len() {
+        return (error: [*Error:* Every CSV row must contain values for `"vowel"`, `"f1"`, and `"f2"`], tokens: ())
+      }
+      let vowel = ipa-to-unicode(str(row.at(vowel-idx)))
+      let f1 = float(row.at(f1-idx))
+      let f2 = float(row.at(f2-idx))
+      tokens.push((vowel: vowel, f1: f1, f2: f2))
+    }
+  } else {
+    return (error: [*Error:* `source` must be tabular data from `csv(...)`], tokens: ())
+  }
+  (error: none, tokens: tokens)
+}
+
+#let _centroids-from-tokens(tokens) = {
+  let vowels = _unique(tokens.map(token => token.vowel))
+  vowels.map(vowel => {
+    let subset = tokens.filter(token => token.vowel == vowel)
+    (
+      vowel: vowel,
+      f1: _mean(subset.map(token => token.f1)),
+      f2: _mean(subset.map(token => token.f2)),
+      sd-f1: _sd(subset.map(token => token.f1)),
+      sd-f2: _sd(subset.map(token => token.f2)),
+    )
+  })
+}
+
 #let _warn(body) = text(fill: red.darken(20%), weight: "bold")[⚠ #body]
 
 #let _nice-tick-step(span, target: 8) = {
   let rough = span / target
-  if rough <= 50 { 50 }
-  else if rough <= 100 { 100 }
-  else if rough <= 200 { 200 }
-  else if rough <= 250 { 250 }
-  else if rough <= 500 { 500 }
-  else { 1000 }
+  if rough <= 50 { 50 } else if rough <= 100 { 100 } else if rough <= 200 { 200 } else if rough <= 250 { 250 } else if (
+    rough <= 500
+  ) { 500 } else { 1000 }
 }
 
 #let _make-ticks(minimum, maximum, step) = {
@@ -191,6 +269,8 @@
 /// Arguments:
 /// - vowels (string): Tipa-style/IPA vowel string or a built-in language name
 ///   such as `"english"`.
+/// - source (array, optional): Tabular data from `csv(...)` with required
+///   columns `vowel`, `f1`, and `f2`. Extra columns are ignored.
 /// - sd (float): Standard deviation used for F1 jitter in Hz.
 /// - sd2 (float, optional): Standard deviation for F2 jitter in Hz; defaults to `sd`.
 /// - n (int): Number of synthetic tokens per vowel (default: 10).
@@ -208,7 +288,7 @@
 ///   (default: auto).
 /// - point-alpha (ratio): Token transparency (default: 20%).
 /// - vowel-color (color): Color used for vowel labels (default: black).
-/// - vowel-size (length): Font size used for vowel labels (default: 12pt).
+/// - vowel-size (length): Font size used for vowel labels (default: 20pt).
 /// - axis-size (length): Font size used for axis labels and tick labels
 ///   (default: 10pt).
 /// - scale (float): Overall scale factor for the figure (default: 1.0).
@@ -222,6 +302,7 @@
 ///   language preset such as `"english"` or `"french"`, that inventory is used.
 /// - Otherwise, the input is parsed through `ipa-to-unicode` by default, so
 ///   tipa-style strings like `"a e E o O i u"` work directly.
+/// - In CSV mode, `source: csv("...")` assumes the first row is a header row.
 /// - The ellipses visualize the user-provided spread parameters (`sd`, `sd2`);
 ///   they are not data-derived confidence ellipses.
 ///
@@ -229,8 +310,9 @@
 /// ```
 /// #formants("i ɪ e ɛ æ a ə ɔ o ʊ u", sd: 80)
 /// ```
-#let formants(
-  vowels,
+#let _formants_impl(
+  vowels: none,
+  source: none,
   sd: 60,
   sd2: none,
   n: 10,
@@ -246,7 +328,7 @@
   point-color: auto,
   point-alpha: 20%,
   vowel-color: black,
-  vowel-size: 12pt,
+  vowel-size: formants-default-vowel-size,
   axis-size: 10pt,
   scale: 1.0,
   x-label: [F2 (Hz)],
@@ -254,22 +336,39 @@
   width: 10cm,
   height: 7cm,
 ) = {
-  let preset-map = if vowels == "english" {
-    english-hillenbrand-male
-  } else {
-    phonetic-vowel-presets
-  }
-  let requested = _normalize-vowel-string(vowels)
-  let known = requested.filter(vowel => vowel in preset-map)
-  let unknown = _unique(requested.filter(vowel => vowel not in preset-map))
-
-  if known.len() == 0 {
-    return _warn([No supported vowels found in input: "#vowels".])
-  }
-
+  let tokens = ()
+  let centroids = ()
   let spread2 = if sd2 == none { sd } else { sd2 }
-  let tokens = _token-cloud(known, preset-map, n, sd, spread2, seed)
-  let centroids = _centroid-pairs(known, preset-map)
+  let unknown = ()
+
+  if source != none {
+    let parsed = _csv-tokens(source)
+    if parsed.error != none {
+      return parsed.error
+    }
+    tokens = parsed.tokens
+    centroids = _centroids-from-tokens(tokens)
+    if tokens.len() == 0 {
+      return [*Error:* `source` is empty]
+    }
+  } else {
+    let preset-map = if vowels == "english" {
+      english-hillenbrand-male
+    } else {
+      phonetic-vowel-presets
+    }
+    let requested = _normalize-vowel-string(vowels)
+    let known = requested.filter(vowel => vowel in preset-map)
+    unknown = _unique(requested.filter(vowel => vowel not in preset-map))
+
+    if known.len() == 0 {
+      return _warn([No supported vowels found in input: "#vowels".])
+    }
+
+    tokens = _token-cloud(known, preset-map, n, sd, spread2, seed)
+    centroids = _centroid-pairs(known, preset-map).map(ct => (..ct, sd-f1: sd, sd-f2: spread2))
+  }
+
   let f1-values = tokens.map(t => t.f1) + centroids.map(t => t.f1)
   let f2-values = tokens.map(t => t.f2) + centroids.map(t => t.f2)
   let f1-min = calc.min(..f1-values) - calc.max(sd * 1.5, 60)
@@ -280,7 +379,7 @@
   let y-step = _nice-tick-step(f1-max - f1-min)
   let x-ticks = _make-ticks(f2-min, f2-max, x-step)
   let y-ticks = _make-ticks(f1-min, f1-max, y-step)
-  let groups = known.map(vowel => (
+  let groups = _unique(tokens.map(token => token.vowel)).map(vowel => (
     vowel,
     tokens.filter(token => token.vowel == vowel),
   ))
@@ -314,13 +413,19 @@
       let scaled-point-size = point-size * scale
       let scaled-vowel-size = vowel-size * scale
       let scaled-axis-size = axis-size * scale
+      let axis-tick-color = gray.darken(35%)
       show lq.selector(lq.tick-label): it => []
       let x-tick-labels = x-ticks.map(value => text(font: doc-font, size: scaled-axis-size)[#str(value)])
       let y-tick-labels = y-ticks.map(value => text(font: doc-font, size: scaled-axis-size)[#str(value)])
       let max-x-tick-height = calc.max(..x-tick-labels.map(label => measure(label).height))
       let max-y-tick-width = calc.max(..y-tick-labels.map(label => measure(label).width))
-      let x-axis-label = text(font: doc-font, size: scaled-axis-size)[#x-label]
-      let y-axis-label = rotate(-90deg, text(font: doc-font, size: scaled-axis-size)[#y-label], reflow: true)
+      let axis-label-color = black
+      let x-axis-label = text(font: doc-font, size: scaled-axis-size, fill: axis-label-color)[#x-label]
+      let y-axis-label = rotate(
+        -90deg,
+        text(font: doc-font, size: scaled-axis-size, fill: axis-label-color)[#y-label],
+        reflow: true,
+      )
       lq.diagram(
         width: scaled-width,
         height: scaled-height,
@@ -332,12 +437,14 @@
         yscale: "linear",
         xaxis: (
           position: top,
+          stroke: 0.8pt + axis-tick-color,
           mirror: false,
           exponent: none,
           tick-distance: x-step,
         ),
         yaxis: (
           position: right,
+          stroke: 0.8pt + axis-tick-color,
           mirror: false,
           exponent: none,
           tick-distance: y-step,
@@ -348,10 +455,10 @@
         legend: none,
         ..centroids.map(ct => if ellipse {
           lq.ellipse(
-            ct.f2 - spread2,
-            ct.f1 - sd,
-            width: spread2 * 2,
-            height: sd * 2,
+            ct.f2 - ct.sd-f2,
+            ct.f1 - ct.sd-f1,
+            width: ct.sd-f2 * 2,
+            height: ct.sd-f1 * 2,
             stroke: ellipse-stroke,
             fill: ellipse-fill,
           )
@@ -393,27 +500,28 @@
             ct.f2,
             ct.f1,
             align: center + horizon,
-            context text(font: phonokit-font.get(), weight: "bold", size: scaled-vowel-size, fill: vowel-color)[#ct.vowel],
+            context text(
+              font: phonokit-font.get(),
+              weight: "bold",
+              size: scaled-vowel-size,
+              fill: vowel-color,
+            )[#ct.vowel],
           )
         } else {
           none
         }),
-        ..x-ticks.map(value =>
-          lq.place(
-            value,
-            0%,
-            align: bottom + center,
-            pad(bottom: 0.35em * scale, text(font: doc-font, size: scaled-axis-size)[#str(value)]),
-          )
-        ),
-        ..y-ticks.map(value =>
-          lq.place(
-            100%,
-            value,
-            align: left + horizon,
-            pad(left: 0.35em * scale, text(font: doc-font, size: scaled-axis-size)[#str(value)]),
-          )
-        ),
+        ..x-ticks.map(value => lq.place(
+          value,
+          0%,
+          align: bottom + center,
+          pad(bottom: 0.35em * scale, text(font: doc-font, size: scaled-axis-size, fill: axis-tick-color)[#str(value)]),
+        )),
+        ..y-ticks.map(value => lq.place(
+          100%,
+          value,
+          align: left + horizon,
+          pad(left: 0.35em * scale, text(font: doc-font, size: scaled-axis-size, fill: axis-tick-color)[#str(value)]),
+        )),
         lq.place(
           50%,
           0%,
@@ -429,4 +537,37 @@
       )
     }
   ]
+}
+
+#let formants(..args) = {
+  let pos = args.pos()
+  let named = args.named()
+  let vowels = if "vowels" in named { named.at("vowels") } else { pos.at(0, default: none) }
+
+  _formants_impl(
+    vowels: vowels,
+    source: named.at("source", default: none),
+    sd: named.at("sd", default: 60),
+    sd2: named.at("sd2", default: none),
+    n: named.at("n", default: 10),
+    seed: named.at("seed", default: 1),
+    labels: named.at("labels", default: true),
+    points: named.at("points", default: true),
+    centers: named.at("centers", default: false),
+    ellipse: named.at("ellipse", default: true),
+    ellipse-stroke: named.at("ellipse-stroke", default: 0.8pt + luma(190)),
+    ellipse-fill: named.at("ellipse-fill", default: none),
+    color-by-vowel: named.at("color-by-vowel", default: true),
+    point-size: named.at("point-size", default: 50),
+    point-color: named.at("point-color", default: auto),
+    point-alpha: named.at("point-alpha", default: 20%),
+    vowel-color: named.at("vowel-color", default: black),
+    vowel-size: named.at("vowel-size", default: formants-default-vowel-size),
+    axis-size: named.at("axis-size", default: 10pt),
+    scale: named.at("scale", default: 1.0),
+    x-label: named.at("x-label", default: [F2 (Hz)]),
+    y-label: named.at("y-label", default: [F1 (Hz)]),
+    width: named.at("width", default: 10cm),
+    height: named.at("height", default: 7cm),
+  )
 }

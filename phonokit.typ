@@ -646,6 +646,102 @@ As is often the case, a figure can quickly become too crowded. Once we start add
   ],
 )
 
+=== Vowel dispersion <dispersion>
+
+The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the global standard deviation of formant values (defaults to 60), number of samples (defaults to 10 per vowel). As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. Several arguments are also available for aesthetic adjustments (point sizes, colour, transparency, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion.
+
+
+#align(center)[
+  #figure(
+    caption: [Code to generate the two plots in @fig-dispersion],
+    supplement: "Code",
+    kind: "code",
+    ```typst
+    #formants("italian", scale: 0.6, axis-size: 1.3em),
+    #formants("english", point-size: 100,
+      point-color: luma(150),
+      axis-size: 1.3em,
+      vowel-size: 2.8em,
+      ellipse-stroke: none,
+      scale: 0.6
+    )
+    ```,
+  ) <code-dispersion>
+]
+
+#figure(
+  caption: [Vowel dispersion illustration],
+  grid(
+    columns: 2,
+    gutter: 2em,
+    align: center + horizon,
+    formants("italian", scale: 0.6, axis-size: 1.3em),
+    formants(
+      "english",
+      point-size: 100,
+      point-color: luma(150),
+      axis-size: 1.3em,
+      vowel-size: 2.8em,
+      ellipse-stroke: none,
+      scale: 0.6,
+    ),
+  ),
+) <fig-dispersion>
+
+
+Note that the F1-F2 values used in `#formants()` are illustrative, and only serve as a pedagogical tool. The user may want to user the `seed` argument (default: `1`) to ensure that multiple figures use identical F1-F2 values to reproduce exactly the same vowel positions.
+
+If you would like to plot actual vowels from a real file, `#formants()` can also be used. The argument `source` can read a `csv` file and plot the vowels in it, as long as your file contains a header with `vowel`, `f1`, and `f2` columns. It's OK if the file has other columns, but these three are necessary. @fig-file shows an example of the expected `csv` format.
+
+#align(center)[
+  #figure(
+    caption: [A sample `csv` file with vowel formants],
+    gap: 1em,
+    supplement: "Code",
+    kind: "code",
+    ```typst
+    vowel,f1,f2,speaker
+    i,342,2322,s1
+    i,360,2260,s2
+    i,334,2350,s3
+    i,351,2295,s4
+    i,347,2310,s5
+    e,476,2089,s1
+    e,500,2040,s2
+
+    ```,
+  ) <fig-file>
+]
+
+Once you have your `csv` file, you can import it inside the `#formants()` function. Here, the file `formants_sample.csv` sits inside the `extras/` directory. The path to the file goes inside the `csv()` function. This is shown in @code-csv.
+
+#align(center)[
+  #grid(
+    columns: 1,
+    gutter: 1em,
+    align: (center + horizon),
+    [
+
+      #figure(
+        caption: [Code to generate @fig-csv],
+        supplement: "Code",
+        kind: "code",
+      )[
+        ```typst
+        #formants(source: csv("extras/formants_sample.csv"), scale: 0.8, ellipse-stroke: none)
+        ```
+      ] <code-csv>
+    ],
+    [
+      #figure(caption: [Vowels plotted from a `csv` file])[
+        #formants(source: csv("extras/formants_sample.csv"), scale: 0.8, ellipse-stroke: none)
+      ] <fig-csv>
+    ],
+  )
+]
+
+
+
 = SPE <spe>
 
 Rewrite rules can be very complex, and an excellent package already exists to deal with their complexity in Typst #cite(<linphon>, supplement: [#link("https://typst.app/universe/package/linphon")[`linphon`]]). The problem is that, like autosegmental representations, too many degrees of freedom exist in SPE-like representations, not to mention the variation across scholars when it comes to symbols, brackets, etc. On the plus side, you can do a lot simply by employing primitives that already exist (e.g., matrices and arrows), so SPE rules are not as challenging to typeset as some other non-linear structures in phonology (at least simpler rules...). For that reason, #logo only has two primitive functions to help create feature matrices, which in turn can be combined to form SPE-style rules @chomsky1968spe.
@@ -664,7 +760,6 @@ The first function is `#feat-matrix()`, shown in @feat-matrix. It outputs the ma
 
 #figure(
   gap: 2em,
-  // placement: auto,
   caption: [Matrices for the phonemes in the word "patchy"],
   [#feat-matrix("p") #feat-matrix("\\ae") #feat-matrix("\\t tS") #feat-matrix("i")],
 ) <fig-max-feat>
