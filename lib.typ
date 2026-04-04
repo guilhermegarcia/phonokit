@@ -31,6 +31,7 @@
 #import "ex.typ": *
 #import "intonational.typ": *
 #import "geom.typ": *
+#import "phonetics.typ": *
 
 /// Initialize phonokit settings
 ///
@@ -97,6 +98,36 @@
 /// Note: Input is automatically truncated to the first 10 phonemes to prevent
 /// visual overflow.
 #let sonority = sonority
+
+/// Create an illustrative F1/F2 vowel cloud for teaching.
+///
+/// Generates synthetic vowel tokens around built-in F1/F2 means and displays
+/// them on an inverted F1/F2 diagram.
+///
+/// Arguments:
+/// - vowels (string): Tipa-style/IPA vowel string or a built-in language name
+///   such as `"english"`
+/// - sd (float): Spread of synthetic tokens in Hz
+/// - sd2 (float, optional): Optional separate F2 spread in Hz
+/// - n (int): Number of tokens per vowel (default: 10)
+/// - seed (int): Deterministic seed for token placement (default: 1)
+/// - ellipse (bool): Show 1-SD ellipses centered on the means (default: true)
+/// - ellipse-stroke (stroke or auto): Stroke for SD ellipses
+///   (default: `0.8pt + luma(190)`)
+/// - ellipse-fill (fill): Fill for SD ellipses (default: none)
+/// - point-size (int): Marker size for synthetic tokens (default: 50)
+/// - point-color (color or auto): Override token color (default: auto)
+/// - point-alpha (ratio): Token transparency (default: 20%)
+/// - vowel-color (color): Color of vowel labels (default: black)
+/// - vowel-size (length): Font size of vowel labels (default: 12pt)
+/// - axis-size (length): Font size of axis labels and tick labels (default: 10pt)
+/// - scale (float): Overall scale factor for the figure (default: 1.0)
+///
+/// Example:
+/// ```
+/// #formants("i ɪ e ɛ æ a ə ɔ o ʊ u", sd: 80)
+/// ```
+#let formants = formants
 
 /// Draw a single syllable's internal structure
 ///
