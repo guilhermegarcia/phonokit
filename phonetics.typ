@@ -1,4 +1,4 @@
-#import "@preview/lilaq:0.5.0" as lq
+#import "@preview/lilaq:0.6.0" as lq
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
 #import "vowels.typ": language-vowels
@@ -166,7 +166,7 @@
 #let _sd(values) = {
   if values.len() <= 1 { return 0.0 }
   let mean = _mean(values)
-  let variance = values.map(value => calc.pow(value - mean, 2)).sum() / values.len()
+  let variance = values.map(value => calc.pow(value - mean, 2)).sum() / (values.len() - 1)
   calc.sqrt(variance)
 }
 
@@ -235,7 +235,7 @@
 
 #let _warn(body) = text(fill: red.darken(20%), weight: "bold")[⚠ #body]
 
-#let _nice-tick-step(span, target: 8) = {
+#let _nice-tick-step(span, target: 6) = {
   let rough = span / target
   if rough <= 50 { 50 } else if rough <= 100 { 100 } else if rough <= 200 { 200 } else if rough <= 250 { 250 } else if (
     rough <= 500
@@ -278,10 +278,11 @@
 /// - labels (bool): Show vowel labels at preset means (default: true).
 /// - points (bool): Show synthetic tokens (default: true).
 /// - centers (bool): Show explicit `+` mean markers (default: false).
-/// - ellipse (bool): Show 1-SD ellipses centered on the vowel means (default: true).
+/// - ellipse (bool): Show 1-SD ellipses centered on the vowel means (default: false).
 /// - ellipse-stroke (stroke or auto): Stroke used for SD ellipses
 ///   (default: `0.8pt + luma(190)`).
 /// - ellipse-fill (fill): Fill used for SD ellipses (default: none).
+/// - grid (bool): Show the background grid (default: true).
 /// - color-by-vowel (bool): Use a color cycle by vowel category (default: true).
 /// - point-size (int): Marker size for synthetic tokens (default: 50).
 /// - point-color (color or auto): Override token color; `auto` uses the plot cycle
@@ -320,9 +321,10 @@
   labels: true,
   points: true,
   centers: false,
-  ellipse: true,
+  ellipse: false,
   ellipse-stroke: 0.8pt + luma(190),
   ellipse-fill: none,
+  grid: true,
   color-by-vowel: true,
   point-size: 50,
   point-color: auto,
@@ -449,7 +451,7 @@
           exponent: none,
           tick-distance: y-step,
         ),
-        grid: 0.5pt + luma(220),
+        grid: if grid { 0.5pt + luma(220) } else { none },
         fill: white,
         cycle: cycle,
         legend: none,
@@ -554,9 +556,10 @@
     labels: named.at("labels", default: true),
     points: named.at("points", default: true),
     centers: named.at("centers", default: false),
-    ellipse: named.at("ellipse", default: true),
+    ellipse: named.at("ellipse", default: false),
     ellipse-stroke: named.at("ellipse-stroke", default: 0.8pt + luma(190)),
     ellipse-fill: named.at("ellipse-fill", default: none),
+    grid: named.at("grid", default: true),
     color-by-vowel: named.at("color-by-vowel", default: true),
     point-size: named.at("point-size", default: 50),
     point-color: named.at("point-color", default: auto),

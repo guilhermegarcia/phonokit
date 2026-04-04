@@ -26,3 +26,4 @@ zenodo-badge.svg
 # Extras
 extras/*
 !extras/*.pdf
+!extras/*.csv

@@ -264,10 +264,9 @@ _A toolkit to create phonological representations in Typst_
 #v(3em)
 
 #align(center, text(size: 0.85em)[
-  How to keep track of updates? See table of contents on the next page.
+  How to keep track of updates? See table of contents.
 
-  #new-dot = new feature #h(1.5em) #recent-dot = recent update or change])
-
+  #new-dot = something new #h(1.5em) #recent-dot = something recent])
 
 
 #pagebreak()
@@ -294,7 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.5` - Improved alignment for numbered examples; UI language support for functions \
+`0.5.5` - Better alignment for numbered examples; vowel dispersion; nasal vowels; UI language support \
 `0.5.4` - Minor bug fixes in tableaux after recent changes to 0-index\
 `0.5.3` - Custom spacing for prosody; improved IPA coverage; more flexible tableaux \
 `0.5.2` - Improved numbered examples with simpler code \
@@ -403,7 +402,7 @@ See @sec-ipa for a reference table with the main IPA symbols available. For a mo
 
 == Phonemic inventories
 
-=== Consonants <sec-consonants>
+=== Consonants #new-dot <sec-consonants>
 
 Two additional functions allow users to quickly create consonant tables and vowel trapezoids given a string of phonemes. @fig-consonants-it shows the consonant inventory for Italian, for example. The function mirrors the pulmonic consonants table in the IPA chart with some minor changes. For example, affricates are shown when `affricates: true`, and #ipa("/w/") is shown in the approximant row under both bilabial and velar columns (when #ipa("/ \\mw /") is not present, in which case #ipa("/w/") appears only under bilabial). The argument `abbreviate: true` shortens labels for both rows and columns.
 
@@ -484,10 +483,10 @@ Finally, as of version 0.5.5, you certain functions have a `ui-lang` parameter f
 
 
 
-=== Vowels <sec-vowels>
+=== Vowels #new-dot <sec-vowels>
 
 
-Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed.
+Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. If desired, the function can also add schematic nasalized copies with `nasals: true`. For preset languages, this currently adds only the French nasal vowels. For custom strings, only vowels that are explicitly nasalized in the input are shown in the nasal layer, as in `#vowels("aãioõu", nasals: true)`. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap.
 
 #grid(
   columns: (1fr, 1fr),
@@ -646,9 +645,9 @@ As is often the case, a figure can quickly become too crowded. Once we start add
   ],
 )
 
-=== Vowel dispersion <dispersion>
+=== Vowel dispersion #new-dot <dispersion>
 
-The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the global standard deviation of formant values (defaults to 60), number of samples (defaults to 10 per vowel). As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. Several arguments are also available for aesthetic adjustments (point sizes, colour, transparency, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion.
+The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory phonology/phonetics courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the standard deviation used for synthetic jitter (`sd` for F1, and `sd2` for F2 when specified; otherwise both use the same value) and the number of samples (defaults to 10 per vowel). Vowel labels represent mean F1 and F2 values. As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. These preset values are schematic and intended only for pedagogical illustration. Several arguments are also available for aesthetic adjustments (point sizes, color, transparency, optional ellipses, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion, but the user should explore the function to experiment with the remaining arguments.
 
 
 #align(center)[
@@ -657,12 +656,12 @@ The function `#formants()` creates a vowel plot to illustrate vowel dispersion. 
     supplement: "Code",
     kind: "code",
     ```typst
-    #formants("italian", scale: 0.6, axis-size: 1.3em),
+    #formants("italian", scale: 0.6, ellipse: true, axis-size: 1.3em),
     #formants("english", point-size: 100,
       point-color: luma(150),
       axis-size: 1.3em,
       vowel-size: 2.8em,
-      ellipse-stroke: none,
+      grid: false,
       scale: 0.6
     )
     ```,
@@ -675,23 +674,23 @@ The function `#formants()` creates a vowel plot to illustrate vowel dispersion. 
     columns: 2,
     gutter: 2em,
     align: center + horizon,
-    formants("italian", scale: 0.6, axis-size: 1.3em),
+    formants("italian", scale: 0.6, ellipse: true, axis-size: 1.3em),
     formants(
       "english",
       point-size: 100,
       point-color: luma(150),
       axis-size: 1.3em,
       vowel-size: 2.8em,
-      ellipse-stroke: none,
+      grid: false,
       scale: 0.6,
     ),
   ),
 ) <fig-dispersion>
 
 
-Note that the F1-F2 values used in `#formants()` are illustrative, and only serve as a pedagogical tool. The user may want to user the `seed` argument (default: `1`) to ensure that multiple figures use identical F1-F2 values to reproduce exactly the same vowel positions.
+Note that the F1-F2 values used in `#formants()` are illustrative, and only serve as a pedagogical tool. The user may want to use the `seed` argument (default: `1`) to ensure that multiple figures use identical F1-F2 values to reproduce the same vowel positions.
 
-If you would like to plot actual vowels from a real file, `#formants()` can also be used. The argument `source` can read a `csv` file and plot the vowels in it, as long as your file contains a header with `vowel`, `f1`, and `f2` columns. It's OK if the file has other columns, but these three are necessary. @fig-file shows an example of the expected `csv` format.
+If you would like to plot actual vowels from a real file, `#formants()` can also be used. The `source` argument can read a `csv` file and plot the vowels in it, as long as your file contains a header with `vowel`, `f1`, and `f2` columns. It's OK if the file has other columns, but these three are necessary.#footnote[In `csv` mode, vowel means are computed directly from the observed F1 and F2 values for each vowel category, and ellipses use sample standard deviations.] @fig-file shows an example of the expected `csv` format.
 
 #align(center)[
   #figure(
@@ -713,7 +712,7 @@ If you would like to plot actual vowels from a real file, `#formants()` can also
   ) <fig-file>
 ]
 
-Once you have your `csv` file, you can import it inside the `#formants()` function. Here, the file `formants_sample.csv` sits inside the `extras/` directory. The path to the file goes inside the `csv()` function. This is shown in @code-csv.
+Once you have your `csv` file, you can pass it to `#formants()` via the `csv()` function. Here, the file `formants_sample.csv` sits inside the `extras/` directory. The path to the file goes inside `csv()`. This is shown in @code-csv.
 
 #align(center)[
   #grid(
@@ -728,13 +727,13 @@ Once you have your `csv` file, you can import it inside the `#formants()` functi
         kind: "code",
       )[
         ```typst
-        #formants(source: csv("extras/formants_sample.csv"), scale: 0.8, ellipse-stroke: none)
+        #formants(source: csv("extras/formants_sample.csv"), scale: 0.8)
         ```
       ] <code-csv>
     ],
     [
       #figure(caption: [Vowels plotted from a `csv` file])[
-        #formants(source: csv("extras/formants_sample.csv"), scale: 0.8, ellipse-stroke: none)
+        #formants(source: csv("extras/formants_sample.csv"), scale: 0.8)
       ] <fig-csv>
     ],
   )
@@ -790,7 +789,7 @@ Next, the function `#feat()` creates a matrix given a set of features. This is t
 
 
 
-= Prosody module #new-dot <sec-prosody>
+= Prosody module #recent-dot <sec-prosody>
 
 == Sonority
 
@@ -3154,4 +3153,3 @@ These render upright (non-italicized), unlike math-mode `$sigma$`.
 
 
 If you have any questions, visit #link("https://github.com/guilhermegarcia/phonokit")[`github.com/guilhermegarcia/phonokit`], where you will find all the code for the package. You will also find a #link("https://github.com/guilhermegarcia/phonokit/discussions")[discussion page]. If you find a bug or typo, or if you'd like to suggest a feature, please open an issue in the repository --- this will help improve the package. This is an ongoing project that started in December 2025, so there is _a lot_ to be improved.
-
