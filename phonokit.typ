@@ -687,7 +687,6 @@ The function `#formants()` creates a vowel plot to illustrate vowel dispersion. 
   ),
 ) <fig-dispersion>
 
-
 Note that the F1-F2 values used in `#formants()` are illustrative, and only serve as a pedagogical tool. The user may want to use the `seed` argument (default: `1`) to ensure that multiple figures use identical F1-F2 values to reproduce the same vowel positions.
 
 If you would like to plot actual vowels from a real file, `#formants()` can also be used. The `source` argument can read a `csv` file and plot the vowels in it, as long as your file contains a header with `vowel`, `f1`, and `f2` columns. It's OK if the file has other columns, but these three are necessary.#footnote[In `csv` mode, vowel means are computed directly from the observed F1 and F2 values for each vowel category, and ellipses use sample standard deviations.] @fig-file shows an example of the expected `csv` format.
