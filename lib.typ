@@ -782,9 +782,8 @@
 /// - highlights (array): Node ids or coordinate pairs to highlight with a
 ///   background circle (default: ())
 /// - node-size (length): Default IPA font size for nodes (default: 2.2em)
-/// - label-size (length): Default size for optional captions (default: 1em)
 /// - text-fill (color): Default node color (default: black)
-/// - highlight-fill (fill): Default node/highlight fill (default: none)
+/// - highlight-fill (fill): Default node/highlight fill (default: `luma(230)`)
 /// - highlight-radius (float): Default circle radius in canvas units (default: 0.42)
 /// - arrow-color (color): Default arrow color (default: black)
 /// - arrow-style (str): Default arrow style: `"solid"`, `"dashed"`, or `"dotted"`
@@ -792,10 +791,7 @@
 /// - arrow-size (float): Default arrowhead scale (default: 1.0)
 /// - curved (bool): Curve arrows by default (default: false)
 /// - curve (float): Default curvature multiplier for curved arrows (default: 0.45)
-/// - baseline (str): Baseline alignment (default: 40%)
 /// - scale (float): Uniform diagram scale factor (default: 1.0)
-/// - pad (float): Extra canvas padding in CeTZ units (default: 0.6)
-/// - show-grid (bool): Show a debug grid behind the diagram (default: false)
 ///
 /// Returns: A CeTZ-based sound-shift diagram
 ///
@@ -803,21 +799,22 @@
 /// ```
 /// #sound-shift(
 ///   nodes: (
-///     (label: "I", at: (-3.6, 2.8)),
-///     (label: "E", at: (-1.6, 1.0)),
+///     (label: "I", at: (-4.2, 2.8)),
+///     (label: "E", at: (-1.9, 1.0)),
 ///     (label: "2", at: (0.9, 1.0)),
-///     (label: "O", at: (3.3, 1.0)),
-///     (label: "a", at: (2.0, -1.3)),
-///     (label: "\\ae", at: (-1.0, -1.3)),
+///     (label: "O", at: (3.8, 1.0)),
+///     (label: "A", at: (2.4, -1.5)),
+///     (label: "\\ae", at: (-1.0, -1.5)),
 ///   ),
 ///   arrows: (
-///     ("I", "E"),
 ///     ("E", "2"),
 ///     ("2", "O"),
-///     ("O", "a"),
-///     ("a", "\\ae"),
-///     (from: "\\ae", to: "I", curved: true, curve: -0.28),
+///     ("O", "A"),
+///     ("A", "\\ae"),
+///     ("I", "E"),
+///     (from: "\\ae", to: "I", curved: true, curve: 0.28),
 ///   ),
+///   scale: 0.7,
 /// )
 /// ```
 #let sound-shift = sound-shift

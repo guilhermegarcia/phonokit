@@ -69,9 +69,8 @@
   arrows: (),
   highlights: (),
   node-size: 2.2em,
-  label-size: 1em,
   text-fill: black,
-  highlight-fill: none,
+  highlight-fill: luma(230),
   highlight-radius: 0.42,
   arrow-color: black,
   arrow-style: "solid",
@@ -79,10 +78,7 @@
   arrow-size: 1.0,
   curved: false,
   curve: 0.45,
-  baseline: 40%,
   scale: 1.0,
-  pad: 0.6,
-  show-grid: false,
 ) = {
   assert(type(nodes) == array, message: "nodes must be an array")
   assert(nodes.len() > 0, message: "nodes array cannot be empty")
@@ -97,7 +93,7 @@
       id: id,
       label: label,
       at: pos,
-      fill: node.at("fill", default: highlight-fill),
+      fill: node.at("fill", default: none),
       size: node.at("size", default: node-size),
       text-fill: node.at("text-fill", default: text-fill),
       radius: node.at("radius", default: highlight-radius),
@@ -113,6 +109,7 @@
     (from.pos, to.pos)
   })
 
+  let pad = 0.6
   let xs = all-points.map(p => p.at(0)) + arrow-points.map(pair => pair.at(0).at(0)) + arrow-points.map(pair => pair.at(1).at(0))
   let ys = all-points.map(p => p.at(1)) + arrow-points.map(pair => pair.at(0).at(1)) + arrow-points.map(pair => pair.at(1).at(1))
   let min-x = calc.min(..xs) - pad
@@ -120,23 +117,8 @@
   let min-y = calc.min(..ys) - pad
   let max-y = calc.max(..ys) + pad
 
-  box(inset: 1.2em, baseline: baseline, cetz.canvas(length: scale-factor * 1cm, {
+  box(inset: 1.2em, baseline: 40%, cetz.canvas(length: scale-factor * 1cm, {
     import cetz.draw: *
-
-    if show-grid {
-      let grid-stroke = (paint: luma(180), thickness: 0.3pt, dash: "dashed")
-      let start-x = calc.floor(min-x)
-      let end-x = calc.ceil(max-x)
-      let start-y = calc.floor(min-y)
-      let end-y = calc.ceil(max-y)
-
-      for x in range(start-x, end-x + 1) {
-        line((x, min-y), (x, max-y), stroke: grid-stroke)
-      }
-      for y in range(start-y, end-y + 1) {
-        line((min-x, y), (max-x, y), stroke: grid-stroke)
-      }
-    }
 
     for item in highlights {
       let pos = _ss-arrow-end(item, normalized-nodes).pos
@@ -239,9 +221,22 @@
       } else {
         (paint: local-color, thickness: local-width)
       }
+      let head-stroke = (paint: local-color, thickness: local-width)
       let mark-style = (end: ">", fill: local-color, scale: spec.at("arrow-size", default: arrow-size) * scale-factor)
 
-      if local-curved {
+      if local-style == "dashed" or local-style == "dotted" {
+        if local-curved {
+          bezier(drawn-from, drawn-to, drawn-ctrl, stroke: shaft-stroke)
+        } else {
+          line(drawn-from, drawn-to, stroke: shaft-stroke)
+        }
+        let tiny = 0.01
+        let head-anchor = (
+          drawn-to.at(0) - end-tangent.at(0) * tiny,
+          drawn-to.at(1) - end-tangent.at(1) * tiny,
+        )
+        line(head-anchor, drawn-to, stroke: head-stroke, mark: mark-style)
+      } else if local-curved {
         bezier(drawn-from, drawn-to, drawn-ctrl, stroke: shaft-stroke, mark: mark-style)
       } else {
         line(drawn-from, drawn-to, stroke: shaft-stroke, mark: mark-style)
@@ -261,22 +256,6 @@
           _ss-render-label(node.label),
         ),
       )
-    }
-
-    for node in normalized-nodes {
-      if "caption" in node {
-        let offset = node.at("caption-offset", default: (0, -0.8))
-        content(
-          (node.at.at(0) + offset.at(0), node.at.at(1) + offset.at(1)),
-          anchor: node.at("caption-anchor", default: "center"),
-          context text(
-            font: phonokit-font.get(),
-            size: node.at("caption-size", default: label-size) * scale-factor,
-            fill: node.at("caption-fill", default: node.text-fill),
-            _ss-render-label(node.caption),
-          ),
-        )
-      }
     }
   }))
 }
