@@ -29,7 +29,7 @@
 #import "autosegmental.typ": *
 #import "multi-tier.typ": *
 #import "sound-shift.typ": *
-#import "ex.typ": *
+#import "ex.typ": ex, ex-rules
 #import "intonational.typ": *
 #import "geom.typ": *
 #import "phonetics.typ": *
@@ -822,78 +822,32 @@
 /// Create a numbered linguistic example
 ///
 /// Generates numbered examples (1), (2), etc. similar to linguex in LaTeX.
-/// Use with tables and subex-label() for aligned, labelable sub-examples.
+/// Wrap content directly for a single example, or use list syntax for
+/// automatically lettered sub-examples. Use `labels` to make individual
+/// sub-examples referenceable.
 ///
 /// Arguments:
-/// - body (content): The example content (typically a table)
+/// - body (content): The example content
 /// - number-dy (length): Vertical offset for the number (optional; default: 0.4em)
 /// - caption (string): Caption for outline (hidden in document; optional)
 /// - title (string, optional): Title for the example (default: none)
 /// - labels (array): Array of labels for sub-examples (default: ())
-/// - columns (array): Column specification for the table layout (default: ())
+/// - columns (array): Column widths for data columns (default: ())
 ///
 /// Returns: Numbered example that can be labeled and referenced
 ///
 /// Example:
 /// ```
 /// #ex(caption: "A phonology example", labels: (<ex-anba>, <ex-anka>), columns: (5em, 2em, 5em))[
-///   #table(
-///     columns: (auto, auto, auto),
-///     stroke: none,
-///     align: left,
-///     [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r #ipa("[amba]")],
-///     [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r #ipa("[aNka]")],
-///   )
-/// ] <ex-phon1>
-///
-/// See @ex-phon1, @ex-anba, and @ex-anka.
+///   - #ipa("/anba/") & #a-r & #ipa("[amba]")
+///   - #ipa("/anka/") & #a-r & #ipa("[aNka]")
+/// ] <phon-ex>
 /// ```
 #let ex = ex
 
-/// Create a sub-example label for use in tables
-///
-/// Generates automatic lettering (a., b., c., ...) for table rows.
-/// Place in the first column of each row and attach a label after it.
-///
-/// Returns: Labelable letter marker (a., b., c., ...)
-///
-/// Example:
-/// ```
-/// #ex(caption: "A phonology example")[
-///   #table(
-///     columns: 4, // <- where we may specify widths
-///     stroke: none,
-///     align: left,
-///     [#subex-label()<ex-anba>], [#ipa("/anba/")], [#a-r], [#ipa("[amba]")],
-///     [#subex-label()<ex-anka>], [#ipa("/anka/")], [#a-r], [#ipa("[aNka]")],
-///   )
-/// ] <ex-phon2>
-///
-/// See @ex-phon2, @ex-anba, and @ex-anka.
-/// ```
-#let subex-label = subex-label
-
-/// Auxiliary helper for advanced `#ex()` table layouts.
-///
-/// Most users should rely on `#ex()` and `#subex-label()` directly.
-/// This helper is retained for compatibility with older or custom layouts.
-///
-/// ```
-/// #ex(caption: "Example")[
-///   #table(
-///     columns: 3,
-///     stroke: none,
-///     align: (left + bottom, left + bottom, left + top),
-///     [#ex-num-label()<ex-1>], [#subex-label()<ex-1a>], [sentence a],
-///     [],                      [#subex-label()<ex-1b>], [sentence b],
-///   )
-/// ]
-/// ```
-#let ex-num-label = ex-num-label
-
 /// Show rules for linguistic examples
 ///
-/// Apply this to enable proper reference formatting for ex() and subex-label().
+/// Apply this to enable proper reference formatting for ex().
 /// References render as (1), (1a), (1b), etc.
 ///
 /// Usage: `#show: ex-rules`
