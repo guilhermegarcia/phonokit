@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.5`]
+#let version = text(size: 0.8em)[`v 0.5.6`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.6` - VOT function to create pedagogical VOT timelines \
 `0.5.5` - Better alignment for numbered examples; vowel dispersion; nasal vowels; UI language support \
 `0.5.4` - Minor bug fixes in tableaux after recent changes to 0-index\
 `0.5.3` - Custom spacing for prosody; improved IPA coverage; more flexible tableaux \
@@ -314,12 +315,6 @@ Any questions, comments or suggestions should be posted to the repository below 
 #pagebreak()
 
 #outline(depth: 3, title: "Table of contents")
-
-// #v(1fr)
-// #align(right)[
-//   #text(fill: gray)[_Last updated on #datetime.today().display("[month repr:long] [day], [year]")_]
-// ]
-
 
 #pagebreak()
 
