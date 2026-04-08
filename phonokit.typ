@@ -645,7 +645,9 @@ As is often the case, a figure can quickly become too crowded. Once we start add
   ],
 )
 
-=== Sound shifts #new-dot <sec-sound-shift>
+= Phonetics <phonetics>
+
+== Sound shifts #new-dot <sec-sound-shift>
 
 The function `#sound-shift()` is meant for cases where a vowel trapezoid is no longer the best fit. This is often the case when we want to draw a schematic chain shift, merger, or split in which symbols must be placed freely in two-dimensional space. In `#sound-shift()`, each node is defined by a label and a position, and arrows connect nodes by referring to those labels directly. Optional arguments make it possible to curve arrows, circle nodes, and scale the whole representation up or down. @fig-sound-shift shows a simple schematic representation of the Northern Cities Shift @labov2008atlas.
 
@@ -709,7 +711,57 @@ The function `#sound-shift()` is meant for cases where a vowel trapezoid is no l
   ],
 )
 
-=== Vowel dispersion #new-dot <dispersion>
+== Voice Onset Time #new-dot <vot>
+
+The function `#vot()` creates schematic timelines to illustrate negative, zero, and positive voice onset time values. This can be useful in introductory phonetics and phonology courses when discussing prevoicing, release, aspiration, and the onset of voicing. As shown in @code-vot and @fig-vot, a minimal diagram for a negative VOT of -70 ms can be generated with `#vot(-70)`, but the function also supports localized labels, optional segmental annotation below each interval, and a range of aesthetic adjustments such as fill color and the display of schematic voicing waves. The resulting diagrams are intended as pedagogical illustrations rather than as direct plots from acoustic measurements, of course. Finally, as with other functions in #logo, you can scale it up or down with the `scale` argument.
+
+#align(center)[
+  #figure(
+    caption: [Code to generate the four VOT diagrams in @fig-vot],
+    supplement: "Code",
+    kind: "code",
+    ```typst
+    // minimalist function
+    #vot(-70),
+
+    // support for French and Portuguese labels
+    #vot(0, ui-lang: "pt"),
+
+    // annotate diagram using IPA symbols
+    #vot(60, closure-segment: "t", interval-segment: "\\h", vowel-segment: "\\ae"),
+
+    // various arguments to customize diagrams
+    #vot(
+     25,
+     ui-lang: "fr",
+     voicing: false, // optionally hide illustrative waves
+     fill-closure: blue.lighten(50%).desaturate(30%),
+     fill-vowel: yellow.lighten(10%),
+
+    )
+    ```,
+  ) <code-vot>
+]
+
+#figure(caption: [Examples of the `#vot()` function], grid(
+  columns: 2,
+  gutter: 2em,
+  align: center + horizon,
+  vot(-70), vot(0, ui-lang: "pt"),
+  vot(60, closure-segment: "t", interval-segment: "\\h", vowel-segment: "\\ae"),
+  vot(
+    25,
+    ui-lang: "fr",
+    voicing: false,
+    fill-closure: blue.lighten(50%).desaturate(30%),
+    fill-vowel: yellow.lighten(10%),
+  ),
+)) <fig-vot>
+
+
+
+
+== Vowel dispersion #new-dot <dispersion>
 
 The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory phonology/phonetics courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the standard deviation used for synthetic jitter (`sd` for F1, and `sd2` for F2 when specified; otherwise both use the same value) and the number of samples (defaults to 10 per vowel). Vowel labels represent mean F1 and F2 values. As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. These preset values are schematic and intended only for pedagogical illustration. Several arguments are also available for aesthetic adjustments (point sizes, color, transparency, optional ellipses, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion, but the user should explore the function to experiment with the remaining arguments.
 
@@ -801,7 +853,6 @@ Once you have your `csv` file, you can pass it to `#formants()` via the `csv()` 
     ],
   )
 ]
-
 
 
 = SPE <spe>

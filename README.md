@@ -89,7 +89,7 @@ Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensi
 As of version `0.3.7`, the package allows the user to choose a global font for all functions. By default, Charis is used (Typst has a fallback font should you not have it installed). However, you can use whichever font you prefer with the following command:
 
 ```typst
-#import "@preview/phonokit:0.5.5": *
+#import "@preview/phonokit:0.5.6": *
 #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
 ```
 
@@ -100,6 +100,12 @@ As of version `0.3.7`, the package allows the user to choose a global font for a
 - **Vowel charts**: Plot vowels on the IPA vowel trapezoid with accurate positioning
 - **Consonant tables**: Display consonants in the pulmonic IPA consonant table
 - **Scalable charts**: Adjust size to fit your document layout (scaling includes text as expected)
+
+### Phonetics Module
+
+- **Sound shifts**: Create schematic chain shifts, mergers, and splits by placing symbols freely in two-dimensional space and connecting them with arrows
+- **Voice Onset Time**: Generate pedagogical VOT timelines showing closure, release, aspiration, and voicing onset, with support for segment labels and localized interface labels
+- **Vowel dispersion**: Plot illustrative F1/F2 vowel distributions with optional jitter, ellipses, and support for reading real vowel data from `csv` files
 
 ### Prosody Module
 

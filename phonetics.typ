@@ -712,11 +712,29 @@
   let segment-font-size = segment-size * scale-factor
   let event-size = 6pt * scale-factor
   let region-stroke = 0.7pt * scale-factor + black
-  let release-stroke = (paint: black, thickness: 0.8pt * scale-factor, dash: "dashed")
+  let release-stroke = (
+    paint: black,
+    thickness: 0.7pt * scale-factor,
+    dash: "dashed",
+    cap: "butt",
+    join: "miter",
+  )
+  let aspiration-stroke = (
+    paint: gray.darken(35%),
+    thickness: 0.7pt * scale-factor,
+    dash: "dotted",
+    cap: "butt",
+    join: "miter",
+  )
   let wave-stroke = if voicing-stroke == auto {
     (paint: gray.darken(45%), thickness: 0.55pt * scale-factor)
   } else {
     voicing-stroke
+  }
+  let waveform-stroke = if type(wave-stroke) == dictionary {
+    (cap: "round", join: "round", ..wave-stroke)
+  } else {
+    wave-stroke
   }
   let text-label = body => text(size: label-size, font: phonokit-font.get())[#body]
   let text-doc = body => text(size: doc-font-size, font: phonokit-font.get())[#body]
@@ -770,106 +788,102 @@
   box(inset: 1em, baseline: 50%, cetz.canvas(length: scale-factor * 1cm, {
     import cetz.draw: *
 
-    let draw-wave = (x1, x2, y, amp: 0.08, step: 0.08, cycle-width: 0.65) => {
+    let draw-wave = (x1, x2, y, amp: 0.08, step: 0.025, cycle-width: 0.65) => {
       let span = x2 - x1
       if span > step {
-        let count = int(calc.max(6, calc.floor(span / step)))
+        let count = int(calc.max(18, calc.floor(span / step)))
         let cycles = calc.max(1.0, span / cycle-width)
+        let points = ()
         for i in range(count) {
-          let p1 = i / count
-          let p2 = (i + 1) / count
-          line(
-            (x1 + p1 * span, y + amp * calc.sin(p1 * cycles * 360deg)),
-            (x1 + p2 * span, y + amp * calc.sin(p2 * cycles * 360deg)),
-            stroke: wave-stroke,
-          )
+          let p = i / (count - 1)
+          points.push((x1 + p * span, y + amp * calc.sin(p * cycles * 360deg)))
         }
+        line(..points, stroke: waveform-stroke)
       }
     }
     let noise-sample = i => {
       (calc.sin(i * 137deg) * 0.55) + (calc.sin(i * 271deg) * 0.32) + (calc.sin(i * 53deg) * 0.18)
     }
-    let draw-noise = (x1, x2, y, amp: 0.055, step: 0.055) => {
+    let draw-noise = (x1, x2, y, amp: 0.055, step: 0.04) => {
       let span = x2 - x1
       if span > step {
-        let count = int(calc.max(5, calc.floor(span / step)))
+        let count = int(calc.max(8, calc.floor(span / step)))
+        let points = ()
         for i in range(count) {
-          let p1 = i / count
-          let p2 = (i + 1) / count
-          line(
-            (x1 + p1 * span, y + amp * noise-sample(i)),
-            (x1 + p2 * span, y + amp * noise-sample(i + 1)),
-            stroke: wave-stroke,
-          )
+          let p = i / (count - 1)
+          points.push((x1 + p * span, y + amp * noise-sample(i)))
         }
+        line(..points, stroke: waveform-stroke)
       }
     }
     let draw-prevoicing = (x1, x2, y, amp: 0.035, step: 0.04, cycle-width: 0.32) => {
       let span = x2 - x1
       if span > step {
-        let count = int(calc.max(6, calc.floor(span / step)))
+        let count = int(calc.max(10, calc.floor(span / step)))
         let cycles = calc.max(1.0, span / cycle-width)
+        let points = ()
         for i in range(count) {
-          let p1 = i / count
-          let p2 = (i + 1) / count
-          let modulation-1 = 0.75 + 0.25 * calc.sin(p1 * 137deg)
-          let modulation-2 = 0.75 + 0.25 * calc.sin(p2 * 137deg)
-          let sample-1 = (
-            0.45 * modulation-1 * calc.sin(p1 * cycles * 360deg)
-              + 0.55 * calc.sin(p1 * cycles * 900deg + 37deg)
-              + 0.42 * calc.sin(p1 * cycles * 1450deg + 83deg)
+          let p = i / (count - 1)
+          let modulation = 0.75 + 0.25 * calc.sin(p * 137deg)
+          let sample = (
+            0.45 * modulation * calc.sin(p * cycles * 360deg)
+              + 0.55 * calc.sin(p * cycles * 900deg + 37deg)
+              + 0.42 * calc.sin(p * cycles * 1450deg + 83deg)
               + 0.34 * noise-sample(i)
           )
-          let sample-2 = (
-            0.45 * modulation-2 * calc.sin(p2 * cycles * 360deg)
-              + 0.55 * calc.sin(p2 * cycles * 900deg + 37deg)
-              + 0.42 * calc.sin(p2 * cycles * 1450deg + 83deg)
-              + 0.34 * noise-sample(i + 1)
-          )
-          line(
-            (x1 + p1 * span, y + amp * sample-1),
-            (x1 + p2 * span, y + amp * sample-2),
-            stroke: wave-stroke,
-          )
+          points.push((x1 + p * span, y + amp * sample))
         }
+        line(..points, stroke: waveform-stroke)
       }
     }
     let draw-prevoicing-transition = (x1, x2, y, step: 0.04, cycle-width: 0.36) => {
       let span = x2 - x1
       if span > step {
-        let count = int(calc.max(4, calc.floor(span / step)))
+        let count = int(calc.max(8, calc.floor(span / step)))
         let cycles = calc.max(1.0, span / cycle-width)
+        let points = ()
         for i in range(count) {
-          let p1 = i / count
-          let p2 = (i + 1) / count
-          let closure-1 = (1.0 - p1) * 0.008 * calc.sin(p1 * 180deg)
-          let closure-2 = (1.0 - p2) * 0.008 * calc.sin(p2 * 180deg)
-          let prevoice-1 = (
-            p1
+          let p = i / (count - 1)
+          let closure = (1.0 - p) * 0.008 * calc.sin(p * 180deg)
+          let prevoice = (
+            p
               * 0.035
               * (
-                0.45 * calc.sin(p1 * cycles * 360deg)
-                  + 0.55 * calc.sin(p1 * cycles * 900deg + 37deg)
-                  + 0.42 * calc.sin(p1 * cycles * 1450deg + 83deg)
+                0.45 * calc.sin(p * cycles * 360deg)
+                  + 0.55 * calc.sin(p * cycles * 900deg + 37deg)
+                  + 0.42 * calc.sin(p * cycles * 1450deg + 83deg)
                   + 0.34 * noise-sample(i)
               )
           )
-          let prevoice-2 = (
-            p2
-              * 0.035
-              * (
-                0.45 * calc.sin(p2 * cycles * 360deg)
-                  + 0.55 * calc.sin(p2 * cycles * 900deg + 37deg)
-                  + 0.42 * calc.sin(p2 * cycles * 1450deg + 83deg)
-                  + 0.34 * noise-sample(i + 1)
-              )
-          )
-          line(
-            (x1 + p1 * span, y + closure-1 + prevoice-1),
-            (x1 + p2 * span, y + closure-2 + prevoice-2),
-            stroke: wave-stroke,
-          )
+          points.push((x1 + p * span, y + closure + prevoice))
         }
+        line(..points, stroke: waveform-stroke)
+      }
+    }
+    let draw-waveforms = () => {
+      if voicing {
+        if closure-ms > 0 {
+          if vot-ms < 0 {
+            let transition-width = calc.min(voicing-x - tx(closure-start-time), 0.32)
+            let transition-start-x = voicing-x - transition-width
+            draw-wave(
+              tx(closure-start-time),
+              transition-start-x,
+              region-y1 + 0.16,
+              amp: 0.008,
+              step: 0.07,
+              cycle-width: 1.2,
+            )
+            draw-prevoicing-transition(transition-start-x, voicing-x, region-y1 + 0.16)
+            draw-prevoicing(voicing-x, release-x, region-y1 + 0.16)
+          } else {
+            draw-wave(tx(closure-start-time), release-x, region-y1 + 0.16, amp: 0.008, step: 0.07, cycle-width: 1.2)
+          }
+        }
+        if vot-ms > 0 {
+          draw-noise(release-x, voicing-x, region-y1 + 0.16)
+        }
+        draw-wave(tx(vowel-start), tx(right-time), region-y1 + 0.16)
       }
     }
 
@@ -878,8 +892,10 @@
         (release-x, region-y1),
         (voicing-x, region-y2),
         fill: fill-aspiration,
-        stroke: (paint: gray.darken(35%), thickness: 0.7pt * scale-factor, dash: "dotted"),
+        stroke: none,
       )
+      line((release-x, region-y2), (voicing-x, region-y2), stroke: aspiration-stroke)
+      line((release-x, region-y1), (voicing-x, region-y1), stroke: aspiration-stroke)
     }
 
     line((release-x, event-line-bottom), (release-x, event-line-top), stroke: release-stroke)
@@ -955,31 +971,6 @@
       )
     }
 
-    if voicing {
-      if closure-ms > 0 {
-        if vot-ms < 0 {
-          let transition-width = calc.min(voicing-x - tx(closure-start-time), 0.32)
-          let transition-start-x = voicing-x - transition-width
-          draw-wave(
-            tx(closure-start-time),
-            transition-start-x,
-            region-y1 + 0.16,
-            amp: 0.008,
-            step: 0.07,
-            cycle-width: 1.2,
-          )
-          draw-prevoicing-transition(transition-start-x, voicing-x, region-y1 + 0.16)
-          draw-prevoicing(voicing-x, release-x, region-y1 + 0.16)
-        } else {
-          draw-wave(tx(closure-start-time), release-x, region-y1 + 0.16, amp: 0.008, step: 0.07, cycle-width: 1.2)
-        }
-      }
-      if vot-ms > 0 {
-        draw-noise(release-x, voicing-x, region-y1 + 0.16)
-      }
-      draw-wave(tx(vowel-start), tx(right-time), region-y1 + 0.16)
-    }
-
     if keys {
       content(
         (release-x, event-label-y),
@@ -999,6 +990,8 @@
         anchor: "east",
       )
     }
+
+    draw-waveforms()
 
     if show-label {
       if vot-ms == 0 {
