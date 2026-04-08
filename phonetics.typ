@@ -1,7 +1,9 @@
+#import "@preview/cetz:0.4.2"
 #import "@preview/lilaq:0.6.0" as lq
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
 #import "vowels.typ": language-vowels
+#import "ui-lang.typ": resolve-ui-lang, ui-lang-error
 
 #let formants-default-vowel-size = 18pt
 
@@ -594,4 +596,429 @@
     width: named.at("width", default: 10cm),
     height: named.at("height", default: 7cm),
   )
+}
+
+#let _vot-label(value, abbreviation) = {
+  let shown = if calc.abs(value) == calc.round(calc.abs(value)) {
+    str(int(value))
+  } else {
+    str(value)
+  }
+  [#abbreviation: #shown ms]
+}
+
+#let _vot-ui-labels = (
+  "en": (
+    closure: [closure],
+    release: [release],
+    voicing-onset: [voicing onset],
+    vowel: [vowel],
+    aspiration: [aspiration],
+    prevoicing: [prevoicing],
+    vot-abbr: [VOT],
+  ),
+  "fr": (
+    closure: [occlusion],
+    release: [relâchement],
+    voicing-onset: [début du voisement],
+    vowel: [voyelle],
+    aspiration: [aspiration],
+    prevoicing: [prévoisement],
+    vot-abbr: [DES],
+  ),
+  "pt": (
+    closure: [oclusão],
+    release: [soltura],
+    voicing-onset: [início do vozeamento],
+    vowel: [vogal],
+    aspiration: [aspiração],
+    prevoicing: [pré-vozeamento],
+    vot-abbr: [VOT],
+  ),
+)
+
+#let _vot-label-or-default(label, default) = {
+  if label == auto {
+    default
+  } else {
+    label
+  }
+}
+
+#let vot(
+  vot,
+  closure: 40,
+  vowel: 60,
+  scale: 1.0,
+  label: auto,
+  keys: false,
+  ui-lang: "en",
+  closure-label: auto,
+  release-label: auto,
+  voicing-label: auto,
+  vowel-label: auto,
+  vot-label: auto,
+  interval-label: auto,
+  interval-key: auto,
+  closure-segment: none,
+  interval-segment: none,
+  vowel-segment: none,
+  segment-size: 10pt,
+  fill-closure: luma(230),
+  fill-vowel: white,
+  fill-aspiration: luma(245),
+  voicing: true,
+  voicing-stroke: auto,
+) = context {
+  assert(type(vot) == int or type(vot) == float, message: "vot must be a number of milliseconds")
+  assert(type(closure) == int or type(closure) == float, message: "closure must be a number of milliseconds")
+  assert(type(vowel) == int or type(vowel) == float, message: "vowel must be a number of milliseconds")
+  let ui-locale = resolve-ui-lang(ui-lang)
+  if ui-locale == none {
+    return ui-lang-error(ui-lang)
+  }
+  let ui-labels = _vot-ui-labels.at(ui-locale)
+
+  let vot-ms = float(vot)
+  let closure-ms = calc.max(float(closure), 0.0)
+  let vowel-ms = calc.max(float(vowel), 1.0)
+  let release = 0.0
+  let voicing-onset-time = vot-ms
+  let closure-start-time = -closure-ms + calc.min(vot-ms, 0.0)
+  let left-time = calc.min(closure-start-time, calc.min(vot-ms, 0.0))
+  let right-time = calc.max(vot-ms, 0.0) + vowel-ms
+  let time-span = calc.max(right-time - left-time, 1.0)
+  let width = calc.max(4.5, time-span * 0.045)
+  let tx = t => (t - left-time) / time-span * width
+  let show-label = if label == auto { true } else { label }
+  let closure-text = _vot-label-or-default(closure-label, ui-labels.closure)
+  let release-text = _vot-label-or-default(release-label, ui-labels.release)
+  let voicing-text = _vot-label-or-default(voicing-label, ui-labels.voicing-onset)
+  let vowel-text = _vot-label-or-default(vowel-label, ui-labels.vowel)
+  let vot-text = _vot-label-or-default(vot-label, _vot-label(vot-ms, ui-labels.vot-abbr))
+  let interval-text = _vot-label-or-default(interval-label, ui-labels.aspiration)
+  let region-y1 = 0.1
+  let region-y2 = 0.85
+  let bracket-y = -0.86
+  let event-label-y = 1.56
+  let event-line-top = if keys { event-label-y } else { region-y2 }
+  let legend-y = 2.2
+  let release-x = tx(release)
+  let voicing-x = tx(voicing-onset-time)
+  let vowel-start = calc.max(vot-ms, 0.0)
+  let scale-factor = scale
+  let doc-font-size = 8pt * scale-factor
+  let label-size = 7pt * scale-factor
+  let segment-font-size = segment-size * scale-factor
+  let event-size = 6pt * scale-factor
+  let region-stroke = 0.7pt * scale-factor + black
+  let release-stroke = (paint: black, thickness: 0.8pt * scale-factor, dash: "dashed")
+  let wave-stroke = if voicing-stroke == auto {
+    (paint: gray.darken(45%), thickness: 0.55pt * scale-factor)
+  } else {
+    voicing-stroke
+  }
+  let text-label = body => text(size: label-size, font: phonokit-font.get())[#body]
+  let text-doc = body => text(size: doc-font-size, font: phonokit-font.get())[#body]
+  let text-segment = body => {
+    let rendered = if type(body) == str { ipa-to-unicode(body) } else { body }
+    text(size: segment-font-size, font: phonokit-font.get())[#rendered]
+  }
+  let canvas-label-width = body => measure(text-label(body)).width / 1cm / scale-factor
+  let label-padding = 0.35
+  let interval-width = calc.abs(voicing-x - release-x)
+  let closure-width = calc.abs(release-x - tx(closure-start-time))
+  let vowel-width = calc.abs(tx(right-time) - tx(vowel-start))
+  let minimum-labelled-interval = 5.0
+  let show-closure-label = closure-ms > 0 and canvas-label-width(closure-text) + label-padding <= closure-width
+  let show-vowel-label = canvas-label-width(vowel-text) + label-padding <= vowel-width
+  let show-interval-segment = vot-ms >= minimum-labelled-interval and interval-segment != none
+  let show-positive-interval-label = (
+    vot-ms >= minimum-labelled-interval
+      and interval-label != none
+      and canvas-label-width(interval-text) + label-padding <= interval-width
+  )
+  let legend-interval = vot-ms > 0 and interval-label != none and not show-positive-interval-label
+  let interval-key-text = if interval-key != auto {
+    interval-key
+  } else if type(interval-text) == str and lower(interval-text).contains("aspir") {
+    [A]
+  } else {
+    [I]
+  }
+  let legend-text = {
+    [R = #release-text; V = #voicing-text]
+    if legend-interval {
+      [; #interval-key-text = #interval-text]
+    }
+  }
+  let event-tag = body => box(
+    width: 0.28cm * scale-factor,
+    height: 0.28cm * scale-factor,
+    stroke: region-stroke,
+    fill: white,
+    align(center + horizon, text(size: event-size, font: phonokit-font.get())[#body]),
+  )
+  let event-key-width = measure(event-tag(interval-key-text)).width / 1cm / scale-factor
+  let show-interval-key = keys and legend-interval and event-key-width + label-padding <= interval-width
+  let region-label-y = region-y2 + 0.24
+  let interval-label-y = region-label-y
+  let region-label-anchor = "base"
+  let segment-y = -0.22
+  let event-line-bottom = bracket-y - 0.12
+
+  box(inset: 1em, baseline: 50%, cetz.canvas(length: scale-factor * 1cm, {
+    import cetz.draw: *
+
+    let draw-wave = (x1, x2, y, amp: 0.08, step: 0.08, cycle-width: 0.65) => {
+      let span = x2 - x1
+      if span > step {
+        let count = int(calc.max(6, calc.floor(span / step)))
+        let cycles = calc.max(1.0, span / cycle-width)
+        for i in range(count) {
+          let p1 = i / count
+          let p2 = (i + 1) / count
+          line(
+            (x1 + p1 * span, y + amp * calc.sin(p1 * cycles * 360deg)),
+            (x1 + p2 * span, y + amp * calc.sin(p2 * cycles * 360deg)),
+            stroke: wave-stroke,
+          )
+        }
+      }
+    }
+    let noise-sample = i => {
+      (calc.sin(i * 137deg) * 0.55) + (calc.sin(i * 271deg) * 0.32) + (calc.sin(i * 53deg) * 0.18)
+    }
+    let draw-noise = (x1, x2, y, amp: 0.055, step: 0.055) => {
+      let span = x2 - x1
+      if span > step {
+        let count = int(calc.max(5, calc.floor(span / step)))
+        for i in range(count) {
+          let p1 = i / count
+          let p2 = (i + 1) / count
+          line(
+            (x1 + p1 * span, y + amp * noise-sample(i)),
+            (x1 + p2 * span, y + amp * noise-sample(i + 1)),
+            stroke: wave-stroke,
+          )
+        }
+      }
+    }
+    let draw-prevoicing = (x1, x2, y, amp: 0.035, step: 0.04, cycle-width: 0.32) => {
+      let span = x2 - x1
+      if span > step {
+        let count = int(calc.max(6, calc.floor(span / step)))
+        let cycles = calc.max(1.0, span / cycle-width)
+        for i in range(count) {
+          let p1 = i / count
+          let p2 = (i + 1) / count
+          let modulation-1 = 0.75 + 0.25 * calc.sin(p1 * 137deg)
+          let modulation-2 = 0.75 + 0.25 * calc.sin(p2 * 137deg)
+          let sample-1 = (
+            0.45 * modulation-1 * calc.sin(p1 * cycles * 360deg)
+              + 0.55 * calc.sin(p1 * cycles * 900deg + 37deg)
+              + 0.42 * calc.sin(p1 * cycles * 1450deg + 83deg)
+              + 0.34 * noise-sample(i)
+          )
+          let sample-2 = (
+            0.45 * modulation-2 * calc.sin(p2 * cycles * 360deg)
+              + 0.55 * calc.sin(p2 * cycles * 900deg + 37deg)
+              + 0.42 * calc.sin(p2 * cycles * 1450deg + 83deg)
+              + 0.34 * noise-sample(i + 1)
+          )
+          line(
+            (x1 + p1 * span, y + amp * sample-1),
+            (x1 + p2 * span, y + amp * sample-2),
+            stroke: wave-stroke,
+          )
+        }
+      }
+    }
+    let draw-prevoicing-transition = (x1, x2, y, step: 0.04, cycle-width: 0.36) => {
+      let span = x2 - x1
+      if span > step {
+        let count = int(calc.max(4, calc.floor(span / step)))
+        let cycles = calc.max(1.0, span / cycle-width)
+        for i in range(count) {
+          let p1 = i / count
+          let p2 = (i + 1) / count
+          let closure-1 = (1.0 - p1) * 0.008 * calc.sin(p1 * 180deg)
+          let closure-2 = (1.0 - p2) * 0.008 * calc.sin(p2 * 180deg)
+          let prevoice-1 = (
+            p1
+              * 0.035
+              * (
+                0.45 * calc.sin(p1 * cycles * 360deg)
+                  + 0.55 * calc.sin(p1 * cycles * 900deg + 37deg)
+                  + 0.42 * calc.sin(p1 * cycles * 1450deg + 83deg)
+                  + 0.34 * noise-sample(i)
+              )
+          )
+          let prevoice-2 = (
+            p2
+              * 0.035
+              * (
+                0.45 * calc.sin(p2 * cycles * 360deg)
+                  + 0.55 * calc.sin(p2 * cycles * 900deg + 37deg)
+                  + 0.42 * calc.sin(p2 * cycles * 1450deg + 83deg)
+                  + 0.34 * noise-sample(i + 1)
+              )
+          )
+          line(
+            (x1 + p1 * span, y + closure-1 + prevoice-1),
+            (x1 + p2 * span, y + closure-2 + prevoice-2),
+            stroke: wave-stroke,
+          )
+        }
+      }
+    }
+
+    if vot-ms > 0 {
+      rect(
+        (release-x, region-y1),
+        (voicing-x, region-y2),
+        fill: fill-aspiration,
+        stroke: (paint: gray.darken(35%), thickness: 0.7pt * scale-factor, dash: "dotted"),
+      )
+    }
+
+    line((release-x, event-line-bottom), (release-x, event-line-top), stroke: release-stroke)
+    if vot-ms != 0 {
+      line((voicing-x, event-line-bottom), (voicing-x, event-line-top), stroke: release-stroke)
+    }
+
+    if closure-ms > 0 {
+      rect(
+        (tx(closure-start-time), region-y1),
+        (release-x, region-y2),
+        fill: fill-closure,
+        stroke: region-stroke,
+      )
+      if show-closure-label {
+        content(
+          ((tx(closure-start-time) + release-x) / 2, region-label-y),
+          text-label(closure-text),
+          anchor: region-label-anchor,
+        )
+      }
+      if closure-segment != none {
+        let closure-segment-right-x = if vot-ms < 0 { voicing-x } else { release-x }
+        content(
+          ((tx(closure-start-time) + closure-segment-right-x) / 2, segment-y),
+          text-segment(closure-segment),
+          anchor: "center",
+        )
+      }
+    }
+
+    if vot-ms > 0 {
+      if show-positive-interval-label {
+        content(
+          ((release-x + voicing-x) / 2, interval-label-y),
+          text-label(interval-text),
+          anchor: region-label-anchor,
+        )
+      } else if interval-label != none and show-interval-key {
+        content(
+          ((release-x + voicing-x) / 2, interval-label-y),
+          event-tag(interval-key-text),
+          anchor: "center",
+        )
+      }
+      if show-interval-segment {
+        content(
+          ((release-x + voicing-x) / 2, segment-y),
+          text-segment(interval-segment),
+          anchor: "center",
+        )
+      }
+    }
+
+    rect(
+      (tx(vowel-start), region-y1),
+      (tx(right-time), region-y2),
+      fill: fill-vowel,
+      stroke: region-stroke,
+    )
+    if show-vowel-label {
+      content(
+        ((tx(vowel-start) + tx(right-time)) / 2, region-label-y),
+        text-label(vowel-text),
+        anchor: region-label-anchor,
+      )
+    }
+    if vowel-segment != none {
+      content(
+        ((tx(vowel-start) + tx(right-time)) / 2, segment-y),
+        text-segment(vowel-segment),
+        anchor: "center",
+      )
+    }
+
+    if voicing {
+      if closure-ms > 0 {
+        if vot-ms < 0 {
+          let transition-width = calc.min(voicing-x - tx(closure-start-time), 0.32)
+          let transition-start-x = voicing-x - transition-width
+          draw-wave(
+            tx(closure-start-time),
+            transition-start-x,
+            region-y1 + 0.16,
+            amp: 0.008,
+            step: 0.07,
+            cycle-width: 1.2,
+          )
+          draw-prevoicing-transition(transition-start-x, voicing-x, region-y1 + 0.16)
+          draw-prevoicing(voicing-x, release-x, region-y1 + 0.16)
+        } else {
+          draw-wave(tx(closure-start-time), release-x, region-y1 + 0.16, amp: 0.008, step: 0.07, cycle-width: 1.2)
+        }
+      }
+      if vot-ms > 0 {
+        draw-noise(release-x, voicing-x, region-y1 + 0.16)
+      }
+      draw-wave(tx(vowel-start), tx(right-time), region-y1 + 0.16)
+    }
+
+    if keys {
+      content(
+        (release-x, event-label-y),
+        event-tag([R]),
+        anchor: "center",
+      )
+      if vot-ms != 0 {
+        content(
+          (voicing-x, event-label-y),
+          event-tag([V]),
+          anchor: "center",
+        )
+      }
+      content(
+        (tx(right-time), legend-y),
+        text-doc(legend-text),
+        anchor: "east",
+      )
+    }
+
+    if show-label {
+      if vot-ms == 0 {
+        content(
+          (release-x, bracket-y - 0.35),
+          text-doc(vot-text),
+          anchor: "center",
+        )
+      } else {
+        let start-x = calc.min(release-x, voicing-x)
+        let end-x = calc.max(release-x, voicing-x)
+        line((start-x, bracket-y), (end-x, bracket-y), stroke: region-stroke)
+        line((start-x, bracket-y - 0.12), (start-x, bracket-y + 0.12), stroke: region-stroke)
+        line((end-x, bracket-y - 0.12), (end-x, bracket-y + 0.12), stroke: region-stroke)
+        content(
+          ((start-x + end-x) / 2, bracket-y - 0.35),
+          text-doc(vot-text),
+          anchor: "center",
+        )
+      }
+    }
+  }))
 }

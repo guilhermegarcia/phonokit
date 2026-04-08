@@ -150,6 +150,61 @@
 /// ```
 #let formants = formants
 
+/// Draw a schematic voice onset time (VOT) timeline.
+///
+/// Positive values show an aspiration interval between release and voicing
+/// onset, zero values align release and voicing onset, and negative values
+/// show prevoicing.
+///
+/// Arguments:
+/// - vot (number): Voice onset time in milliseconds
+/// - closure (number): Closure duration in milliseconds (default: 40)
+/// - vowel (number): Vowel region duration in milliseconds (default: 60)
+/// - scale (float): Overall scale factor for the diagram (default: 1.0)
+/// - label (auto or bool): Show the VOT value label (default: auto, equivalent
+///   to true)
+/// - keys (bool): Show event keys and legend (`R`, `V`, and compact interval
+///   keys such as `A`; default: false)
+/// - ui-lang (string): UI label language. Supported aliases: en/english,
+///   fr/french, pt/portuguese (default: "en")
+/// - closure-label, release-label, voicing-label, vowel-label, vot-label,
+///   interval-label (auto, content, string, or none): Override individual
+///   labels. `auto` uses localized defaults; `interval-label: auto` is the
+///   localized aspiration label. Set `interval-label: none` to hide it
+/// - interval-key (auto or content): Key used when `interval-label` does not
+///   fit and `keys: true` (default: auto, usually `A` for aspiration)
+/// - closure-segment, interval-segment, vowel-segment (string, content, or none):
+///   Optional IPA/segment labels placed below the closure, interval, and
+///   vowel regions. Strings use phonokit's IPA parser (default: none)
+/// - segment-size (length): Font size for segment labels (default: 10pt)
+/// - fill-closure (color): Closure region fill (default: luma(230))
+/// - fill-vowel (color): Vowel region fill (default: white)
+/// - fill-aspiration (color): Positive-VOT interval fill (default: luma(245))
+/// - voicing (bool): Draw a schematic voicing/noise waveform (default: true)
+/// - voicing-stroke (stroke or auto): Stroke for the voicing waveform (default:
+///   auto)
+///
+/// Region labels are placed above the boxes and are shown only when their
+/// localized or overridden label fits the available region width. Positive-VOT
+/// interval labels use the same fit logic; when they do not fit and `keys:
+/// true`, the interval key is shown in the diagram and explained in the legend.
+///
+/// Example:
+/// ```
+/// #vot(65)
+/// #vot(65, interval-label: none)
+/// #vot(
+///   65,
+///   closure-segment: "t",
+///   interval-segment: "\\h",
+///   vowel-segment: "\\ae",
+/// )
+/// #vot(-60, voicing: true)
+/// #vot(-60, ui-lang: "pt")
+/// #vot(-60, ui-lang: "fr")
+/// ```
+#let vot = vot
+
 /// Draw a single syllable's internal structure
 ///
 /// Visualizes only the syllable (σ) level with onset, rhyme, nucleus, and coda.
