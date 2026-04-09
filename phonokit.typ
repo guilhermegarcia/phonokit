@@ -717,13 +717,13 @@ The function `#vot()` creates schematic timelines to illustrate negative, zero, 
     kind: "code",
     ```typst
     // minimalist function
-    #vot(-70),
+    #vot(-70)
 
     // support for French and Portuguese labels
-    #vot(0, ui-lang: "pt"),
+    #vot(0, ui-lang: "pt")
 
     // annotate diagram using IPA symbols
-    #vot(60, closure-segment: "t", interval-segment: "\\h", vowel-segment: "\\ae"),
+    #vot(60, closure-segment: "t", interval-segment: "\\h", vowel-segment: "\\ae")
 
     // various arguments to customize diagrams
     #vot(
