@@ -916,7 +916,7 @@ When discussing the sonority principle in introductory phonology courses, it is 
 We start with an essential representation, namely the syllable. Two options are available: `#syllable()` for a classic onset-rhyme representation (@fig-syl1), and `#mora(..., coda: true)` for a moraic representation (@fig-syl2). The latter option allows you to define whether or not codas project a mora (`coda: true`). These two functions are used for single-syllable representations only. As can be seen in the figures, these functions take as input a string that should be familiar given the discussion about `#ipa()` in @sec-ipa-trans.
 
 #grid(
-  columns: (1fr, 1fr),
+  columns: (1fr, 1.2fr),
   [#align(center + bottom)[
     #figure(
       caption: [`#syllable("\\t tS \\ae t")`],
@@ -1795,7 +1795,7 @@ Let us begin by reproducing the full representation for consonants presented in 
 #grid(
   columns: (1fr, 1fr),
   gutter: 1em,
-  align: (center + horizon, center + horizon),
+  align: (bottom, bottom),
   [
     #figure(
       caption: [Code to create @fig-geom1],
@@ -1842,7 +1842,7 @@ Let us begin by reproducing the full representation for consonants presented in 
 #grid(
   columns: (1fr, 1fr),
   gutter: 1em,
-  align: (center + horizon, center + horizon),
+  align: (bottom, bottom),
   [
     #figure(
       caption: [Code to create @fig-geom2],
