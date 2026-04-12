@@ -81,13 +81,29 @@
     }
   }
 
+  // Normalize a visible label into an automatic reference stem.
+  // Examples: "N1" -> "n1", "C'" -> "cbar", "sigma" -> "sigma".
+  let ref-stem(label) = {
+    if type(label) != str { return none }
+
+    let stem = lower(label.trim())
+    if stem == "" { return none }
+
+    stem = stem.replace("'", "bar").replace("\u{2019}", "bar")
+    stem = stem.replace(regex("[^a-z0-9]+"), "-")
+    stem = stem.replace(regex("^-+"), "")
+    stem = stem.replace(regex("-+$"), "")
+
+    if stem == "" { none } else { stem }
+  }
+
   // Parse levels into a grid of (label, x-position, y-level) tuples
   // Entries can be:
   //   "label"                → label at (array col index, array level index)
   //   ("label", col)         → fractional column, normal level
   //   ("label", col, level)  → fractional column, fractional level
   //   ""                     → empty slot
-  let tier-grid = levels
+  let parsed-grid = levels
     .enumerate()
     .map(((level-idx, row)) => {
       row
@@ -102,6 +118,54 @@
           }
         })
     })
+
+  let ref-counts = (:)
+  let name-to-node = (:)
+  let tier-grid = ()
+
+  for (level-idx, row) in parsed-grid.enumerate() {
+    let tier-row = ()
+    for (col-idx, cell) in row.enumerate() {
+      let stem = ref-stem(cell.label)
+      let ref-name = if cell.label == "" or stem == none {
+        none
+      } else {
+        let count = ref-counts.at(stem, default: 0) + 1
+        ref-counts.insert(stem, count)
+        let key = stem + str(count)
+        name-to-node.insert(key, (level-idx, col-idx))
+        key
+      }
+
+      tier-row.push((..cell, ref-name: ref-name))
+    }
+    tier-grid.push(tier-row)
+  }
+
+  let resolve-node-ref(ref, arg-name: "reference") = {
+    if type(ref) == str {
+      assert(ref in name-to-node, message: arg-name + " references unknown multi-tier node `" + ref + "`")
+      name-to-node.at(ref)
+    } else {
+      assert(type(ref) == array and ref.len() == 2, message: arg-name + " node references must be `(level, col)` or a string key")
+      (ref.at(0), ref.at(1))
+    }
+  }
+
+  let resolve-link-ref(link, arg-name: "reference") = {
+    assert(type(link) == array and link.len() == 2, message: arg-name + " entries must contain exactly two node references")
+    (
+      resolve-node-ref(link.at(0), arg-name: arg-name),
+      resolve-node-ref(link.at(1), arg-name: arg-name),
+    )
+  }
+
+  let resolved-float = float.map(item => resolve-node-ref(item, arg-name: "float"))
+  let resolved-highlight = highlight.map(item => resolve-node-ref(item, arg-name: "highlight"))
+  let resolved-links = links.map(item => resolve-link-ref(item, arg-name: "links"))
+  let resolved-dashed = dashed.map(item => resolve-link-ref(item, arg-name: "dashed"))
+  let resolved-delinks = delinks.map(item => resolve-link-ref(item, arg-name: "delinks"))
+  let resolved-arrows = arrows.map(item => resolve-link-ref(item, arg-name: "arrows"))
 
   let num-levels = tier-grid.len()
 
@@ -230,7 +294,7 @@
 
       for col in range(cols) {
         if row-top.at(col).label == "" or row-bot.at(col).label == "" { continue }
-        if (level, col) in float or (level + 1, col) in float { continue }
+        if (level, col) in resolved-float or (level + 1, col) in resolved-float { continue }
 
         let (p1, p2) = line-endpoints(level, col, level + 1, col)
         line(p1, p2, stroke: sw)
@@ -238,22 +302,22 @@
     }
 
     // === Layer 2: Extra solid links (skip any that also appear in dashed) ===
-    for link in links {
-      if link in dashed { continue }
+    for link in resolved-links {
+      if link in resolved-dashed { continue }
       let ((l1, c1), (l2, c2)) = link
       let (p1, p2) = line-endpoints(l1, c1, l2, c2)
       line(p1, p2, stroke: sw)
     }
 
     // === Layer 3: Dashed lines ===
-    for d in dashed {
+    for d in resolved-dashed {
       let ((l1, c1), (l2, c2)) = d
       let (p1, p2) = line-endpoints(l1, c1, l2, c2)
       line(p1, p2, stroke: (dash: "dashed", thickness: sw))
     }
 
     // === Layer 4: Highlight circles (drawn behind labels, centered on text) ===
-    for (level-idx, col-idx) in highlight {
+    for (level-idx, col-idx) in resolved-highlight {
       let cell = tier-grid.at(level-idx).at(col-idx)
       if cell.label == "" { continue }
 
@@ -310,7 +374,7 @@
     }
 
     // === Layer 6: Delink cross marks (on top of everything) ===
-    for d in delinks {
+    for d in resolved-delinks {
       let ((l1, c1), (l2, c2)) = d
 
       let (p1, p2) = line-endpoints(l1, c1, l2, c2)
@@ -360,7 +424,7 @@
     // === Layer 7: Arrows (rectangular paths above top / below bottom level) ===
     let arrow-clearance = 0.5
 
-    for (arrow-idx, a) in arrows.enumerate() {
+    for (arrow-idx, a) in resolved-arrows.enumerate() {
       let ((l1, c1), (l2, c2)) = a
 
       let is-top = l1 == 0 and l2 == 0

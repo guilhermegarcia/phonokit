@@ -44,7 +44,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.6": *
+/// #import "@preview/phonokit:0.5.7": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -770,14 +770,15 @@
 /// Arguments:
 /// - levels (array): Array of arrays; each inner array is a tier of label strings (use "" for empty positions).
 ///   Entries can be "label", ("label", col) for fractional columns, or ("label", col, level) for fractional levels.
-/// - links (array): Extra solid lines as ((level1, col1), (level2, col2)) tuples (default: ())
-/// - dashed (array): Dashed lines as ((level1, col1), (level2, col2)) tuples (default: ())
-/// - delinks (array): Cross marks on connections as ((level1, col1), (level2, col2)) tuples (default: ())
-/// - arrows (array): Rectangular-path arrows as ((level, col-from), (level, col-to)) tuples (default: ()).
+/// - links (array): Extra solid lines as either `((level1, col1), (level2, col2))`
+///   tuples or `("name1", "name2")` pairs (default: ())
+/// - dashed (array): Dashed lines as either coordinate tuples or string-name pairs (default: ())
+/// - delinks (array): Cross marks on connections as either coordinate tuples or string-name pairs (default: ())
+/// - arrows (array): Rectangular-path arrows as either coordinate tuples or string-name pairs (default: ()).
 ///   Top-level arrows arc above; bottom-level arrows arc below. Arrowhead at destination.
 /// - arrow-delinks (array): Indices of arrows that should have a delink mark (||) at the midpoint (default: ())
-/// - float (array): Positions excluded from auto-linking as (level, col) tuples (default: ())
-/// - highlight (array): Positions with circle highlight as (level, col) tuples (default: ())
+/// - float (array): Positions excluded from auto-linking as `(level, col)` tuples or `"name"` strings (default: ())
+/// - highlight (array): Positions with circle highlight as `(level, col)` tuples or `"name"` strings (default: ())
 /// - ipa (array): Level indices whose labels should be rendered as IPA (default: ())
 /// - tier-labels (array): Labels for tiers as (level, "label") tuples, placed to the right (default: ())
 /// - spacing (float): Horizontal spacing between columns (default: 1.5)
@@ -800,12 +801,12 @@
 ///     ("", "", "s", "t", "E", "m", ""),
 ///   ),
 ///   links: (
-///     ((0, 1), (2, 2)),
+///     ("r2", "x2"),
 ///   ),
 ///   ipa: (3,),
 ///   arrows: (
-///     ((3, 3), (3, 2)),
-///     ((0, 4), (0, 1)),
+///     ("t1", "s1"),
+///     ("r2", "r1"),
 ///   ),
 ///   arrow-delinks: (
 ///     (1,)
@@ -816,6 +817,9 @@
 ///
 /// Note: Trailing digits in labels are automatically rendered as subscripts
 /// (e.g., "O1" becomes O₁). Standalone "x" is rendered as "×" (multiplication sign).
+/// Non-empty labels also receive automatic reference names in reading order
+/// (e.g., `sigma1`, `sigma2`, `x3`), which can be used in `links`, `dashed`,
+/// `delinks`, `float`, `highlight`, and `arrows`.
 #let multi-tier = multi-tier
 
 /// Create free-positioned sound-shift diagrams
