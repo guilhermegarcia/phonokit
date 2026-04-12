@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.6`]
+#let version = text(size: 0.8em)[`v 0.5.7`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.7` - Automatic node names for `#multi-tier()`; coordinate references still supported \
 `0.5.6` - VOT function to create pedagogical VOT timelines \
 `0.5.5` - Better alignment for numbered examples; vowel dispersion; nasal vowels; UI language support \
 `0.5.4` - Minor bug fixes in tableaux after recent changes to 0-index\
@@ -1535,7 +1536,7 @@ Adding ToBI labels to strings can be achieved with the function `#int()`. One of
 In the vast majority of cases, the strings in @fig-tobi will be in numbered examples that can be cross-referenced in the text. To see how `#int()` can work in those scenarios, see @sec-examples. Note that `#int()` is not meant to be used in numbered/unnumbered lists: you should always favour numbered examples instead.
 
 
-== Multi-tier representations <sec-multi>
+== Multi-tier representations #new-dot <sec-multi>
 
 Thus far, the functions we've seen are single-purpose: `#syllable()` only creates syllables. The advantage of such an approach is that the function can offer minimal syntax, which makes it easy to use and very user-friendly. The disadvantage is that the user can only produce one type of output. Certain phonological structures, however, have too many degrees of freedom for a single-purpose function to be enough. This is why the function `#multi-tier()` exists: it gives you the freedom to create a wide range of non-linear structures. It is much more flexible, but that comes with more complicated syntax and more arguments, by definition.
 
@@ -1635,7 +1636,73 @@ Let us look at three use cases. First, let's reproduce a figure from #cite(<booi
   ],
 )
 
-You can think of `#multi-tier()` as a more powerful version of `#autoseg()`, and you will recognize many common elements between the two. For example, `float` is again an argument here, which allows you to have elements in the representation that aren't linked to anything. This is important because `#multi-tier()` will automatically link an element (with a single link) to the element on the next level (row). In @fig-multi1, you can comment out the contents in the `links` argument to see what the figure looks like in its bare form. Likewise, `highlight` can also be used if you need to circle a particular element in the representation.
+You can think of `#multi-tier()` as a more powerful version of `#autoseg()`, and you will recognize many common elements between the two. For example, `float` is again an argument here, which allows you to have elements in the representation that are not linked to anything. This is important because `#multi-tier()` automatically links an element (with a single link) to the element on the next level (row). In @fig-multi1, you can comment out the contents of the `links` argument to see what the figure looks like in its bare form. Likewise, `highlight` can also be used if you need to circle a particular element in the representation.
+
+Although the function still supports referencing nodes by their coordinates, as of version `0.5.7`, non-empty labels also receive automatic names in reading order (`adj1`, `adj2`, `sigma3`, etc.). This means that you can avoid coordinates altogether and simply refer to nodes by name. @fig-multi-new repeats @fig-multi1 for convenience. Notice that labels are *case-insensitive* in @code-multi-new: both `sigma` and `Sigma` are assigned names of the form `sigmaX`, where `X` corresponds to the _n_#super[th] occurrence of `sigma` in the code. In practice, this usually makes node references easier to write and read.
+
+#grid(
+  columns: (1.5fr, 1fr),
+  gutter: 1em,
+  align: (center + horizon, center + horizon),
+  [
+    #figure(
+      caption: [Code to create @fig-multi-new],
+      supplement: "Code",
+      kind: "code",
+      ```typst
+      #multi-tier(
+        levels: (
+          ("", "", "", "", ("Adj", 3.5)),
+          ("", "", "", "", ("Adj", 3.5)),
+          ("", ("Af", 0.5), "", ("N", 2.5), "Af"),
+          ("in", "ter", "na", "tion", "al"),
+          ("sigma", "sigma", "sigma", "sigma", "sigma"),
+          ("Sigma", "", "Sigma", "", ""),
+          ("", "", "omega", "", ""),
+        ),
+        links: (
+          ("adj1", "af1"),
+          ("adj2", "n1"),
+          ("af1", "in1"),
+          ("n1", "na1"),
+          ("sigma2", "sigma6"),
+          ("sigma4", "sigma7"),
+          ("sigma5", "omega1"),
+          ("sigma6", "omega1"),
+        ),
+      ),
+      ```,
+    ) <code-multi-new>
+  ],
+  [
+    #figure(
+      caption: [Morphology and phonology],
+      multi-tier(
+        levels: (
+          ("", "", "", "", ("Adj", 3.5)),
+          ("", "", "", "", ("Adj", 3.5)),
+          ("", ("Af", 0.5), "", ("N", 2.5), "Af"),
+          ("in", "ter", "na", "tion", "al"),
+          ("sigma", "sigma", "sigma", "sigma", "sigma"),
+          ("Sigma", "", "Sigma", "", ""),
+          ("", "", "omega", "", ""),
+        ),
+        links: (
+          ("adj1", "af1"),
+          ("adj2", "n1"),
+          ("af1", "in1"),
+          ("n1", "na1"),
+          ("sigma2", "sigma6"),
+          ("sigma4", "sigma7"),
+          ("sigma5", "omega1"),
+          ("sigma6", "omega1"),
+        ),
+        scale: 0.75,
+      ),
+    ) <fig-multi-new>
+
+  ],
+)
 
 By default, elements are automatically placed on the grid, but you may want to specify a different position. In @fig-multi1, for example, four elements are placed at fractional positions on the grid (both "Adj" at column 3.5, "Af" at 0.5, and "N" at 2.5). This is made possible by defining the position for the element in question as a tuple. Therefore, "N" is specified as `("N", 2.5)`, which places "N" in between "na" and "tion", found in the level below. You can also add a third argument for the vertical position if you ever want to place an element in between levels (not shown here). The argument `levels` will also render numbers as subscripts automatically.
 
@@ -1662,12 +1729,12 @@ You can use `#multi-tier()` to create a wide range of representations that are n
           ("", "", "s", "t", "E", "m", ""),
         ),
         links: (
-          ((0, 1), (2, 2)),
+          ("r2", "x2"),
         ),
         ipa: (3,),
         arrows: (
-          ((3, 3), (3, 2)),
-          ((0, 4), (0, 1)),
+          ("t1", "s1"),
+          ("r2", "r1"),
         ),
         arrow-delinks: (
           (1,)
@@ -1688,12 +1755,12 @@ You can use `#multi-tier()` to create a wide range of representations that are n
           ("", "", "s", "t", "E", "m", ""),
         ),
         links: (
-          ((0, 1), (2, 2)),
+          ("r2", "x2"),
         ),
         ipa: (3,),
         arrows: (
-          ((3, 3), (3, 2)),
-          ((0, 4), (0, 1)),
+          ("t1", "s1"),
+          ("r2", "r1"),
         ),
         arrow-delinks: (
           (1,)
@@ -1728,14 +1795,14 @@ Finally, let's reproduce another figure, this time adapted from #cite(<carvalho2
           ("", "", ("V", 2.5), ""),
         ),
         links: (
-          ((1, 3), (2, 2)),
+          ("n21", "x2"),
         ),
         dashed: (
-          ((2, 0), (3, 2)),
+          ("x1", "n1"),
         ),
         level-spacing: 1.2,
         highlight: (
-          (1, 0),
+          "o11",
         ),
         spacing: 1,
         stroke-width: 0.7pt,
@@ -1761,14 +1828,14 @@ Finally, let's reproduce another figure, this time adapted from #cite(<carvalho2
           ("", "", ("V", 2.5), ""),
         ),
         links: (
-          ((1, 3), (2, 2)),
+          ("n21", "x2"),
         ),
         dashed: (
-          ((2, 0), (3, 2)),
+          ("x1", "n1"),
         ),
         level-spacing: 1.2,
         highlight: (
-          (1, 0),
+          "o11",
         ),
         spacing: 1,
         stroke-width: 0.7pt,
@@ -3040,7 +3107,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.5.2": *
+    #import "@preview/phonokit:0.5.7": *
     ```
 
     Now you can use any function you want:
@@ -3052,7 +3119,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.3.7": *` to your `typ` document if you plan on using #logo (assuming version `0.3.7`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.7": *` to your `typ` document if you plan on using #logo (assuming version `0.5.7`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
