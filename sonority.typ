@@ -4,7 +4,7 @@
 
 #import "ipa.typ": ipa, ipa-to-unicode
 #import "_config.typ": phonokit-font
-#import "@preview/cetz:0.4.2"
+#import "@preview/cetz:0.5.0"
 
 // Sonority scale based on Parker (2011)
 #let sonority-scale = (

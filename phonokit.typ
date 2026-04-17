@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.7`]
+#let version = text(size: 0.8em)[`v 0.5.8`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -409,12 +409,12 @@ The user can either input a language#footnote[Available languages: Arabic, Engli
 
 #figure(
   caption: [Italian consonants - `#consonants("italian", affricates: true, abbreviate: true)`],
-  consonants("italian", affricates: true, abbreviate: true),
+  consonants("italian", affricates: true, abbreviate: true, scale: 0.65),
 ) <fig-consonants-it>
 
 #figure(
   caption: [`#consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true)`],
-  consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true),
+  consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true, scale: 0.65),
 ) <fig-consonants-custom>
 
 As of version 0.5.3, you can delete rows or columns to create a more minimal table. The relevant arguments are `delete-cols` and `delete-rows`. Both accept an array of positions (starting from 0). For example, you could create a minimal table for English consonants, shown in @fig-c-min. You can also use `simplify: true` to remove all rows and columns without consonants in them.

@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.4.2": canvas, draw
+#import "@preview/cetz:0.5.0": canvas, draw
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
 #import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-consonant-labels
