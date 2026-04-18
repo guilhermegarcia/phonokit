@@ -44,7 +44,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.7": *
+/// #import "@preview/phonokit:0.5.8": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -787,6 +787,7 @@
 /// - baseline (string): Vertical alignment (default: 40%)
 /// - scale (float): Uniform scale factor (default: 1.0)
 /// - show-grid (bool): Show background grid for debugging layout (default: false)
+/// - show-refs (bool): Show node references below nodes for debugging; string nodes use generated names and content nodes fall back to coordinates (default: false)
 ///
 /// Returns: Multi-tier phonological representation
 ///

@@ -22,6 +22,7 @@
   baseline: 40%,
   scale: 1.0,
   show-grid: false,
+  show-refs: false,
 ) = {
   // Validate input
   assert(type(levels) == array, message: "levels must be an array of arrays")
@@ -176,14 +177,26 @@
   let scale-factor = scale
   let sw = stroke-width * scale-factor
   let ipa-levels = ipa
+  let refs-visible = show-refs
 
   // Vertical offsets from level center (following prosody.typ pattern)
   let text-above = 0.30
+  let text-below = -0.58
   let line-top = 0.42
   let line-bot = -0.18
 
   box(inset: 1.2em, baseline: baseline, cetz.canvas(length: scale-factor * 1cm, {
     import cetz.draw: *
+
+    let debug-ref(level, col, cell) = {
+      if cell.ref-name != none {
+        cell.ref-name
+      } else if cell.label != "" {
+        "(" + str(level) + ", " + str(col) + ")"
+      } else {
+        none
+      }
+    }
 
     // Helper: y-coordinate for a level index (used for default positioning)
     let level-y(level) = -level * level-spacing
@@ -371,6 +384,32 @@
         anchor: "north-west",
         text(size: 1em * scale-factor, context text(font: phonokit-font.get(), label-text)),
       )
+    }
+
+    // === Layer 5: Debug references (below labels) ===
+    if refs-visible {
+      let ref-color = luma(155)
+
+      for (level-idx, row) in tier-grid.enumerate() {
+        for (col-idx, cell) in row.enumerate() {
+          let ref-label = debug-ref(level-idx, col-idx, cell)
+          if ref-label == none { continue }
+
+          let x = cell-x(level-idx, col-idx)
+          let y = cell-y(level-idx, col-idx) + text-below
+
+          content(
+            (x, y),
+            anchor: "south",
+            text(
+              size: 0.75em * scale-factor,
+              fill: ref-color,
+              font: "Courier New",
+              ref-label,
+            ),
+          )
+        }
+      }
     }
 
     // === Layer 6: Delink cross marks (on top of everything) ===
