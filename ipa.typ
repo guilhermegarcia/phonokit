@@ -405,10 +405,8 @@
 
 #let ipa(input) = {
   let rendered = ipa-to-unicode(input)
-  [
-    #metadata(rendered)
-    #context {
-      text(font: phonokit-font.get(), rendered)
-    }
-  ]
+  context {
+    metadata(rendered)
+    text(font: phonokit-font.get(), rendered)
+  }
 }
