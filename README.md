@@ -16,7 +16,7 @@
 
 **Charis font is needed** for this package to work exactly as intended, but you can also use your own font with `#phonokit-init(font: "...")`. New Computer Modern is used for arrows.
 
-## Some examples
+## 📝 Some examples
 
 <table>
 <tr>
@@ -79,18 +79,9 @@
 
 <sub>Click on any image to view its source code.</sub>
 
-## Manual 🔍
+## 🔍 Manual
 
-Download [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive demonstration of available functions and their usage.
-
-## Fonts
-
-As of version `0.3.7`, the package allows the user to choose a global font for all functions. By default, Charis is used (Typst has a fallback font should you not have it installed). However, you can use whichever font you prefer with the following command:
-
-```typst
-#import "@preview/phonokit:0.5.8": *
-#phonokit-init(font: "New Computer Modern") // <- add to the top of your document
-```
+See [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive demonstration of available functions and their usage.
 
 ### IPA Module
 
@@ -112,6 +103,7 @@ As of version `0.3.7`, the package allows the user to choose a global font for a
 - **Multi-tier representations**: Create complex non-linear representations
 - **Metrical grids**: Inputs as strings or tuples
 - **Sonority profile**: Visualize the sonority of a string
+- **ToBI labels**: Add intonational labels to running text with `#int()`, with optional vertical lines for association
 
 ### Autosegmental Module
 
@@ -127,7 +119,7 @@ As of version `0.3.7`, the package allows the user to choose a global font for a
 
 ### SPE module
 
-- **Feature matrices**: Easily display feature matrices for SPE-style rules
+- **Feature matrices**: Create SPE-style feature matrices with `#feat()` and segment-based distinctive-feature matrices with `#feat-matrix()`
 
 ### Optimality Theory Module
 
@@ -154,14 +146,14 @@ As of version `0.3.7`, the package allows the user to choose a global font for a
 - **Numbered examples**: Create examples and sub-examples with labels and correct alignment
 - **Shortcuts**: Quick commands to add a range of arrows, angle brackets for extrametricality, and SPE-style underlines for context
 
-## Installation
+***
 
-### Package Repository
+## 📦 Package Repository
 
 - `https://github.com/guilhermegarcia/phonokit` [(most up-to-date version)](http://github.com/guilhermegarcia/phonokit)
 - `https://typst.app/universe/package/phonokit` [(published on Typst)](https://typst.app/universe/package/phonokit)
 
-### Package website
+## Package website
 
 For the most up-to-date information about the package, vignettes and demos, visit <https://gdgarcia.ca/phonokit>.
 
@@ -175,7 +167,7 @@ MIT
 Email: <guilherme.garcia@lli.ulaval.ca> \
 Website: <https://gdgarcia.ca>
 
-## Citation
+## 📚 Citation
 
 If you use this package in your research, please visit its GitHub repository and cite it using the metadata from the `CITATION.cff` file or click the "Cite this repository" button in the GitHub sidebar.
 
