@@ -1,12 +1,25 @@
 // Inuktitut Syllabics functions for Phonokit
 //
-// #syllabics(input, dialect: "nunavut")
+// #syllabics(input, dialect: "nunavut", strict: true)
 //   Roman orthography → Unicode Canadian Aboriginal Syllabics
 //
 // #roman(input, dialect: "nunavut")
 //   Unicode Canadian Aboriginal Syllabics → Roman orthography
 //
 // Supported dialects: "nunavut" (default), "nunavik", "north-baffin"
+//
+// DIALECT NOTE
+//   The Roman orthographies of Eastern Inuktitut (Nunavut, North Baffin, Nunavik)
+//   and Western Inuktitut (e.g. Inuinnaqtun) are not interchangeable. Inuinnaqtun
+//   has /h/, /qh/, and /kh/ where Eastern dialects have /s/, /q/, /k/, and uses
+//   heterorganic clusters (mn, pq, tk, kv) that do not occur in Eastern Roman.
+//   Western speakers do not conventionally use syllabics. By default this
+//   function refuses Eastern-dialect conversion of input containing h, qh, or
+//   kh, and reports the offending substring. Nunavik has a distinct /h/ phoneme
+//   with its own syllabic series; the check is not applied there.
+//
+//   Pass `strict: false` to opt out (h is then silently rewritten to s,
+//   preserving the pre-0.5 behavior).
 //
 // Font: Noto Sans Canadian Aboriginal (free, Google Fonts)
 //       Install before compiling: https://fonts.google.com/noto/specimen/Noto+Sans+Canadian+Aboriginal
@@ -24,12 +37,40 @@
 #let _cons2 = ("ng", "lh")
 #let _cons1 = ("p", "t", "k", "g", "q", "s", "h", "l", "j", "v", "m", "n", "r")
 
+// Eastern dialects whose Roman orthography contains no /h/. Presence of h, qh,
+// or kh signals Inuinnaqtun (Western) input.
+#let _eastern-dialects = ("nunavut", "north-baffin")
+
+// Returns the first Inuinnaqtun marker substring found, or none.
+// `lh` is legal in North Baffin (/ɬ/), so strip it before scanning for stray h.
+#let _detect-inuinnaqtun(input) = {
+  let lowered = lower(input).replace("lh", "")
+  if "qh" in lowered { return "qh" }
+  if "kh" in lowered { return "kh" }
+  if "h" in lowered { return "h" }
+  none
+}
+
 // ─── Core conversion: Roman → Syllabics ──────────────────────────────────────
 
-#let roman-to-syllabics(input, dialect: "nunavut") = {
+#let roman-to-syllabics(input, dialect: "nunavut", strict: true) = {
   let tables = syllabics-data.at(dialect)
   let cv = tables.at("cv")
   let finals = tables.at("finals")
+
+  // ── Pre-flight: catch Inuinnaqtun input being mis-routed to Eastern ────────
+  if strict and dialect in _eastern-dialects {
+    let marker = _detect-inuinnaqtun(input)
+    if marker != none {
+      panic(
+        "syllabics(): input contains \"" + marker + "\", a marker of Inuinnaqtun "
+          + "(Western dialect), but dialect is \"" + dialect + "\" (Eastern). "
+          + "Inuinnaqtun is not conventionally written in syllabics. "
+          + "Supply Eastern-dialect Roman text, or pass strict: false to "
+          + "force the h → s rewrite (e.g. for Kivalliq sub-dialects).",
+      )
+    }
+  }
 
   // ── Pre-normalization ──────────────────────────────────────────────────────
   // Lowercase first: Inuktitut Roman has no case distinction
@@ -43,13 +84,16 @@
     .replace("qqii", "qkii")
     .replace("qquu", "qkuu")
     .replace("qqaa", "qkaa")
+    .replace("qqai", "qkai") // Nunavik AI diphthong
     .replace("qqi", "qki")
     .replace("qqu", "qku")
     .replace("qqa", "qka")
 
-  // In Nunavut and North Baffin, /h/ and /s/ are phonetic variants → same syllabics.
-  // Nunavik has a distinct H series (U+1574–U+157B), so we skip this normalization there.
-  let input = if dialect != "nunavik" { input.replace("h", "s") } else { input }
+  // Nunavut may receive Kivalliq sub-dialect input that writes /s/ as 'h' (only
+  // reachable here with strict: false; otherwise strict mode rejected it above).
+  // North Baffin must NOT rewrite, because its sole legal use of 'h' is the
+  // 'lh' digraph (/ɬ/). Nunavik treats 'h' as a distinct phoneme.
+  let input = if dialect == "nunavut" { input.replace("h", "s") } else { input }
 
   // Some western dialects (e.g. Kivalliq) write /v/ before /l/ as 'b' — normalize to 'v'.
   let input = input.replace("bl", "vl")
@@ -164,7 +208,7 @@
 //   → syllabics for "nunavut" and "-mit", Roman for "Microsoft"
 // Anything inside { } is passed through in the document's current font.
 
-#let syllabics(input, dialect: "nunavut") = {
+#let syllabics(input, dialect: "nunavut", strict: true) = {
   // Split into alternating syllabics/escaped segments
   let parts = ()
   let current = ""
@@ -190,7 +234,7 @@
     if part.escaped {
       part.text
     } else {
-      text(font: ("Noto Sans Canadian Aboriginal", "Euphemia UCAS"), roman-to-syllabics(part.text, dialect: dialect))
+      text(font: ("Noto Sans Canadian Aboriginal", "Euphemia UCAS"), roman-to-syllabics(part.text, dialect: dialect, strict: strict))
     }
   }
 }
