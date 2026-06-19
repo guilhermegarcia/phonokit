@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.5.0"
+#import "@preview/cetz:0.5.2"
 #import "ipa.typ": ipa
 #import "_config.typ": phonokit-font
 
