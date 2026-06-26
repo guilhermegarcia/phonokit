@@ -144,7 +144,7 @@
 
 // Main vowels function
 #let vowels(
-  vowel-string, // Positional parameter (no default to allow positional args)
+  ..args, // Optional positional vowel-string (read below) — allows `lang`-only calls
   lang: none,
   width: 8,
   height: 6,
@@ -162,13 +162,23 @@
   highlight: (), // List of tipa strings whose background circle is highlighted
   highlight-color: luma(220), // Circle color for highlighted vowels (default: light gray)
 ) = {
+  // Read the optional positional argument: vowel symbols, a language name, or
+  // tipa-style IPA. It is optional (via the `..args` sink) so that `lang`-only
+  // calls like `vowels(lang: "spanish")` work — a parameter with a default value
+  // would be named-only in Typst and could not be passed positionally.
+  assert(args.pos().len() <= 1,
+    message: "vowels: expected at most one positional argument (the vowel string)")
+  assert(args.named().len() == 0,
+    message: "vowels: unexpected named argument(s): " + args.named().keys().join(", "))
+  let vowel-string = args.pos().at(0, default: none)
+
   // Determine which vowels to plot
   let vowels-to-plot = ""
   let nasal-target-vowels = ()
   let error-msg = none
 
   // Check if vowel-string is actually a language name
-  if vowel-string in language-vowels {
+  if vowel-string != none and vowel-string in language-vowels {
     // It's a language name - use language vowels
     vowels-to-plot = language-vowels.at(vowel-string)
   } else if lang != none {
@@ -180,7 +190,7 @@
       let available = language-vowels.keys().join(", ")
       error-msg = [*Error:* Language "#lang" not available. \ Available languages: #available]
     }
-  } else if vowel-string != "" {
+  } else if vowel-string != none and vowel-string != "" {
     // Use as manual vowel specification - keep oral bases for plotting and
     // remember which vowels were explicitly nasalized in the input.
     let parsed = _collect-custom-vowels(vowel-string)
@@ -287,7 +297,7 @@
         let base = get-vowel-position(vowel-data.at(sv), trapezoid, scaled-width, scaled-height, scaled-offset)
         (base.at(0) + s.at(1), base.at(1) + s.at(2))
       })
-    let preset-name = if vowel-string in language-vowels {
+    let preset-name = if vowel-string != none and vowel-string in language-vowels {
       vowel-string
     } else {
       lang

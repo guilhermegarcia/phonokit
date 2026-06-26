@@ -289,7 +289,7 @@
 
 // Main consonants function
 #let consonants(
-  consonant-string,
+  ..args, // Optional positional consonant-string (read below) — allows `lang`-only calls
   lang: none,
   ui-lang: "en",
   affricates: false,
@@ -304,6 +304,17 @@
   label-height: 1.2,
   scale: 0.7,
 ) = {
+  // Read the optional positional argument: consonant symbols (tipa-style IPA,
+  // optionally with braced affricates/aspirated items) or a built-in language
+  // name. Optional (via the `..args` sink) so that `lang`-only calls like
+  // `consonants(lang: "spanish")` work — a parameter with a default value would
+  // be named-only in Typst and could not be passed positionally.
+  assert(args.pos().len() <= 1,
+    message: "consonants: expected at most one positional argument (the consonant string)")
+  assert(args.named().len() == 0,
+    message: "consonants: unexpected named argument(s): " + args.named().keys().join(", "))
+  let consonant-string = args.pos().at(0, default: none)
+
   // Determine which consonants to plot
   let consonants-to-plot = ""
   let custom-affricates-string = ""
@@ -318,7 +329,7 @@
   let labels = ui-consonant-labels(ui-locale)
 
   // Check if consonant-string is actually a language name
-  if consonant-string in language-consonants {
+  if consonant-string != none and consonant-string in language-consonants {
     consonants-to-plot = language-consonants.at(consonant-string)
   } else if lang != none {
     if lang in language-consonants {
@@ -327,7 +338,7 @@
       let available = language-consonants.keys().join(", ")
       error-msg = [*Error:* Language "#lang" not available. \ Available languages: #available]
     }
-  } else if consonant-string != "" {
+  } else if consonant-string != none and consonant-string != "" {
     // Use as manual consonant specification
     // Extract braced content first (affricates, aspirated consonants, etc.)
     let extracted = extract-braced-content(consonant-string)
@@ -360,7 +371,7 @@
   let affricates-to-plot = ""
   if affricates {
     // Check if we used a language name
-    if consonant-string in language-affricates {
+    if consonant-string != none and consonant-string in language-affricates {
       affricates-to-plot = language-affricates.at(consonant-string)
     } else if lang != none and lang in language-affricates {
       affricates-to-plot = language-affricates.at(lang)
@@ -375,7 +386,7 @@
   let aspirated-affricates-to-plot = ""
   if aspirated {
     // Aspirated plosives
-    if consonant-string in language-aspirated-plosives {
+    if consonant-string != none and consonant-string in language-aspirated-plosives {
       aspirated-plosives-to-plot = language-aspirated-plosives.at(consonant-string)
     } else if lang != none and lang in language-aspirated-plosives {
       aspirated-plosives-to-plot = language-aspirated-plosives.at(lang)
@@ -386,7 +397,7 @@
 
     // Aspirated affricates (only if affricates is also true)
     if affricates {
-      if consonant-string in language-aspirated-affricates {
+      if consonant-string != none and consonant-string in language-aspirated-affricates {
         aspirated-affricates-to-plot = language-aspirated-affricates.at(consonant-string)
       } else if lang != none and lang in language-aspirated-affricates {
         aspirated-affricates-to-plot = language-aspirated-affricates.at(lang)

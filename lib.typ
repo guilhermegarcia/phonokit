@@ -44,7 +44,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.10": *
+/// #import "@preview/phonokit:0.5.11": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -355,8 +355,14 @@
 /// inventories, custom vowel sets, or tipa-style IPA notation.
 ///
 /// Arguments:
-/// - vowel-string (string): Vowel symbols to plot, language name, or tipa-style IPA
-/// - lang (string, optional): Explicit language parameter (e.g., lang: "spanish")
+/// - vowel-string (string, optional): Vowel symbols to plot, a built-in language
+///   name, or tipa-style IPA, passed positionally (e.g. `vowels("aeiou")` or
+///   `vowels("spanish")`). Optional: you may omit it and pass `lang` instead
+///   (e.g. `vowels(lang: "spanish")`). If both are given and the positional is a
+///   language name, the positional wins.
+/// - lang (string, optional): Built-in language whose inventory to plot, used when
+///   no language-name positional is given (e.g. `vowels(lang: "spanish")`). Also
+///   selects the nasal-vowel preset when the positional is a custom symbol string.
 /// - width (float): Base width of trapezoid (default: 8)
 /// - height (float): Base height of trapezoid (default: 6)
 /// - rows (int): Number of horizontal grid lines (default: 3)
@@ -405,8 +411,13 @@
 /// are shown left/right in each cell. Impossible articulations are grayed out.
 ///
 /// Arguments:
-/// - consonant-string (string): Consonant symbols to plot, language name, or tipa-style IPA
-/// - lang (string, optional): Explicit language parameter (e.g., lang: "russian")
+/// - consonant-string (string, optional): Consonant symbols to plot, a built-in
+///   language name, or tipa-style IPA, passed positionally (e.g.
+///   `consonants("ptk")` or `consonants("russian")`). Optional: you may omit it
+///   and pass `lang` instead (e.g. `consonants(lang: "russian")`). If both are
+///   given and the positional is a language name, the positional wins.
+/// - lang (string, optional): Built-in language whose inventory to plot, used when
+///   no language-name positional is given (e.g. `consonants(lang: "russian")`).
 /// - ui-lang (string): UI label language. Supported aliases: en/english, fr/french,
 ///   pt/portuguese (default: "en")
 /// - affricates (bool): Show affricate row after fricatives (default: false)
