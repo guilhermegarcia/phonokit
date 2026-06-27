@@ -513,7 +513,8 @@
   ), // ɳ retroflex nasal
   // Flagged consonants — place analysis is theory-dependent:
   "r": (root: ("+son", "-approx", "-vocoid"), coronal: true, anterior: "+", voice: "+", continuant: "-", segment: "r"), // r alveolar trill — [-cont] following Kenstowicz (1994)
-  "l": (root: ("+son", "+approx", "-vocoid"), coronal: true, anterior: "+", voice: "+", continuant: "+", segment: "l"), // l alveolar lateral — NOTE: lateral feature not modelled
+  "l": (root: ("+son", "+approx", "-vocoid"), coronal: true, anterior: "+", voice: "+", continuant: "+", lateral: true, segment: "l"), // l alveolar lateral
+  "L": (root: ("+son", "+approx", "-vocoid"), coronal: true, anterior: "-", voice: "+", continuant: "+", lateral: true, segment: "L"), // ʎ palatal lateral approximant — palatal = coronal [−anterior], cf. ɲ/ç
   "J": (root: ("-son", "-approx", "-vocoid"), dorsal: true, voice: "+", continuant: "+", segment: "J"), // ʝ voiced palatal fricative — NOTE: coronal vs. dorsal analysis contested; dorsal used here
   "C": (root: ("-son", "-approx", "-vocoid"), coronal: true, anterior: "-", voice: "-", continuant: "+", segment: "C"), // ç voiceless palatal fricative — NOTE: strident not modelled (cf. /ʃ/)
   // archiphoneme /T/: any stop — no place, no voice specified
@@ -523,7 +524,9 @@
 )
 
 // ── Segment presets (Sagey 1986) ─────────────────────────────────────────────
-// Vowels only — consonant presets are identical in both models.
+// Vowels only — consonants fall back to _presets in both models. The only
+// consonant difference between models is where [lateral] attaches, which
+// _build-tree handles from the `model` key (oral cavity vs. [coronal]).
 // Height/backness encoded as dorsal sub-features; roundness as labial: ("round",).
 // No aperture node. Note: [e]/[ɛ] and [o]/[ɔ] share the same basic features
 // in Sagey (ATR/tense distinguishes them, which is not modelled here).
@@ -729,6 +732,10 @@
   let vocalic = spec.at("vocalic", default: false)
   let vplace = spec.at("vplace", default: false)
   let aperture = spec.at("aperture", default: false)
+  let lateral = spec.at("lateral", default: false)
+  // Feature-geometry model: "ch" (Clements & Hume) attaches [lateral] under the
+  // oral cavity (sibling of [continuant]); "sagey" attaches it under [coronal].
+  let model = spec.at("model", default: "ch")
 
   // Normalize root to array
   let root-feats = if type(root) == str { (root,) } else { root }
@@ -737,8 +744,20 @@
   let radical = spec.at("radical", default: false)
 
   let laryngeal = laryngeal or spread or constricted or voice != false
-  // coronal may be bool or array; treat array as "active"
-  let coronal = if type(coronal) == array { coronal } else if coronal or (anterior != false) or distributed {
+
+  // [lateral] label and placement. In the Sagey model [lateral] hangs off
+  // [coronal]; in C&H it is a manner feature under the oral cavity.
+  let lateral-lbl = if lateral == true { "lateral" } else if lateral == "+" { "+lateral" } else if lateral == "-" {
+    "−lateral"
+  } else { none }
+  let lateral-cor = lateral-lbl != none and model == "sagey" // attach under [coronal]
+  let lateral-oc = lateral-lbl != none and model != "sagey" // attach under oral cavity
+
+  // coronal may be bool or array; treat array as "active".
+  // A Sagey-style [lateral] forces [coronal] to appear as its host.
+  let coronal = if type(coronal) == array { coronal } else if (
+    coronal or (anterior != false) or distributed or lateral-cor
+  ) {
     true
   } else { false }
   let tense = spec.at("tense", default: false)
@@ -800,6 +819,8 @@
   }
   if coronal != false {
     let ch = if type(coronal) == array { coronal.map(f => _feat(_norm-feat(f))) } else { cor-ch-default }
+    // Sagey model: [lateral] is a dependent of [coronal].
+    if lateral-cor { ch = ch + (_feat(lateral-lbl),) }
     place-ch = place-ch + (_feat("coronal", ch: ch),)
   }
   if radical != false { place-ch = place-ch + (_feat("radical"),) }
@@ -838,10 +859,12 @@
   let cplace-ch = if vocalic { (_class("vocalic", voc-ch),) } else { place-ch }
 
   // Auto-inference: != false covers true, "+", "-"
-  let show-oc = continuant-lbls.len() > 0 or show-cplace
+  let show-oc = continuant-lbls.len() > 0 or show-cplace or lateral-oc
 
-  // Oral cavity children
+  // Oral cavity children. C&H model: [lateral] is a manner feature here,
+  // sitting alongside [continuant] and before C-place.
   let oc-ch = continuant-lbls.map(_feat)
+  if lateral-oc { oc-ch = oc-ch + (_feat(lateral-lbl),) }
   if show-cplace { oc-ch = oc-ch + (_class("C-place", cplace-ch),) }
 
   // Laryngeal children — [voice] is under laryngeal (Clements & Hume 1995)
@@ -1088,6 +1111,7 @@
   let has-lar = nodes.any(e => e.label == "laryngeal")
   let has-nas = nodes.any(e => e.label == "nasal" or e.label.ends-with("nasal"))
   let has-oc = nodes.any(e => e.label == "oral cavity")
+  let has-distr = nodes.any(e => e.label == "distributed")
   let oc-shift = if has-lar and has-nas and has-oc { -0.50 } else { 0.0 }
 
   // Build oral-cavity subtree membership (pre-order, using original positions).
@@ -1164,6 +1188,19 @@
     calc.max(..cont-nodes.map(e => e.x))
   } else { none }
 
+  // Fix 5 — C&H [lateral] leaf is a sibling of [continuant] under oral cavity and
+  // its label crowds the C-place node. Locate the oral-cavity node so a lateral
+  // child of it can be nudged clear. (Sagey laterals sit under [coronal], untouched.)
+  let oc-lat-host = nodes.find(e => e.label == "oral cavity")
+
+  // Fix 6 — a Sagey [lateral] is a child of [coronal], which widens the C-place
+  // subtree and pushes C-place right, stranding [+cont] far to the left under
+  // oral cavity. Detect that case so [+cont] can be nudged right to recentre it.
+  let cor-lat-host = nodes.find(e => e.label == "coronal")
+  let has-sagey-lat = cor-lat-host != none and nodes.any(e => (
+    e.label.ends-with("lateral") and e.par == (cor-lat-host.x, cor-lat-host.y)
+  ))
+
   nodes.map(e => {
     // [voice] drops down when [continuant] is also present (avoids overlap).
     let e2 = if has-cont and (e.label == "voice" or e.label.ends-with("voice")) {
@@ -1173,9 +1210,32 @@
     let e2 = if oc-shift != 0.0 and (e2.label == "nasal" or e2.label.ends-with("nasal")) {
       (..e2, x: e2.x + 0.10, y: e2.y + 0.20)
     } else { e2 }
+    // Fix 7: retroflex nasal ɳ has a wide oral-cavity subtree ([distr] under
+    // [cor]) that crowds [+nasal] against the laryngeal line — shift it right.
+    // Gated like the nudge above (oc-shift != 0 ⇒ full laryngeal+nasal+oral-cavity
+    // tree) plus [distr], so it only fires when that laryngeal line is present.
+    // Among the presets this is unique to ɳ; a hand-built nasal retroflex with a
+    // laryngeal hits the same crowding and benefits from the same shift.
+    let e2 = if oc-shift != 0.0 and has-distr and (e2.label == "nasal" or e2.label.ends-with("nasal")) {
+      (..e2, x: e2.x + 0.35)
+    } else { e2 }
     // [rad] nudge left when [dor] is also present, to close the gap between them.
     let e2 = if has-dor and e2.label == "radical" {
       (..e2, x: e2.x - 0.30)
+    } else { e2 }
+    // Fix 5: C&H [lateral] child of oral cavity overlaps C-place — push left+down.
+    let e2 = if e2.label.ends-with("lateral") and oc-lat-host != none and e.par == (
+      oc-lat-host.x,
+      oc-lat-host.y,
+    ) {
+      (..e2, x: e2.x - 0.35, y: e2.y - 0.30)
+    } else { e2 }
+    // Fix 6: Sagey [lateral] widens C-place — nudge [+cont] right under oral cavity.
+    let e2 = if has-sagey-lat and e2.label.ends-with("continuant") and oc-lat-host != none and e.par == (
+      oc-lat-host.x,
+      oc-lat-host.y,
+    ) {
+      (..e2, x: e2.x + 0.45)
     } else { e2 }
     // Fix 3: shift [cor] subtree to midpoint between [lab] and post-nudge [rad].
     let e2 = if cor-sub.contains((e.x, e.y)) {
@@ -1249,6 +1309,10 @@
 ///   `true` → `[openN]`, `"+"` → `[+openN]`, `"-"` → `[−openN]`,
 ///   or `false` → omit that degree. E.g. `aperture: ("+", false, "-")`.
 ///   (Replaces the former `open` parameter.)
+/// - lateral (bool, str): Show `[lateral]`. Pass `true` → `[lateral]`,
+///   `"+"` → `[+lateral]`, `"-"` → `[−lateral]`. Attachment depends on `model`:
+///   under the oral cavity (sibling of `[continuant]`) for `"ch"`, under
+///   `[coronal]` for `"sagey"`. In the Sagey case `[coronal]` is shown automatically.
 /// - scale (number): Uniform scale factor (default: 1).
 /// - position (array): Manual position tweaks. Each entry: `(key, dx, dy)` where
 ///   `key` is the bare argument name (`"continuant"`, `"oral-cavity"`) and `dx`/`dy`
@@ -1268,7 +1332,8 @@
 /// - model (str): Feature-geometry model for preset vowels. `"ch"` (default) uses
 ///   Clements & Hume 1995 (aperture nodes for height). `"sagey"` uses Sagey 1986
 ///   (dorsal sub-features for height/backness, labial `[round]` for rounding, no aperture).
-///   Consonant presets are identical in both models.
+///   Consonant presets are otherwise identical in both models, except for the
+///   placement of `[lateral]` (oral cavity under `"ch"`, `[coronal]` under `"sagey"`).
 /// -> content
 #let geom(
   ph: none,
@@ -1291,6 +1356,7 @@
   vplace: false,
   aperture: false,
   tense: false,
+  lateral: false,
   scale: 1.0,
   position: (),
   delinks: (),
@@ -1305,12 +1371,13 @@
     return ui-lang-error(ui-lang)
   }
 
-  // Auto-detect length from ph: "iː" or "i:" → long (two timing slots)
-  // Strip the length mark so the preset lookup finds "i", not "iː"
-  // Keep the original for use as the segment label fallback.
-  let _is-long = ph != none and type(ph) == str and (ph.contains("ː") or ph.contains(":"))
+  // Auto-detect length from ph: "iː" or "i:" → long (two timing slots).
+  // Only a TRAILING colon counts as a length mark — a colon elsewhere belongs to
+  // a TIPA escape such as "\:t" (ʈ) and must not be stripped, or the preset lookup
+  // would fail. Strip just the trailing mark; keep the original as label fallback.
+  let _is-long = ph != none and type(ph) == str and (ph.ends-with("ː") or ph.ends-with(":"))
   let _ph-orig = ph
-  let ph = if ph != none and type(ph) == str { ph.replace("ː", "").replace(":", "") } else { ph }
+  let ph = if _is-long { ph.trim("ː", at: end, repeat: false).trim(":", at: end, repeat: false) } else { ph }
 
   // Resolve timing:
   //   auto  → one × normally, two × when ph contains a length mark
@@ -1361,6 +1428,7 @@
     if vplace != false { overrides.insert("vplace", vplace) }
     if aperture != false { overrides.insert("aperture", aperture) }
     if tense != false { overrides.insert("tense", tense) }
+    if lateral != false { overrides.insert("lateral", lateral) }
     (..(preset-dict.at(ph-key)), segment: seg, ..overrides)
   } else {
     (
@@ -1381,11 +1449,13 @@
       vplace: vplace,
       aperture: aperture,
       tense: tense,
+      lateral: lateral,
       segment: if segment != none { prefix + segment + suffix } else if prefix != "" or suffix != "" {
         prefix + suffix
       } else { none },
     )
   }
+  let spec = (..spec, model: model)
   let result = _build-tree(spec)
   let tree = result.tree
   let is-vocoid = result.is-vocoid
@@ -1625,11 +1695,12 @@
   let seg-labels = () // (x, y, ts, text, root-nname, has-timing)
   let timing-data = () // (root-x, ts, resolved-timing-array)
   for (idx, spec) in specs.enumerate() {
-    // Auto-detect length mark in ph; strip it so preset lookup works.
+    // Auto-detect a TRAILING length mark in ph; strip just that so preset lookup
+    // works. A mid-string colon belongs to a TIPA escape like "\:t" (ʈ) — leave it.
     let ph-raw = spec.at("ph", default: none)
-    let _is-long = ph-raw != none and type(ph-raw) == str and (ph-raw.contains("ː") or ph-raw.contains(":"))
+    let _is-long = ph-raw != none and type(ph-raw) == str and (ph-raw.ends-with("ː") or ph-raw.ends-with(":"))
     let spec = if _is-long {
-      (..spec, ph: ph-raw.replace("ː", "").replace(":", ""))
+      (..spec, ph: ph-raw.trim("ː", at: end, repeat: false).trim(":", at: end, repeat: false))
     } else { spec }
 
     // Resolve preset if ph key is present; explicit spec keys override the preset.
@@ -1667,6 +1738,7 @@
       } else { t })
     }
 
+    let spec = (..spec, model: model)
     let result = _build-tree(spec)
     let tree = result.tree
     let is-vocoid = result.is-vocoid

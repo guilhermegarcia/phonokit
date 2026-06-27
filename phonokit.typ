@@ -263,10 +263,10 @@ _A toolkit to create phonological representations in Typst_
 
 #v(3em)
 
-#align(center, text(size: 0.85em)[
-  How to keep track of updates? See table of contents.
-
-  #new-dot = something new #h(1.5em) #recent-dot = something recent])
+// #align(center, text(size: 0.85em)[
+//   How to keep track of updates? See table of contents.
+//
+//   #new-dot = something new #h(1.5em) #recent-dot = something recent])
 
 
 #pagebreak()
@@ -293,7 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.11` - `#vowels()` and `#consonants()` now accept a `lang`-only call (the vowel/consonant string is optional) \
+`0.5.11` - `#vowels()` & `#consonants()` now accept a `lang`-only call; laterals added to `#geom()`\
 `0.5.10` - Updated CeTZ dependency to 0.5.2 \
 `0.5.9` - README updates and documentation refresh \
 `0.5.8` - Helper for coordinates in `#multi-tier()`; updated dependencies \
@@ -402,7 +402,7 @@ See @sec-ipa for a reference table with the main IPA symbols available. For a mo
 
 == Phonemic inventories
 
-=== Consonants #new-dot <sec-consonants>
+=== Consonants <sec-consonants>
 
 Two additional functions allow users to quickly create consonant tables and vowel trapezoids given a string of phonemes. @fig-consonants-it shows the consonant inventory for Italian, for example. The function mirrors the pulmonic consonants table in the IPA chart with some minor changes. For example, affricates are shown when `affricates: true`, and #ipa("/w/") is shown in the approximant row under both bilabial and velar columns (when #ipa("/ \\mw /") is not present, in which case #ipa("/w/") appears only under bilabial). The argument `abbreviate: true` shortens labels for both rows and columns.
 
@@ -483,7 +483,7 @@ Finally, as of version 0.5.5, you certain functions have a `ui-lang` parameter f
 
 
 
-=== Vowels #new-dot <sec-vowels>
+=== Vowels <sec-vowels>
 
 
 Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. If desired, the function can also add schematic nasalized copies with `nasals: true`. For preset languages, this currently adds only the French nasal vowels. For custom strings, only vowels that are explicitly nasalized in the input are shown in the nasal layer, as in `#vowels("aãioõu", nasals: true)`. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap.
@@ -647,7 +647,7 @@ As is often the case, a figure can quickly become too crowded. Once we start add
 
 = Phonetics <phonetics>
 
-== Sound shifts #new-dot <sec-sound-shift>
+== Sound shifts <sec-sound-shift>
 
 The function `#sound-shift()` is meant for cases where a vowel trapezoid is no longer the best fit. This is often the case when we want to draw a schematic chain shift, merger, or split in which symbols must be placed freely in two-dimensional space. In `#sound-shift()`, each node is defined by a label and a position, and arrows connect nodes by referring to those labels directly. Optional arguments make it possible to curve arrows, circle nodes, and scale the whole representation up or down. @fig-sound-shift shows a simple schematic representation of the Northern Cities Shift @labov2008atlas.
 
@@ -711,7 +711,7 @@ The function `#sound-shift()` is meant for cases where a vowel trapezoid is no l
   ],
 )
 
-== Voice Onset Time #new-dot <vot>
+== Voice Onset Time <vot>
 
 The function `#vot()` creates schematic timelines to illustrate negative, zero, and positive voice onset time values. This can be useful in introductory phonetics and phonology courses when discussing prevoicing, release, aspiration, and the onset of voicing. As shown in @code-vot and @fig-vot, a minimal diagram for a negative VOT of -70 ms can be generated with `#vot(-70)`, but the function also supports localized labels, optional segmental annotation below each interval, and a range of aesthetic adjustments such as fill color and the display of schematic voicing waves. The resulting diagrams are intended as pedagogical illustrations rather than as direct plots from acoustic measurements, of course. Finally, as with other functions in #logo, you can scale it up or down with the `scale` argument.
 
@@ -761,7 +761,7 @@ The function `#vot()` creates schematic timelines to illustrate negative, zero, 
 
 
 
-== Vowel dispersion #new-dot <dispersion>
+== Vowel dispersion <dispersion>
 
 The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory phonology/phonetics courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the standard deviation used for synthetic jitter (`sd` for F1, and `sd2` for F2 when specified; otherwise both use the same value) and the number of samples (defaults to 10 per vowel). Vowel labels represent mean F1 and F2 values. As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. These preset values are schematic and intended only for pedagogical illustration. Several arguments are also available for aesthetic adjustments (point sizes, color, transparency, optional ellipses, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion, but the user should explore the function to experiment with the remaining arguments.
 
@@ -903,7 +903,7 @@ Next, the function `#feat()` creates a matrix given a set of features. This is t
 
 
 
-= Prosody module #recent-dot <sec-prosody>
+= Prosody module <sec-prosody>
 
 == Sonority
 
@@ -1505,7 +1505,7 @@ To create a tone that is underlyingly linked to more than one segment, we use th
 Autosegments are difficult to typeset because there are many degrees of freedom involved, which means functions start to become too convoluted for the benefit they provide (see @sec-multi). There is probably a sweet spot, a point beyond which a function of this type becomes impractical because there are simply too many arguments. `#autoseg()` attempts to be intuitive while covering spreading, delinking, one-to-many and many-to-one relationships, floating tones, and highlights with circles. I believe these cover the vast majority of scenarios with precision and symmetry. The function also provides convenient arguments for horizontal (`spacing`) and vertical (`baseline`) positioning, which can be handy in processes where you may want to adjust the position of the representation relative to an arrow or any other symbols you may want to add outside the function _per se_.
 
 
-== Prosody with ToBI #recent-dot <sec-tobi>
+== Prosody with ToBI <sec-tobi>
 
 Adding ToBI labels to strings can be achieved with the function `#int()`. One of its main arguments is `line`, which allows the user to "turn off" the vertical line (e.g., for boundary tones). The examples below are from #cite(form: "prose", <zsiga2013sounds>). By default, the font size of tones is set to `0.8em`.
 
@@ -1540,7 +1540,7 @@ Adding ToBI labels to strings can be achieved with the function `#int()`. One of
 In the vast majority of cases, the strings in @fig-tobi will be in numbered examples that can be cross-referenced in the text. To see how `#int()` can work in those scenarios, see @sec-examples. Note that `#int()` is not meant to be used in numbered/unnumbered lists: you should always favour numbered examples instead.
 
 
-== Multi-tier representations #new-dot <sec-multi>
+== Multi-tier representations <sec-multi>
 
 Thus far, the functions we've seen are single-purpose: `#syllable()` only creates syllables. The advantage of such an approach is that the function can offer minimal syntax, which makes it easy to use and very user-friendly. The disadvantage is that the user can only produce one type of output. Certain phonological structures, however, have too many degrees of freedom for a single-purpose function to be enough. This is why the function `#multi-tier()` exists: it gives you the freedom to create a wide range of non-linear structures. It is much more flexible, but that comes with more complicated syntax and more arguments, by definition.
 
@@ -1853,7 +1853,7 @@ Finally, let's reproduce another figure, this time adapted from #cite(<carvalho2
   ],
 )
 
-=== Help with labels #new-dot
+=== Help with labels
 
 The argument `show-grid` can be helpful for understanding the layout of a representation, so you know exactly where nodes are located. Automatic labelling is also useful, since it results in more minimal code. However, sometimes you may have a lot of nodes, or nodes that involve IPA transcription, which means labels will be normalized differently. As of version `0.5.8`, a new argument makes `#multi-tier()` more efficient: `show-refs`, shown in @fig-multi-refs.
 
@@ -1930,7 +1930,7 @@ The argument in question provides a more targeted debugging aid. It prints the u
 )
 
 
-= Feature geometry #recent-dot <geometry>
+= Feature geometry <geometry>
 
 Feature geometry is a natural progression from functions that cover autosegmental phonology and multi-tier representations. It presents some important challenges, including the user interface: as already mentioned, if too many degrees of freedom are available, a function becomes too convoluted, which compromises its use. Below I describe two special functions that are dedicated to feature geometry: `#geom()`, which takes care of any given representation, and `#geom-group()`, designed to represent multiple trees and processes.
 
@@ -2522,7 +2522,7 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
 #logo also has functions for harmonic grammars (`#hg()`) and noisy harmonic grammars (`#nhg()`). These functions are very similar to `#maxent()`, so their syntax will be familiar. The Noisy Harmonic Grammar function derives probabilities by simulating a number of evaluations (by default, 1000) given the constraints and violations provided by the user. It is possible to change the number of simulations and to omit the noise column from the tableau. The noise displayed is extracted from an additional simulation, so it is shown for illustrative purposes. For the most part, the functions discussed in this section are based on conventions in the literature, e.g., #cite(<flemming2021comparing>, form: "prose").
 
 
-= Numbered examples #new-dot<sec-examples>
+= Numbered examples <sec-examples>
 
 One important feature in any phonology paper is an environment for numbered examples. We could simply use the excellent `eggs` package for Typst @eggs, which does a great job for syntax examples. In phonology, however, we sometimes want examples to have arrows to show a process, and this creates an alignment issue when we have multiple instances in a single example or in multiple examples throughout. #logo has a function to deal with that: `#ex()`.
 
@@ -2689,7 +2689,7 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 #set page(flipped: true)
 #heading(numbering: none, outlined: true)[Appendix]
 #counter(heading).update(0)
-#set heading(numbering: "A.1.")
+#set heading(numbering: "A.1.", outlined: false)
 
 
 = IPA symbol reference <sec-ipa>
