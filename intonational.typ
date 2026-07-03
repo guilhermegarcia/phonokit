@@ -9,20 +9,20 @@
 /// Always pass labels as *strings* (e.g. `"H*"`), not bare content (`[H*]`), since
 /// characters like `*` and `_` have special meaning in Typst markup. Use ASCII
 /// hyphens for phrase accents (e.g. `"L-"`, `"L-H%"`); en/em dashes are
-/// automatically normalized to hyphens. Double hyphens are converted to superscript "-".
+/// automatically normalized to hyphens. Double hyphens are converted to a
+/// superscript en dash.
 ///
 /// Arguments:
 /// - label (string): ToBI label
 /// - line (boolean): draw a vertical stem connecting label to text (default: true)
-/// - height (length): distance from text baseline to the bottom of the label (default: 1.8em)
-/// - lift (length): gap between text baseline and stem bottom (default: 0.6em)
-/// - gap (length): gap between stem top and label bottom (default: 0.15em)
-/// - en-dash (boolean): render phrase-accent hyphens as en dashes (default: false)
+/// - height (length): distance from text baseline to the bottom of the label (default: 2em)
+/// - lift (length): gap between text baseline and stem bottom (default: 0.8em)
+/// - gap (length): gap between stem top and label bottom (default: 0.22em)
+/// - en-dash (boolean): render phrase-accent hyphens as en dashes (default: true)
 ///
 /// Example:
 /// ```
 /// You're a were#int("*L")wolf?#h(1em)#int("H%", line: false)
-
 /// ```
 #let int(
   label,

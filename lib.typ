@@ -128,7 +128,7 @@
 /// - point-color (color or auto): Override token color (default: auto)
 /// - point-alpha (ratio): Token transparency (default: 20%)
 /// - vowel-color (color): Color of vowel labels (default: black)
-/// - vowel-size (length): Font size of vowel labels (default: 20pt)
+/// - vowel-size (length): Font size of vowel labels (default: 18pt)
 /// - vowel-weight (str): Font weight of vowel labels (default: `"regular"`)
 /// - axis-size (length): Font size of axis labels and tick labels (default: 10pt)
 /// - scale (float): Overall scale factor for the figure (default: 1.0)
@@ -211,7 +211,7 @@
 /// - input (string): A single syllable (e.g., "ka" or "'va")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (σ) (default: ("σ",))
-/// - distance (float, optional): Horizontal distance between segments (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
 ///
 /// Returns: CeTZ drawing of syllable structure
 ///
@@ -228,7 +228,7 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (σ, μ) (default: ("σ", "μ"))
-/// - distance (float, optional): Horizontal distance between segments (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
 ///
 /// Returns: CeTZ drawing of moraic structure
 ///
@@ -246,7 +246,7 @@
 /// - input (string): Syllables separated by dots (e.g., "ka.'va.lo")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (Σ, σ) (default: ("Σ", "σ"))
-/// - distance (float, optional): Horizontal distance between segments (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
 ///
 /// Returns: CeTZ drawing of foot structure
 ///
@@ -264,7 +264,7 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (Σ, σ, μ) (default: ("Σ", "σ", "μ"))
-/// - distance (float, optional): Horizontal distance between segments (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
 ///
 /// Returns: CeTZ drawing of moraic foot structure
 ///
@@ -284,7 +284,7 @@
 /// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (ω, Σ, σ) (default: ("ω", "Σ", "σ"))
-/// - distance (float, optional): Horizontal distance between segments (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
 ///
 /// Returns: CeTZ drawing of prosodic structure
 ///
@@ -306,7 +306,7 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (ω, Σ, σ, μ) (default: ("ω", "Σ", "σ", "μ"))
-/// - distance (float, optional): Horizontal distance between segments (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
 ///
 /// Returns: CeTZ drawing of moraic prosodic structure
 ///
@@ -795,7 +795,7 @@
 /// - spacing (float): Horizontal spacing between columns (default: 1.5)
 /// - level-spacing (float): Vertical spacing between tiers (default: 1.2)
 /// - stroke-width (length): Line thickness (default: 0.05em)
-/// - baseline (string): Vertical alignment (default: 40%)
+/// - baseline (ratio): Vertical alignment (default: 40%)
 /// - scale (float): Uniform scale factor (default: 1.0)
 /// - show-grid (bool): Show background grid for debugging layout (default: false)
 /// - show-refs (bool): Show node references below nodes for debugging; string nodes use generated names and content nodes fall back to coordinates (default: false)
@@ -1055,6 +1055,8 @@
 /// - voice (bool, str): `[voice]` under laryngeal. Same sign convention as `nasal`.
 /// - continuant (bool, str): `[continuant]` under oral cavity. Same sign convention.
 ///   Pass an array of two values for affricates: `continuant: ("-", "+")`.
+/// - lateral (bool, str): `[lateral]`. Same sign convention as `nasal`. Attaches
+///   under oral cavity (CH model) or under coronal (Sagey model).
 /// - labial (bool, array): `[labial]`. Array adds sub-features:
 ///   `labial: ("round",)`.
 /// - coronal (bool, array): `[coronal]`. Array replaces `anterior`/`distributed`:

@@ -364,7 +364,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.3.7": *
+  #import "@preview/phonokit:0.5.11": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -453,7 +453,7 @@ As of version 0.5.3, you can delete rows or columns to create a more minimal tab
   )
 ]
 
-Finally, as of version 0.5.5, you certain functions have a `ui-lang` parameter for localization. French and Portuguese are supported (defaults to English). This parameter is also available in the functions `#feat-matrix()` (@spe), `#geom()` and `#geom-group()` (@geometry).
+Finally, as of version 0.5.5, certain functions have a `ui-lang` parameter for localization. French and Portuguese are supported (defaults to English). This parameter is also available in the functions `#feat-matrix()` (@spe), `#geom()` and `#geom-group()` (@geometry).
 
 #align(center)[
   #grid(
@@ -1086,13 +1086,13 @@ Finally, we arrive at prosodic words (PWd), which bring together syllables and f
 
   [#align(center + bottom)[
     #figure(
-      caption: [When `foot: "L"` (default)],
+      caption: [When `foot: "L"`],
       word-mora("('po.Ra).('ma.pa)", foot: "L", scale: 0.9),
     ) <fig-wd4>
   ]],
   [#align(center + bottom)[
     #figure(
-      caption: [When `foot: "R"`],
+      caption: [When `foot: "R"` (default)],
       word("('po.Ra).('ma.pa)", foot: "R", scale: 0.9),
     ) <fig-wd3>
   ]],
@@ -2226,7 +2226,7 @@ Unlike SPE rules, tableaux in optimality theory (OT; #cite(<prince1993optimality
           ("", "*!", ""),
         ),
         winner: 0, // <- Position of winning cand
-        dashed-lines: (0,) // <- Note the comma
+        dashed-lines: (0,), // <- Note the comma
         shade: true, // <- true by default
       )
       ```,
@@ -2277,7 +2277,7 @@ One nice feature of `#tableau()` is that the function automatically shades cells
 ) <tab-letters>
 
 
-Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[This also applies to other constraint-based functions in the package, discussed later in this manual.] You can pass prosodic function calls as content using square brackets, e.g., `[#syllable("mat")]`. This is the recommended approach because it avoids conflicts with the single quote character, which is also used for stress marking in prosodic notation. @tab-prosody shows an example with `#word()` candidates. When passing content directly, you control the scale via the function's own `scale` argument (this is key because prosodic structures as often too large for a tableau). @tab-prosody also shows the `gloss` argument in case more information is needed for the input. This argument requires two strings (orthographic form and translation).
+Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[This also applies to other constraint-based functions in the package, discussed later in this manual.] You can pass prosodic function calls as content using square brackets, e.g., `[#syllable("mat")]`. This is the recommended approach because it avoids conflicts with the single quote character, which is also used for stress marking in prosodic notation. @tab-prosody shows an example with `#word()` candidates. When passing content directly, you control the scale via the function's own `scale` argument (this is key because prosodic structures are often too large for a tableau). @tab-prosody also shows the `gloss` argument in case more information is needed for the input. This argument requires two strings (orthographic form and translation).
 
 
 #figure(
@@ -2475,12 +2475,12 @@ $ P(y|x) = frac(e^(- sum_(i=1)^n w_i C_i (y, x)), Z(x)) $ <maxent-prob>
 The function `#maxent()` calculates $h_i$, $e^(-h_i)$ and $P(y|x)$#footnote[Where $y$ is a given candidate and $x$ is the input.] (shown as $P_i$ in the tableau) automatically given the weights provided. @fig-tableau2 lists the weights for the constraints in use at the top and prints probability bars at the right margin. These can be turned off with `visualize: false` (see @code-maxent), but they are printed by default as this can help students quickly visualize probabilities when many candidates are evaluated.
 
 #figure(
-  caption: [A MaxEnt tableau with ordered by $P_i$ with `sort: true`],
+  caption: [A MaxEnt tableau ordered by $P_i$ with `sort: true`],
   supplement: "Tableau",
   kind: "Tableau",
   maxent(
     input: "/kraTa/",
-    candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Tu]"),
+    candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
     constraints: ("Max", "Dep", "*Complex"),
     weights: (2.5, 1.8, 1),
     violations: (
@@ -2520,6 +2520,30 @@ In @code-maxent, you can see all the necessary arguments for the function `#maxe
 ) <code-maxent>
 
 #logo also has functions for harmonic grammars (`#hg()`) and noisy harmonic grammars (`#nhg()`). These functions are very similar to `#maxent()`, so their syntax will be familiar. The Noisy Harmonic Grammar function derives probabilities by simulating a number of evaluations (by default, 1000) given the constraints and violations provided by the user. It is possible to change the number of simulations and to omit the noise column from the tableau. The noise displayed is extracted from an additional simulation, so it is shown for illustrative purposes. For the most part, the functions discussed in this section are based on conventions in the literature, e.g., #cite(<flemming2021comparing>, form: "prose").
+
+#v(1em)
+#important(title: "Important.")[
+  `#hg()` and `#nhg()` follow the convention in which violations are *negative* numbers and the candidate with the *highest* harmony wins. This differs from `#maxent()`, where violations are positive counts penalizing each candidate ($P^* = e^(-h)$). If you reuse a `violations` array from `#maxent()` in `#hg()` or `#nhg()`, negate the values first --- otherwise the harmony scores (and, in `#nhg()`, the simulated probabilities) will be inverted.
+]
+
+#figure(
+  caption: [Code to generate an HG tableau (note the negative violations)],
+  supplement: "Code",
+  kind: "code",
+  ```typst
+  #hg(
+    input: "/kraTa/",
+    candidates: ("[kra.Ta]", "[ka.Ta]", "[ka.ra.Ta]"),
+    constraints: ("Max", "Dep", "*Complex"),
+    weights: (2.5, 1.8, 1),
+    violations: (
+      (0, 0, -1),
+      (-1, 0, 0),
+      (0, -1, 0),
+    ),
+  )
+  ```,
+) <code-hg>
 
 
 = Numbered examples <sec-examples>
@@ -3218,7 +3242,7 @@ Finally, Typst's repository contains sub-directories to keep track of each versi
 
 = Exporting representations as images <app-png>
 
-You may want to use #logo without necessarily adopting Typst. The easiest way to do this is go to to #link("https://typst.app")[Typst.app] to create the structure you need using the page set-up shown in @code-export-png. You can then download the output in PNG format and voilà. You can later add to your #LaTeX or Word document --- this is similar to using #LaTeXiT.
+You may want to use #logo without necessarily adopting Typst. The easiest way to do this is to go to #link("https://typst.app")[Typst.app] to create the structure you need using the page set-up shown in @code-export-png. You can then download the output in PNG format and voilà. You can later add to your #LaTeX or Word document --- this is similar to using #LaTeXiT.
 
 Fortunately, it is also easy to automate this process if you want to do it off-line. First, make sure you install Typst compiler #link("https://typst.app/open-source/")[here]. Then, create a Typst file with your desired representation. One example is provided in @code-export-png, where we replicate @fig-tableau2. In the preamble of the file, notice that we load #logo and then adjust our page settings. You will notice that `fill` is set to `none`, which ensures that our resulting PNG file has transparent background. Finally, both `height` and `width` are set to `auto`, which sets the page size dynamically according to the size of the representation you wish to create. We will call this file `maxent.typ`.
 
@@ -3228,7 +3252,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.4.0": *
+  #import "@preview/phonokit:0.5.11": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3268,7 +3292,7 @@ You could go one step further and use a convenient bash script to take a #logo f
   supplement: "Code",
   kind: "code",
   ```bash
-  # NOTE: Function to generate PNGs figures using Phonokit
+  # NOTE: Function to generate PNG figures using Phonokit
   # Adjust Phonokit version and destination as needed
   phonokit() {
     local code="$1"
@@ -3278,7 +3302,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.4.0": *
+  #import "@preview/phonokit:0.5.11": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF
