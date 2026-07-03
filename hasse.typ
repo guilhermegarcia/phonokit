@@ -387,14 +387,29 @@
         let ux = dx / length
         let uy = dy / length
 
-        // Arrow at destination (always solid)
-        let arrow-x = x2 - uy * arrow-size
-        let arrow-y = y2 + ux * arrow-size
-        line((x2, y2), (arrow-x, arrow-y), stroke: stroke-width + black)
+        // Pull the arrow tip back to the edge of the white rectangle that
+        // will be drawn behind the destination label, so the head stays visible
+        // (same dimensions as the label-masking rect below)
+        let dest-half-w = (to.len() * 0.22 * scale-factor + 0.50) / 2
+        let dest-half-h = (0.5 * scale-factor + 0.50) / 2
+        let t-x = if ux == 0 { length } else { dest-half-w / calc.abs(ux) }
+        let t-y = if uy == 0 { length } else { dest-half-h / calc.abs(uy) }
+        let t = calc.min(t-x, t-y, length * 0.5)
+        let tip-x = x2 - ux * t
+        let tip-y = y2 - uy * t
 
-        arrow-x = x2 + uy * arrow-size
-        arrow-y = y2 - ux * arrow-size
-        line((x2, y2), (arrow-x, arrow-y), stroke: stroke-width + black)
+        // Two barbs angled backwards along the edge direction
+        let side = arrow-size * 0.6
+        line(
+          (tip-x, tip-y),
+          (tip-x - ux * arrow-size - uy * side, tip-y - uy * arrow-size + ux * side),
+          stroke: stroke-width + black,
+        )
+        line(
+          (tip-x, tip-y),
+          (tip-x - ux * arrow-size + uy * side, tip-y - uy * arrow-size - ux * side),
+          stroke: stroke-width + black,
+        )
       }
     }
 

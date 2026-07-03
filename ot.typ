@@ -1260,4 +1260,3 @@
     if visualize { pad(right: -bar-col-width, tbl) } else { tbl }
   }
 }
-}

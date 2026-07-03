@@ -208,7 +208,7 @@
   ),
   // Additional vowels — high confidence:
   "y": (
-    // ø̈ close front rounded
+    // y close front rounded
     root: ("+son", "+approx", "+vocoid"),
     vocalic: true,
     vplace: true,
@@ -436,7 +436,7 @@
     continuant: "-",
   ),
   // ɲ: palatal nasal = coronal [-anterior]
-  "\\N": (root: ("+son", "-approx", "-vocoid"), coronal: true, anterior: "-", nasal: "+", segment: "\\N"),
+  "\\nh": (root: ("+son", "-approx", "-vocoid"), coronal: true, anterior: "-", nasal: true, continuant: "-", segment: "\\nh"),
   // Additional consonants — high confidence:
   "j": (root: ("+son", "+approx", "-vocoid"), dorsal: true, continuant: "+", segment: "j"), // j palatal approximant
   "h": (root: ("-son", "-approx", "-vocoid"), spread: true, continuant: "+", segment: "h"), // h glottal fricative
@@ -506,7 +506,7 @@
     coronal: true,
     anterior: "-",
     distributed: true,
-    nasal: "+",
+    nasal: true,
     voice: "+",
     continuant: "-",
     segment: "\\:n",
@@ -1656,9 +1656,9 @@
 ///   Example: `position: (("continuant1", -0.2, 0.3),)`
 /// - delinks (array): Node anchor names (with tree index) whose line to their parent is
 ///   replaced with a delink mark. E.g. `delinks: ("c-place1",)`.
-/// - curved (bool): When `true`, arrows are drawn as quadratic bézier curves with
-///   automatic obstacle avoidance — they route around intervening nodes rather than
-///   crossing them. Uses the same algorithm as `#vowels()`. (default: `false`)
+/// - curved (bool): When `true`, arrows are drawn as bézier curves that bow away
+///   from the straight line between the two nodes instead of crossing it directly.
+///   Use per-arrow `ctrl` offsets to adjust the curvature if needed. (default: `false`)
 /// -> content
 #let geom-group(
   ..args,
@@ -1931,11 +1931,8 @@
         // Draw cross-tree arrows.
         // Shaft is dashed; head is a separate solid segment so the arrowhead
         // contour is never dashed (same technique as #vowels).
-        // When curved: quadratic bézier with obstacle avoidance (same algorithm as vowels.typ).
+        // When curved: bézier bowing away from the straight line between the nodes.
         let head-back = 0.12 // canvas units of solid segment before the tip
-        let clearance = 0.45 // obstacle avoidance radius (canvas units)
-        let sample-ts = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
-        let obs-pts = all-nodes.map(e => (e.x, e.y)) // all node centres
 
         for arrow in arrows {
           // Accept both positional arrays ("from", "to") / ("from", "to", color)
