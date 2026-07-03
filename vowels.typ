@@ -63,7 +63,7 @@
         // Front unrounded: outside (left of left edge)
         x = left-x - offset
       }
-    } // Near-front (0.15-0.4): lax vowels like ɪ, ɛ
+    } // Near-front (0.15-0.4): lax vowels like ɪ, ʏ
     // Always positioned inside the trapezoid
     else {
       x = left-x + (front * (right-x - left-x))

@@ -977,6 +977,7 @@
   for (i, syll) in syllables.enumerate() {
     if syll.stressed {
       head-idx = i
+      break
     }
   }
 
@@ -1389,6 +1390,7 @@
       for syll-idx in target-foot {
         if syllables.at(syll-idx).stressed {
           head-idx = syll-idx
+          break
         }
       }
       pwd-x = start-x + syllable-positions.at(head-idx)
@@ -1410,6 +1412,7 @@
           for syll-idx in ft {
             if syllables.at(syll-idx).stressed {
               head-idx = syll-idx
+              break
             }
           }
           let foot-x = start-x + syllable-positions.at(head-idx)
@@ -1495,6 +1498,7 @@
       for syll-idx in foot {
         if syllables.at(syll-idx).stressed {
           head-idx = syll-idx
+          break
         }
       }
 
@@ -1640,6 +1644,7 @@
   for (i, syll) in syllables.enumerate() {
     if syll.stressed {
       head-idx = i
+      break
     }
   }
 
@@ -2083,6 +2088,7 @@
           for syll-idx in ft {
             if syllables.at(syll-idx).stressed {
               head-idx = syll-idx
+              break
             }
           }
           let foot-x = start-x + syllable-positions.at(head-idx)

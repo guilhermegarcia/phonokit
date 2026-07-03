@@ -373,7 +373,7 @@
       }
     }
 
-    // === Layer 5: Tier labels (right-aligned, to the right of the diagram) ===
+    // === Layer 6: Tier labels (right-aligned, to the right of the diagram) ===
     for tl in tier-labels {
       let (level-idx, label-text) = tl
       let x = (max-col-x + 1.5) * spacing
@@ -386,7 +386,7 @@
       )
     }
 
-    // === Layer 5: Debug references (below labels) ===
+    // === Layer 7: Debug references (below labels) ===
     if refs-visible {
       let ref-color = luma(155)
 
@@ -412,7 +412,7 @@
       }
     }
 
-    // === Layer 6: Delink cross marks (on top of everything) ===
+    // === Layer 8: Delink cross marks (on top of everything) ===
     for d in resolved-delinks {
       let ((l1, c1), (l2, c2)) = d
 
@@ -460,7 +460,7 @@
       line(p2-start, p2-end, stroke: sw)
     }
 
-    // === Layer 7: Arrows (rectangular paths above top / below bottom level) ===
+    // === Layer 9: Arrows (rectangular paths above top / below bottom level) ===
     let arrow-clearance = 0.5
 
     for (arrow-idx, a) in resolved-arrows.enumerate() {

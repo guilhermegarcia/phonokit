@@ -29,7 +29,7 @@
 #import "autosegmental.typ": *
 #import "multi-tier.typ": *
 #import "sound-shift.typ": *
-#import "ex.typ": ex, ex-rules
+#import "ex.typ": ex, ex-rules, ex-num-label, subex-label
 #import "intonational.typ": *
 #import "geom.typ": *
 #import "phonetics.typ": *
@@ -82,7 +82,7 @@
 /// - stressed (int, optional): Index of stressed syllable (default: none)
 /// - box-size (float): Size of individual phoneme boxes (default: 0.8)
 /// - scale (float): Overall scale factor for the diagram (default: 1.0)
-/// - y-range (array): Vertical axis range for plotting (default: (0, 8))
+/// - y-range (array): Vertical axis range for plotting (default: (0, 13), matching Parker's scale)
 /// - show-lines (bool): Connect phonemes with dashed lines (default: true)
 ///
 /// Returns: CeTZ drawing of the sonority profile
@@ -921,6 +921,17 @@
 ///
 /// Usage: `#show: ex-rules`
 #let ex-rules = ex-rules
+
+/// Display the current example number inside an ex() body (legacy table mode).
+///
+/// Use as the first-column cell of a table when managing numbering manually.
+/// See also subex-label().
+#let ex-num-label = ex-num-label
+
+/// Display the next sub-example label (a., b., ...) inside an ex() body
+/// (legacy table mode). Attach a label for cross-referencing, e.g.
+/// `[#subex-label()<ex-a>]`.
+#let subex-label = subex-label
 
 /// Arrow symbols for phonological rules and processes
 ///

@@ -165,7 +165,7 @@
   stressed: none, // Index of stressed syllable
   box-size: 0.8, // Size of phoneme boxes
   scale: 1.0, // Overall scale
-  y-range: (0, 8), // Sonority range for y-axis
+  y-range: (0, 13), // Sonority range for y-axis (Parker's scale maxes at 13)
   show-lines: true, // Connect phonemes with lines
 ) = {
   // Convert tipa-style input to IPA
@@ -177,12 +177,11 @@
   let truncated = original-count > 10
   if truncated {
     phonemes = phonemes.slice(0, 10)
-    syllable-boundaries = syllable-boundaries.filter(pos => pos <= 10)
+    syllable-boundaries = syllable-boundaries.filter(pos => pos < 10)
   }
 
   let sonority-values = phonemes.map(p => get-sonority(p))
   let n-phonemes = phonemes.len()
-  let width = n-phonemes * 1.5
   let height = 3
 
   if truncated {
