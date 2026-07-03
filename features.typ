@@ -668,7 +668,7 @@
     round: "–",
     labiodental: "–",
     coronal: "+",
-    anterior: "+",
+    anterior: "–",
     distributed: "+",
     strident: "+",
     lateral: "–",
@@ -695,7 +695,7 @@
     round: "–",
     labiodental: "–",
     coronal: "+",
-    anterior: "+",
+    anterior: "–",
     distributed: "+",
     strident: "+",
     lateral: "–",
@@ -722,7 +722,7 @@
     round: "–",
     labiodental: "–",
     coronal: "+",
-    anterior: "+",
+    anterior: "–",
     distributed: "+",
     strident: "+",
     lateral: "–",
@@ -749,7 +749,7 @@
     round: "–",
     labiodental: "–",
     coronal: "+",
-    anterior: "+",
+    anterior: "–",
     distributed: "+",
     strident: "+",
     lateral: "–",
@@ -778,8 +778,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "–",
     dorsal: "–",
     high: "0",
@@ -805,8 +805,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "–",
     dorsal: "–",
     high: "0",
@@ -832,7 +832,7 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
+    distributed: "–",
     strident: "+",
     lateral: "–",
     dorsal: "–",
@@ -859,7 +859,7 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
+    distributed: "–",
     strident: "+",
     lateral: "–",
     dorsal: "–",
@@ -886,8 +886,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "–",
     dorsal: "–",
     high: "0",
@@ -913,8 +913,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "+",
     dorsal: "–",
     high: "0",
@@ -940,8 +940,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "–",
     dorsal: "–",
     high: "0",
@@ -951,7 +951,7 @@
     tense: "0",
   ),
   "ɻ": (
-    consonantal: "–",
+    consonantal: "+",
     sonorant: "+",
     continuant: "+",
     delayed_release: "0",
@@ -967,8 +967,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "–",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "–",
     dorsal: "–",
     high: "0",
@@ -1195,7 +1195,7 @@
     back: "0",
     tense: "0",
   ),
-  "g": (
+  "ɡ": (
     consonantal: "+",
     sonorant: "–",
     continuant: "–",
@@ -1304,7 +1304,7 @@
     tense: "0",
   ),
   "ɰ": (
-    consonantal: "+",
+    consonantal: "–",
     sonorant: "+",
     continuant: "+",
     delayed_release: "0",
@@ -1559,8 +1559,8 @@
     trill: "–",
     nasal: "–",
     voice: "–",
-    spread_gl: "+",
-    constr_gl: "–",
+    spread_gl: "–",
+    constr_gl: "+",
     labial: "–",
     round: "–",
     labiodental: "–",
@@ -1579,7 +1579,7 @@
   "h": (
     consonantal: "–",
     sonorant: "–",
-    continuant: "–",
+    continuant: "+",
     delayed_release: "+",
     approximant: "+",
     tap: "–",
@@ -1606,7 +1606,7 @@
   "ɦ": (
     consonantal: "–",
     sonorant: "–",
-    continuant: "–",
+    continuant: "+",
     delayed_release: "+",
     approximant: "+",
     tap: "–",
@@ -1702,8 +1702,8 @@
     labiodental: "–",
     coronal: "+",
     anterior: "+",
-    distributed: "+",
-    strident: "+",
+    distributed: "–",
+    strident: "–",
     lateral: "–",
     dorsal: "+",
     high: "+",
@@ -2065,7 +2065,7 @@
 /// distinctive feature specification from Hayes (2009).
 ///
 /// Arguments:
-/// - segment (string): IPA symbol (e.g., "p", "i", "\\t s" for t͡s)
+/// - segment (string): IPA symbol (e.g., "p", "i", "\\t t s" for t͡s)
 /// - all (bool): Show all features including 0 values (default: false)
 ///
 /// Returns: Formatted feature matrix in SPE-style notation
@@ -2073,7 +2073,7 @@
 /// Example:
 /// ```
 /// #feat-matrix("p")
-/// #feat-matrix("t \\t s")  // affricate using tipa notation
+/// #feat-matrix("\\t t s")  // affricate using tipa notation
 /// #feat-matrix("i", all: true)  // show all features including 0
 /// ```
 #let feat-matrix(segment, all: false, ui-lang: "en") = context {

@@ -80,9 +80,12 @@
     "\\darkl": "ɫ",
     // OTHER CONSONANTS - Clicks
     "\\!o": "ʘ",
+    "\\textpipe": "ǀ",
+    "!": "ǃ",
     "\\textdoublebarpipe": "ǂ",
     "\\doublebarpipe": "ǂ",
     "||": "ǁ",
+    "\\textdoublepipe": "ǁ",
     // OTHER CONSONANTS - Other
     "\\textbarglotstop": "ʡ",
     "\\barredP": "ʡ",
@@ -334,7 +337,7 @@
   let forward_diacritics = (
     "\\~": "̃", // combining tilde (nasalization)
     "\\r": "̥", // combining ring below (devoicing)
-    "\\v": "̩", // combining vertical line below (voicing)
+    "\\v": "̩", // combining vertical line below (syllabic)
     "\\t": "͡", // combining double inverted breve (tie bar for affricates)
     "\\dental": "̪", // no trailing space
   )
@@ -376,6 +379,13 @@
         }
       } else {
         result += token
+      }
+    } else if token in mappings {
+      // No backslash, but the whole token is a mapping (e.g., "||")
+      result += mappings.at(token)
+      if pending_diacritic != none {
+        result += pending_diacritic
+        pending_diacritic = none
       }
     } else {
       // No backslash: split into individual characters

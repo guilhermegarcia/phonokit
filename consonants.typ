@@ -178,13 +178,13 @@
   "all": "pbtdʈɖcɟkɡqɢʔmɱnɳɲŋɴʙrʀⱱɾɽɸβfvθðszʃʒʂʐçʝxɣχʁħʕhɦɬɮʋɹɻjɰwlɭʎʟ",
   "english": "pbmnŋtdkɡfvθðszʃʒhlɹwj",
   "spanish": "pbmnɲtdkɡfθsxlrɾj",
-  "french": "pbmnɲtdkɡfrvszʃʒljw",
+  "french": "pbmnɲtdkɡfʁvszʃʒljw",
   "german": "pbmntdkɡfvszʃʒçxhʁlj",
   "italian": "pbmnɲtdkɡfvszʃʎlrj",
   "japanese": "pbmnɲtdkɡçɸsʃzʒhɾj",
   "portuguese": "pbmnɲtdkɡfvszʃʒʎxlɾjw",
   "russian": "pbmntdkɡfvszʃʒxlrj",
-  "arabic": "btdkqʔmnfvðszʃxɣħʕhlrj",
+  "arabic": "btdkqʔmnfwðszʃxɣħʕhlrj",
 )
 
 // Language affricate inventories (used when affricates: true)
