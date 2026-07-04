@@ -40,10 +40,12 @@
   set math.vec(gap: 0.5em)
   let matrix = math.vec(delim: "[", ..features)
 
-  // 4. Use box with vertical padding to add space around matrices
-  // This prevents overlaps while keeping matrices inline-friendly
+  // 4. Center the matrix on the surrounding text (0.25em ≈ the math axis
+  // height). A ratio baseline (e.g. 50%) is silently ignored for math
+  // content, so the shift must be computed from the measured height.
+  let half = measure(matrix).height / 2
   box(
-    baseline: 50%,
+    baseline: half - 0.25em,
     inset: (top: 0.5em, bottom: 0.5em),
     matrix,
   )

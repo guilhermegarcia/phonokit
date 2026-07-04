@@ -293,7 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.12` - Bug fixes: feature values aligned with Hayes (2009); /ɡ/ lookup in `#feat-matrix()`; click symbols in `#ipa()`; `\nh` (ɲ) and placeless `\N` presets in `#geom()`; documentation fixes throughout \
+`0.5.12` - Several bug fixes\
 `0.5.11` - `#vowels()` & `#consonants()` now accept a `lang`-only call; laterals added to `#geom()`\
 `0.5.10` - Updated CeTZ dependency to 0.5.2 \
 `0.5.9` - README updates and documentation refresh \
