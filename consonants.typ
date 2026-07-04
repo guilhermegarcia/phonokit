@@ -178,7 +178,7 @@
   "all": "pbtdʈɖcɟkɡqɢʔmɱnɳɲŋɴʙrʀⱱɾɽɸβfvθðszʃʒʂʐçʝxɣχʁħʕhɦɬɮʋɹɻjɰwlɭʎʟ",
   "english": "pbmnŋtdkɡfvθðszʃʒhlɹwj",
   "spanish": "pbmnɲtdkɡfθsxlrɾj",
-  "french": "pbmnɲtdkɡfʁvszʃʒljw",
+  "french": "pbmnɲtdkɡfrvszʃʒljw",
   "german": "pbmntdkɡfvszʃʒçxhʁlj",
   "italian": "pbmnɲtdkɡfvszʃʎlrj",
   "japanese": "pbmnɲtdkɡçɸsʃzʒhɾj",

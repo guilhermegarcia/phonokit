@@ -437,6 +437,8 @@
   ),
   // ɲ: palatal nasal = coronal [-anterior]
   "\\nh": (root: ("+son", "-approx", "-vocoid"), coronal: true, anterior: "-", nasal: true, continuant: "-", segment: "\\nh"),
+  // N: nasal archiphoneme — deliberately unspecified for place
+  "\\N": (root: ("+son", "-approx", "-vocoid"), nasal: true, continuant: "-", segment: "\\N"),
   // Additional consonants — high confidence:
   "j": (root: ("+son", "+approx", "-vocoid"), dorsal: true, continuant: "+", segment: "j"), // j palatal approximant
   "h": (root: ("-son", "-approx", "-vocoid"), spread: true, continuant: "+", segment: "h"), // h glottal fricative
