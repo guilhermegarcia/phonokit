@@ -40,14 +40,15 @@
   set math.vec(gap: 0.5em)
   let matrix = math.vec(delim: "[", ..features)
 
-  // 4. Center the matrix on the surrounding text (0.25em ≈ the math axis
-  // height). A ratio baseline (e.g. 50%) is silently ignored for math
-  // content, so the shift must be computed from the measured height.
-  let half = measure(matrix).height / 2
+  // 4. Center the matrix on the math axis of the surrounding text (0.25em
+  // above the baseline, where arrows and slashes sit). box.baseline is not
+  // honored when the body is math content (the math baseline wins), so the
+  // matrix is wrapped in a stack first, which gives the box plain block
+  // content and makes the relative baseline behave.
   box(
-    baseline: half - 0.25em,
+    baseline: 50% - 0.25em,
     inset: (top: 0.5em, bottom: 0.5em),
-    matrix,
+    stack(matrix),
   )
 }
 
