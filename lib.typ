@@ -44,7 +44,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.12": *
+/// #import "@preview/phonokit:0.5.13": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -387,6 +387,8 @@
 ///   same size as regular vowels (default: none)
 /// - highlight (array): List of tipa strings whose background circle is highlighted (default: ())
 /// - highlight-color (color): Circle color for highlighted vowels (default: luma(220))
+/// - phoneme-colors (dictionary): Map vowel symbols to text colors. Keys accept
+///   tipa-style notation and are matched after IPA conversion (default: (:))
 ///
 /// Returns: CeTZ drawing of IPA vowel chart with positioned vowels
 ///
@@ -396,6 +398,7 @@
 /// - `#vowels("aãioõu", nasals: true)` - Add only the nasal vowels marked in the custom inventory
 /// - `#vowels("french", nasals: true)` - Add the French nasal vowels
 /// - `#vowels("english", arrows: (("a", "U"), ("a", "I"), ("e", "I"), ("O", "I"), ("o", "U")), curved: true)` - Diphthong trajectories
+/// - `#vowels("aeiou", phoneme-colors: ("i": red, "u": blue))` - Color selected phonemes
 ///
 /// Note: Diacritics and non-vowel symbols are ignored during plotting. Nasal
 /// overlays are illustrative only and are not language-specific placements.
@@ -431,6 +434,8 @@
 /// - label-width (float): Width of row labels (default: 3.5)
 /// - label-height (float): Height of column labels (default: 1.2)
 /// - scale (float): Scale factor for entire table (default: 0.7)
+/// - phoneme-colors (dictionary): Map consonant symbols to text colors. Keys
+///   accept tipa-style notation and are matched after IPA conversion (default: (:))
 ///
 /// Returns: CeTZ drawing of IPA consonant table with positioned consonants
 ///
@@ -439,6 +444,7 @@
 /// - `#consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true)` - Custom inventory
 /// - `#consonants("english", affricates: true, simplify: true)` - Simplified English inventory
 /// - `#consonants("italian", affricates: true, simplify: true, ui-lang: "fr")` - Localized labels
+/// - `#consonants("ptk", phoneme-colors: ("p": red, "t": blue))` - Color selected phonemes
 ///
 /// Notes:
 /// - /w/ (labiovelar) appears in both bilabial and velar columns when /ɰ/ is not present; otherwise only bilabial

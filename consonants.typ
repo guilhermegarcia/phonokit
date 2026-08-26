@@ -303,6 +303,7 @@
   label-width: 3.5,
   label-height: 1.2,
   scale: 0.7,
+  phoneme-colors: (:),
 ) = {
   // Read the optional positional argument: consonant symbols (tipa-style IPA,
   // optionally with braced affricates/aspirated items) or a built-in language
@@ -534,6 +535,17 @@
   let scaled-label-font-size = 9 * scale
   let scaled-circle-radius = 0.3 * scale
   let scaled-line-thickness = 0.8 * scale
+  let resolved-phoneme-colors = (:)
+  for (phoneme, color) in phoneme-colors {
+    resolved-phoneme-colors.insert(ipa-to-unicode(phoneme), color)
+  }
+  let phoneme-text = phoneme => {
+    if phoneme in resolved-phoneme-colors {
+      text(size: scaled-font-size * 1pt, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme), phoneme)
+    } else {
+      text(size: scaled-font-size * 1pt, font: phonokit-font.get(), phoneme)
+    }
+  }
 
   let num-cols = display-places.len()
   let num-rows = display-manners.len()
@@ -826,13 +838,13 @@
           if pair.voiced != none {
             let pos = (cell-center-x, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiced), anchor: "center")
+            content(pos, context phoneme-text(pair.voiced), anchor: "center")
           }
           // In rare cases where voiceless sonorants exist, also center them
           if pair.voiceless != none {
             let pos = (cell-center-x, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
+            content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }
         } else {
           // Obstruents: use left/right positioning for voicing contrast
@@ -841,13 +853,13 @@
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
+            content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }
 
           if pair.voiced != none {
             let pos = (cell-center-x + offset, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiced), anchor: "center")
+            content(pos, context phoneme-text(pair.voiced), anchor: "center")
           }
         }
       }
@@ -872,7 +884,7 @@
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
+            content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }
         }
       }
@@ -897,13 +909,13 @@
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
+            content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }
 
           if pair.voiced != none {
             let pos = (cell-center-x + offset, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiced), anchor: "center")
+            content(pos, context phoneme-text(pair.voiced), anchor: "center")
           }
         }
       }
@@ -928,7 +940,7 @@
           if pair.voiceless != none {
             let pos = (cell-center-x - offset, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
-            content(pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), pair.voiceless), anchor: "center")
+            content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }
         }
       }

@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.12`]
+#let version = text(size: 0.8em)[`v 0.5.13`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.13` - `#vowels()` and `#consonants()` now accept the `phoneme-colors`\
 `0.5.12` - Several bug fixes\
 `0.5.11` - `#vowels()` & `#consonants()` now accept a `lang`-only call; laterals added to `#geom()`\
 `0.5.10` - Updated CeTZ dependency to 0.5.2 \
@@ -365,7 +366,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.5.12": *
+  #import "@preview/phonokit:0.5.13": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -409,7 +410,7 @@ Two additional functions allow users to quickly create consonant tables and vowe
 
 Aspirated consonants are shown when `aspirated: true`. In cases where neither `affricates` nor `aspirated` are set to `true`, the function will omit both groups and fewer rows will be printed.
 
-The user can either input a language#footnote[Available languages: Arabic, English, French, German, Italian, Japanese, Portuguese, Russian and Spanish (all language names are lowercase in the function). You can also use `all` to display all consonants. The same applies to the function `#vowels()`.] (see caption of @fig-consonants-it) or a string of consonants to create a custom inventory (@fig-consonants-custom) --- the input follows the same format used by the `#ipa()` function discussed in @sec-ipa-trans, so `#ipa("\\*r")` generates "#ipa("\\*r")". Note, however, that both affricates and aspirated consonants require curly braces around them as well as `affricates: true` and `aspirated: true`, as shown in the caption of @fig-consonants-custom. Finally, the function also allows for flexible sizing with the `scale` argument.
+The user can either input a language#footnote[Available languages: Arabic, English, French, German, Italian, Japanese, Portuguese, Russian and Spanish (all language names are lowercase in the function). You can also use `all` to display all consonants. The same applies to the function `#vowels()`.] (see caption of @fig-consonants-it) or a string of consonants to create a custom inventory (@fig-consonants-custom) --- the input follows the same format used by the `#ipa()` function discussed in @sec-ipa-trans, so `#ipa("\\*r")` generates "#ipa("\\*r")". Note, however, that both affricates and aspirated consonants require curly braces around them as well as `affricates: true` and `aspirated: true`, as shown in the caption of @fig-consonants-custom. As of version `0.5.13`, individual consonant symbols can be colored with `phoneme-colors`, for example `#consonants("ptk", phoneme-colors: ("p": red, "t": blue))`. Finally, the function also allows for flexible sizing with the `scale` argument.
 
 
 #figure(
@@ -454,7 +455,7 @@ As of version 0.5.3, you can delete rows or columns to create a more minimal tab
   )
 ]
 
-Finally, as of version 0.5.5, certain functions have a `ui-lang` parameter for localization. French and Portuguese are supported (defaults to English). This parameter is also available in the functions `#feat-matrix()` (@spe), `#geom()` and `#geom-group()` (@geometry).
+Certain functions have a `ui-lang` parameter for localization. French and Portuguese are supported (defaults to English). This parameter is also available in the functions `#feat-matrix()` (@spe), `#geom()` and `#geom-group()` (@geometry). @fig-c-lang, for example, is set to French. The same figure also uses the argument `phoneme-colors` (the same argument is also available for `#vowels()`, discussed below).
 
 #align(center)[
   #grid(
@@ -465,7 +466,11 @@ Finally, as of version 0.5.5, certain functions have a `ui-lang` parameter for l
       #figure(
         caption: [Concise consonant table for Italian in a French document],
         [
-          #consonants("italian", affricates: true, simplify: true, ui-lang: "fr")
+          #consonants("italian", affricates: true, simplify: true, ui-lang: "fr", phoneme-colors: (
+            "f": red,
+            "s": blue,
+            "S": green,
+          ))
         ],
       ) <fig-c-lang>
     ],
@@ -475,7 +480,14 @@ Finally, as of version 0.5.5, certain functions have a `ui-lang` parameter for l
         supplement: "Code",
         kind: "code",
         ```typst
-          #consonants("italian", affricates: true, simplify: true, ui-lang: "fr")
+          #consonants("italian", affricates: true,
+          simplify: true,
+          ui-lang: "fr",
+          phoneme-colors: (
+            "f": red,
+            "s": blue,
+            "S": green,
+          ))
         ```,
       )
     ],
@@ -487,7 +499,7 @@ Finally, as of version 0.5.5, certain functions have a `ui-lang` parameter for l
 === Vowels <sec-vowels>
 
 
-Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. If desired, the function can also add schematic nasalized copies with `nasals: true`. For preset languages, this currently adds only the French nasal vowels. For custom strings, only vowels that are explicitly nasalized in the input are shown in the nasal layer, as in `#vowels("aãioõu", nasals: true)`. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap.
+Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. If desired, the function can also add schematic nasalized copies with `nasals: true`. For preset languages, this currently adds only the French nasal vowels. For custom strings, only vowels that are explicitly nasalized in the input are shown in the nasal layer, as in `#vowels("aãioõu", nasals: true)`. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap. As with `#consonants()`, individual vowel symbols can be colored with `phoneme-colors`, for example `#vowels("aeiou", phoneme-colors: ("i": red, "u": blue))`.
 
 #grid(
   columns: (1fr, 1fr),
@@ -530,6 +542,9 @@ As of version `0.4.5`, the function `#vowels()` accepts a range of additional (o
           curved: true,
           highlight: ("a", "e", "o", "O"),
           highlight-color: blue.lighten(80%),
+          phoneme-colors: (
+            "i": red, "u": orange
+          ),
         )
       ```,
     )
@@ -550,13 +565,14 @@ As of version `0.4.5`, the function `#vowels()` accepts a range of additional (o
           curved: true,
           highlight: ("a", "e", "o", "O"),
           highlight-color: blue.lighten(80%),
+          phoneme-colors: ("i": red, "u": orange),
         )
       ],
     ) <fig-trapezoid-1>
   ],
 )
 
-The function `#vowels()` places vowels in predetermined locations in the trapezoid, as expected. However, as of version `0.4.5`, you can also shift vowels, which allows for a much higher degree of flexibility when illustrating dialectal variation, for example. The argument `shift`, shown in the code next to @fig-trapezoid-2, allows you the specify a vowel as well as a shift from its original position. Shifted vowels can then be independently targeted by the `highlight` argument, just like any other vowel in the trapezoid. In addition, you can customize arrows to target shifted vowels by using the same shifted values you defined for each vowel. Finally, shifted vowels can have their color and size adjusted with `shift-color` and `shift-size`, respectively (but note that all shifted vowels will share the same color and size). In the example shown in @fig-trapezoid-2, a custom vowel inventory is illustrated with three shifted vowels (in #text(fill: blue.darken(20%))[dark blue]). The trapezoid also shows how to change the color and style of arrows.
+The function `#vowels()` places vowels in predetermined locations in the trapezoid, as expected. However, as of version `0.4.5`, you can also shift vowels, which allows for a much higher degree of flexibility when illustrating dialectal variation, for example. The argument `shift`, shown in the code next to @fig-trapezoid-2, allows you to specify a vowel as well as a shift from its original position. Shifted vowels can then be independently targeted by the `highlight` argument, just like any other vowel in the trapezoid. In addition, you can customize arrows to target shifted vowels by using the same shifted values you defined for each vowel. Finally, shifted vowels can have their color and size adjusted with `shift-color` and `shift-size`, respectively (but note that all shifted vowels will share the same color and size). In the example shown in @fig-trapezoid-2, a custom vowel inventory is illustrated with three shifted vowels (in #text(fill: blue.darken(20%))[dark blue]). The trapezoid also shows how to change the color and style of arrows.
 
 As is often the case, a figure can quickly become too crowded. Once we start adding arrows and shifted vowels, a trapezoid may be less clear given the amount of information displayed. @fig-trapezoid-2 (bottom) shows how you can simplify the representation by removing grid lines (`rows` and `cols`). Last but not least, notice that the trapezoid at the bottom in @fig-trapezoid-2 is scaled down to `0.4` (by default, `#vowels()` uses `scale: 0.7`). Everything in the trapezoid scales down or up accordingly.
 
@@ -3211,7 +3227,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.5.12": *
+    #import "@preview/phonokit:0.5.13": *
     ```
 
     Now you can use any function you want:
@@ -3223,7 +3239,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.12": *` to your `typ` document if you plan on using #logo (assuming version `0.5.12`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.13": *` to your `typ` document if you plan on using #logo (assuming version `0.5.13`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3253,7 +3269,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.5.12": *
+  #import "@preview/phonokit:0.5.13": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3303,7 +3319,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.5.12": *
+  #import "@preview/phonokit:0.5.13": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF

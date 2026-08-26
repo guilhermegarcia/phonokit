@@ -161,6 +161,7 @@
   shift-size: none, // Font size for shifted vowels; none = same as regular
   highlight: (), // List of tipa strings whose background circle is highlighted
   highlight-color: luma(220), // Circle color for highlighted vowels (default: light gray)
+  phoneme-colors: (:), // Dictionary of phoneme-specific text colors
 ) = {
   // Read the optional positional argument: vowel symbols, a language name, or
   // tipa-style IPA. It is optional (via the `..args` sink) so that `lang`-only
@@ -224,6 +225,20 @@
   let highlight-set = highlight.filter(h => type(h) == str).map(ipa-to-unicode)
   let highlight-shifts = highlight.filter(h => type(h) != str)
     .map(h => (ipa-to-unicode(h.at(0)), h.at(1), h.at(2)))
+  let resolved-phoneme-colors = (:)
+  for (phoneme, color) in phoneme-colors {
+    resolved-phoneme-colors.insert(ipa-to-unicode(phoneme), color)
+  }
+  let vowel-text = (size, phoneme) => {
+    if phoneme in resolved-phoneme-colors {
+      text(size: size, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme), top-edge: "x-height", bottom-edge: "baseline", phoneme)
+    } else {
+      text(size: size, font: phonokit-font.get(), top-edge: "x-height", bottom-edge: "baseline", phoneme)
+    }
+  }
+  let shifted-vowel-text = (size, phoneme) => {
+    text(size: size, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme, default: shift-color), top-edge: "x-height", bottom-edge: "baseline", phoneme)
+  }
 
   canvas({
     import draw: *
@@ -521,7 +536,7 @@
     for vp in vowel-positions {
       let circle-fill = if vp.vowel in highlight-set { highlight-color } else { white }
       circle(vp.pos, radius: scaled-circle-radius, fill: circle-fill, stroke: none)
-      content(vp.pos, context text(size: scaled-font-size * 1pt, font: phonokit-font.get(), top-edge: "x-height", bottom-edge: "baseline", vp.vowel))
+      content(vp.pos, context vowel-text(scaled-font-size * 1pt, vp.vowel))
     }
 
     // Draw schematic nasalized copies slightly offset from the oral vowels.
@@ -539,7 +554,7 @@
         let shifted-pos = (base-pos.at(0) + x-off, base-pos.at(1) + y-off)
         let shift-fill = if highlight-shifts.any(h => h.at(0) == vowel and h.at(1) == x-off and h.at(2) == y-off) { highlight-color } else { white }
         circle(shifted-pos, radius: scaled-circle-radius, fill: shift-fill, stroke: none)
-        content(shifted-pos, context text(size: resolved-shift-size, font: phonokit-font.get(), fill: shift-color, top-edge: "x-height", bottom-edge: "baseline", vowel))
+        content(shifted-pos, context shifted-vowel-text(resolved-shift-size, vowel))
       }
     }
   })
