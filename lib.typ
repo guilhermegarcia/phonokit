@@ -13,6 +13,7 @@
 // - Maximum Entropy (MaxEnt) grammar tableaux with probability calculations
 // - SPE-style feature matrices for phonological representations
 // - Feature-geometry trees (Clements & Hume 1995; Sagey 1986)
+// - Articulatory gestural scores (Browman & Goldstein 1989)
 
 // Import modules
 #import "_config.typ": phonokit-init
@@ -33,6 +34,7 @@
 #import "intonational.typ": *
 #import "geom.typ": *
 #import "phonetics.typ": *
+#import "gest.typ": *
 
 /// Initialize phonokit settings
 ///
@@ -202,6 +204,55 @@
 /// #vot(-60, ui-lang: "fr")
 /// ```
 #let vot = vot
+
+/// Draw an articulatory gestural score.
+///
+/// Gestures occupy normalized intervals on five articulatory tiers (VEL, TB,
+/// TT, LIPS, and GLO). The bottom label tier determines physical width, while
+/// `duration` maps the normalized horizontal axis to milliseconds. String
+/// labels use phonokit's TIPA-style IPA conversion.
+///
+/// Arguments:
+/// - duration (number, required named): Total score duration in milliseconds
+/// - label (array, required named): Equal-width bottom-tier labels;
+///   strings use TIPA-style IPA conversion, and the complete sequence is
+///   automatically enclosed in square brackets
+/// - vel, tb, tt, lips, glo (array): Gesture entries on each tier as
+///   `(start, end)` or `(label, start, end)` (default: ())
+/// - motions (dictionary): Motions keyed by tier (default: `(:)`). Use
+///   `glo: "normal"` for a default normal curve, `tb: ((x, y), ...)` for a
+///   manual curve, or a dictionary such as `glo: (gesture: 1)` to customize
+///   a normal curve. An array of specs draws multiple curves on one tier.
+/// - tiers (auto or array): Tiers to display. `auto` shows only tiers containing
+///   gestures or motions; an explicit array can retain empty tiers (default: auto)
+/// - grid (bool): Show light horizontal guides for visible tiers (default: false)
+/// - border (bool): Draw a Figure 3-style frame around the tier panel (default: false)
+/// - axis (auto or bool): Show the millisecond time axis. `auto` shows it when
+///   at least one motion is present (default: auto)
+/// - motion-color (color): Color used for all motion curves (default: blue)
+/// - scale (number): Uniform scale factor (default: 1.0)
+///
+/// All interval and point coordinates range from 0 to 1. Normal motion
+/// `position` defaults to the selected gesture interval and can be overridden
+/// with `(start, end)`. Manual x values must be strictly increasing. Gesture
+/// labels wrap and shrink as needed to remain within their activation boxes.
+///
+/// Example:
+/// ```
+/// #gest(
+///   duration: 400,
+///   label: ("p", "a", "m"),
+///   vel: (([wide], 0.72, 0.96),),
+///   tb: (([narrow pharyngeal], 0.20, 0.72),),
+///   lips: (([clo labial], 0.04, 0.23), ([clo labial], 0.72, 0.96)),
+///   glo: (([wide], 0.06, 0.34),),
+///   motions: (
+///     glo: "normal",
+///     tb: ((0, 0.5), (0.5, 1), (0.7, 0.3)),
+///   ),
+/// )
+/// ```
+#let gest = gest
 
 /// Draw a single syllable's internal structure
 ///
