@@ -182,7 +182,7 @@
   "german": "pbmntdkɡfvszʃʒçxhʁlj",
   "italian": "pbmnɲtdkɡfvszʃʎlrj",
   "japanese": "pbmnɲtdkɡçɸsʃzʒhɾj",
-  "portuguese": "pbmnɲtdkɡfvszʃʒʎxlrjw",
+  "portuguese": "pbmnɲtdkɡfvszʃʒʎxlɾjw",
   "russian": "pbmntdkɡfvszʃʒxlrj",
   "arabic": "btdkqʔmnfwðszʃxɣħʕhlrj",
 )

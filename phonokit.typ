@@ -293,7 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.14` - Portuguese consonant inventory now uses /r/ instead of the tap\
+`0.5.14` - Maintenance release\
 `0.5.13` - `#vowels()` and `#consonants()` now accept the `phoneme-colors`\
 `0.5.12` - Several bug fixes\
 `0.5.11` - `#vowels()` & `#consonants()` now accept a `lang`-only call; laterals added to `#geom()`\
