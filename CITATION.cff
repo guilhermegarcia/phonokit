@@ -10,7 +10,7 @@ version: 0.5.14
 date-released: 2026-08-30
 url: "https://github.com/guilhermegarcia/phonokit"
 repository-code: "https://github.com/guilhermegarcia/phonokit"
-doi: 10.5281/zenodo.18190181
+doi: 10.5281/zenodo.18260076
 license: MIT
 keywords:
   - phonology
