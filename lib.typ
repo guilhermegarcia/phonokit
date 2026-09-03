@@ -44,7 +44,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.14": *
+/// #import "@preview/phonokit:0.5.15": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init

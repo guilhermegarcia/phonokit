@@ -541,9 +541,9 @@
   }
   let phoneme-text = phoneme => {
     if phoneme in resolved-phoneme-colors {
-      text(size: scaled-font-size * 1pt, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme), phoneme)
+      text(size: scaled-font-size * 1pt, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme), top-edge: "x-height", bottom-edge: "baseline", phoneme)
     } else {
-      text(size: scaled-font-size * 1pt, font: phonokit-font.get(), phoneme)
+      text(size: scaled-font-size * 1pt, font: phonokit-font.get(), top-edge: "x-height", bottom-edge: "baseline", phoneme)
     }
   }
 
