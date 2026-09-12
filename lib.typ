@@ -387,6 +387,9 @@
 ///   same size as regular vowels (default: none)
 /// - highlight (array): List of tipa strings whose background circle is highlighted (default: ())
 /// - highlight-color (color): Circle color for highlighted vowels (default: luma(220))
+/// - circle-size (float): Multiplier for the radius of the highlight circles.
+///   Arrows pointing at a highlighted vowel stop at its circle edge. Does not
+///   affect the gaps cut in the grid lines behind vowels (default: 1)
 /// - phoneme-colors (dictionary): Map vowel symbols to text colors. Keys accept
 ///   tipa-style notation and are matched after IPA conversion (default: (:))
 ///

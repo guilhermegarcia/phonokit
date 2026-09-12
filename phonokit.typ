@@ -293,7 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.16` - `#vowels()` and `#consonants()` now validate inventories instead of silently dropping unsupported symbols\
+`0.5.16` - `#vowels()` and `#consonants()` now validate inventories; new `circle-size` argument for `#vowels()` highlights\
 `0.5.15` - Alignment is now more accurate for `#consonants()`\
 `0.5.14` - General improvements and bug fixes\
 `0.5.13` - `#vowels()` and `#consonants()` now accept the `phoneme-colors`\
@@ -523,7 +523,7 @@ Besides the function `#consonants()`, the package has a function to print vowel 
   ]],
 )
 
-As of version `0.4.5`, the function `#vowels()` accepts a range of additional (optional) arguments to include arrows, shifted vowels, and highlights to a trapezoid. @fig-trapezoid-1 illustrates some of the available arguments to create a trapezoid showing diphthongs in North American English. The arguments are intuitive and self-explanatory: you can use `arrows` to draw arrows between any pair of vowels in the trapezoid. You can also choose if you want arrows to be curved (`curved: true`) or dashed (`arrow-style: dashed`). And you can specify the color for the arrows (`arrow-color`), which is set to a light blue in @fig-trapezoid-1.
+As of version `0.4.5`, the function `#vowels()` accepts a range of additional (optional) arguments to include arrows, shifted vowels, and highlights to a trapezoid. @fig-trapezoid-1 illustrates some of the available arguments to create a trapezoid showing diphthongs in North American English. The arguments are intuitive and self-explanatory: you can use `arrows` to draw arrows between any pair of vowels in the trapezoid. You can also choose if you want arrows to be curved (`curved: true`) or dashed (`arrow-style: dashed`). And you can specify the color for the arrows (`arrow-color`), which is set to a light blue in @fig-trapezoid-1. Highlighted vowels (`highlight`, `highlight-color`) sit on a colored circle, which you can resize with `circle-size` (default: `1`) if it looks too tight or too loose for your font.
 
 #grid(
   columns: (1fr, 1fr),

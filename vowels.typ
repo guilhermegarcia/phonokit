@@ -164,6 +164,7 @@
   shift-size: none, // Font size for shifted vowels; none = same as regular
   highlight: (), // List of tipa strings whose background circle is highlighted
   highlight-color: luma(220), // Circle color for highlighted vowels (default: light gray)
+  circle-size: 1, // Multiplier for the radius of highlight circles
   phoneme-colors: (:), // Dictionary of phoneme-specific text colors
 ) = {
   // Read the optional positional argument: vowel symbols, a language name, or
@@ -227,7 +228,10 @@
   let scaled-width = width * scale
   let scaled-height = height * scale
   let scaled-offset = 0.55 * scale
+  // White mask circles: fixed size, only cut gaps in the grid lines behind vowels
   let scaled-circle-radius = 0.35 * scale
+  // Colored highlight circles: drawn above the masks, resizable via circle-size
+  let scaled-highlight-radius = 0.4 * circle-size * scale
   let scaled-bullet-radius = 0.09 * scale
   let scaled-font-size = 22 * scale
   let scaled-line-thickness = 0.85 * scale
@@ -307,6 +311,18 @@
       } else {
         (false, (0, 0))
       }
+    }
+
+    // Radius at which an arrow pointing at `endpoint` should stop: the edge of
+    // the highlight circle if that vowel is highlighted, else the mask edge.
+    let end-radius(endpoint) = {
+      let highlighted = if type(endpoint) == str {
+        ipa-to-unicode(endpoint) in highlight-set
+      } else {
+        let v = ipa-to-unicode(endpoint.at(0))
+        highlight-shifts.any(h => h.at(0) == v and h.at(1) == endpoint.at(1) and h.at(2) == endpoint.at(2))
+      }
+      if highlighted { calc.max(scaled-circle-radius, scaled-highlight-radius) } else { scaled-circle-radius }
     }
 
     // Collect vowel positions
@@ -444,9 +460,10 @@
         }
 
         // Pull endpoint back to circle edge along the arrival tangent
+        let end-r = end-radius(arrow.at(1))
         let adjusted-to = (
-          to-pos.at(0) - tangent.at(0) * scaled-circle-radius,
-          to-pos.at(1) - tangent.at(1) * scaled-circle-radius,
+          to-pos.at(0) - tangent.at(0) * end-r,
+          to-pos.at(1) - tangent.at(1) * end-r,
         )
 
         arrows-data.push((
@@ -455,6 +472,7 @@
           ctrl: ctrl,
           tangent: tangent,
           adjusted-to: adjusted-to,
+          end-r: end-r,
         ))
       }
     }
@@ -483,11 +501,11 @@
         // exactly on the circle edge (the centroid of circle-edge points sits
         // strictly inside the circle and would leave the head floating there).
         let snapped = (
-          a.to-pos.at(0) - avg-tan.at(0) * scaled-circle-radius,
-          a.to-pos.at(1) - avg-tan.at(1) * scaled-circle-radius,
+          a.to-pos.at(0) - avg-tan.at(0) * a.end-r,
+          a.to-pos.at(1) - avg-tan.at(1) * a.end-r,
         )
         (from-pos: a.from-pos, to-pos: a.to-pos, ctrl: a.ctrl,
-         tangent: avg-tan, adjusted-to: snapped)
+         tangent: avg-tan, adjusted-to: snapped, end-r: a.end-r)
       } else {
         a
       }
@@ -528,6 +546,16 @@
       }
     }
 
+    // White mask circles: cut a gap in the grid lines behind every vowel
+    for vp in vowel-positions {
+      circle(vp.pos, radius: scaled-circle-radius, fill: white, stroke: none)
+    }
+
+    // Highlight circles: above the masks, below the minimal-pair bullets and symbols
+    for vp in vowel-positions.filter(vp => vp.vowel in highlight-set) {
+      circle(vp.pos, radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
+    }
+
     // Draw bullets between minimal pairs (same frontness/height, different rounding)
     for i in range(vowel-positions.len()) {
       for j in range(i + 1, vowel-positions.len()) {
@@ -548,10 +576,8 @@
       }
     }
 
-    // Plot vowels with background circles (white, or highlight color if highlighted)
+    // Plot vowel symbols
     for vp in vowel-positions {
-      let circle-fill = if vp.vowel in highlight-set { highlight-color } else { white }
-      circle(vp.pos, radius: scaled-circle-radius, fill: circle-fill, stroke: none)
       content(vp.pos, context vowel-text(scaled-font-size * 1pt, vp.vowel))
     }
 
@@ -568,8 +594,10 @@
       if vowel in vowel-data {
         let base-pos = get-vowel-position(vowel-data.at(vowel), trapezoid, scaled-width, scaled-height, scaled-offset)
         let shifted-pos = (base-pos.at(0) + x-off, base-pos.at(1) + y-off)
-        let shift-fill = if highlight-shifts.any(h => h.at(0) == vowel and h.at(1) == x-off and h.at(2) == y-off) { highlight-color } else { white }
-        circle(shifted-pos, radius: scaled-circle-radius, fill: shift-fill, stroke: none)
+        circle(shifted-pos, radius: scaled-circle-radius, fill: white, stroke: none)
+        if highlight-shifts.any(h => h.at(0) == vowel and h.at(1) == x-off and h.at(2) == y-off) {
+          circle(shifted-pos, radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
+        }
         content(shifted-pos, context shifted-vowel-text(resolved-shift-size, vowel))
       }
     }
