@@ -122,9 +122,10 @@
 #let _strip-nasal(vowel) = vowel.normalize(form: "nfd").replace("̃", "")
 
 #let _collect-custom-vowels(input) = {
-  let converted = ipa-to-unicode(input)
+  let converted = ipa-to-unicode(input.replace(regex("\\s+"), " "))
   let oral = ""
   let nasals = ()
+  let rejected = ()
 
   for cluster in converted.clusters() {
     let decomposed = cluster.normalize(form: "nfd")
@@ -136,10 +137,12 @@
       if "̃" in decomposed and base not in nasals {
         nasals.push(base)
       }
+    } else if cluster not in rejected {
+      rejected.push(cluster)
     }
   }
 
-  (oral: oral, nasals: nasals)
+  (oral: oral, nasals: nasals, rejected: rejected)
 }
 
 // Main vowels function
@@ -172,11 +175,19 @@
   assert(args.named().len() == 0,
     message: "vowels: unexpected named argument(s): " + args.named().keys().join(", "))
   let vowel-string = args.pos().at(0, default: none)
+  // An unfinished inventory should stay quiet while the user is typing.
+  if lang == none and (vowel-string == none or vowel-string.trim() == "") {
+    return none
+  }
 
   // Determine which vowels to plot
   let vowels-to-plot = ""
   let nasal-target-vowels = ()
   let error-msg = none
+  let inventory-error = [
+    *Error:* Available presets: #(language-vowels.keys().map(raw).join(", ")).
+    Use a listed preset or provide only vowel symbols.
+  ]
 
   // Check if vowel-string is actually a language name
   if vowel-string != none and vowel-string in language-vowels {
@@ -188,18 +199,23 @@
       vowels-to-plot = language-vowels.at(lang)
     } else {
       // Language not available - prepare error message
-      let available = language-vowels.keys().join(", ")
-      error-msg = [*Error:* Language "#lang" not available. \ Available languages: #available]
+      return inventory-error
     }
   } else if vowel-string != none and vowel-string != "" {
     // Use as manual vowel specification - keep oral bases for plotting and
     // remember which vowels were explicitly nasalized in the input.
     let parsed = _collect-custom-vowels(vowel-string)
+    if parsed.rejected.len() > 0 {
+      return inventory-error
+    }
+    if parsed.oral == "" {
+      return inventory-error
+    }
     vowels-to-plot = parsed.oral
     nasal-target-vowels = parsed.nasals
   } else {
     // Nothing specified
-    error-msg = [*Error:* Either provide vowel string or language name]
+    error-msg = inventory-error
   }
 
   // If there's an error, display it and return

@@ -91,6 +91,22 @@ See [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive de
 - **Consonant tables**: Display consonants in the pulmonic IPA consonant table
 - **Scalable charts**: Adjust size to fit your document layout (scaling includes text as expected)
 
+`vowels()` and `consonants()` check built-in preset names before interpreting
+custom IPA inventories. Empty or whitespace-only input (or no argument) renders
+nothing while the user is getting started, unless a `lang:` is supplied. For
+example, `vowels("english")` uses a preset, while
+`vowels("aeiou")` plots a custom inventory. An unknown name such as
+`vowels("indonesian")` or `consonants("indonesian")` displays an error instead of a chart when it
+contains unsupported inventory symbols, listing available presets and guidance for custom inventories. Unsupported symbols are never silently filtered
+from custom inventories. Supported tipa notation, nasal vowels, and braced
+consonant sequences remain accepted, as does whitespace between symbols.
+
+Use `lang:` when you intend a language preset, for example
+`vowels(lang: "english")`. Unknown `lang:` values also display an error instead of a chart; a
+positional string made entirely of supported inventory symbols is interpreted
+as a custom inventory if it does not match a preset. Braced affricates and
+aspirated consonants still require their existing display flags.
+
 ### Phonetics Module
 
 - **Sound shifts**: Create schematic chain shifts, mergers, and splits by placing symbols freely in two-dimensional space and connecting them with arrows

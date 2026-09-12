@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.15`]
+#let version = text(size: 0.8em)[`v 0.5.16`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.16` - `#vowels()` and `#consonants()` now validate inventories instead of silently dropping unsupported symbols\
 `0.5.15` - Alignment is now more accurate for `#consonants()`\
 `0.5.14` - General improvements and bug fixes\
 `0.5.13` - `#vowels()` and `#consonants()` now accept the `phoneme-colors`\
@@ -368,7 +369,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.5.15": *
+  #import "@preview/phonokit:0.5.16": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -500,6 +501,9 @@ Certain functions have a `ui-lang` parameter for localization. French and Portug
 
 === Vowels <sec-vowels>
 
+Both `vowels()` and `consonants()` look up preset names before interpreting custom inventories. Thus, `vowels("english")` uses a preset and `vowels("aeiou")` accepts a custom inventory, but `vowels("indonesian")` displays an error instead of a chart: it is not a preset and contains unsupported vowel symbols. The same validation applies to consonant inventories, including braced sequences. Errors list available presets and guidance for custom inventories. Validation follows tipa conversion and preserves supported nasal vowels and whitespace between symbols.
+
+Use `lang:` when you intend a preset, for example `vowels(lang: "english")`. Unknown explicit language names also display an error instead of a chart. The rest of the document continues to compile. A positional name consisting entirely of supported inventory symbols remains indistinguishable from a custom inventory.
 
 Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. If desired, the function can also add schematic nasalized copies with `nasals: true`. For preset languages, this currently adds only the French nasal vowels. For custom strings, only vowels that are explicitly nasalized in the input are shown in the nasal layer, as in `#vowels("aãioõu", nasals: true)`. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap. As with `#consonants()`, individual vowel symbols can be colored with `phoneme-colors`, for example `#vowels("aeiou", phoneme-colors: ("i": red, "u": blue))`.
 
@@ -3229,7 +3233,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.5.15": *
+    #import "@preview/phonokit:0.5.16": *
     ```
 
     Now you can use any function you want:
@@ -3241,7 +3245,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.15": *` to your `typ` document if you plan on using #logo (assuming version `0.5.15`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.16": *` to your `typ` document if you plan on using #logo (assuming version `0.5.16`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3271,7 +3275,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.5.15": *
+  #import "@preview/phonokit:0.5.16": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3321,7 +3325,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.5.15": *
+  #import "@preview/phonokit:0.5.16": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF

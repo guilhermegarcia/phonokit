@@ -238,14 +238,18 @@
   let cleaned = ""
   let in-braces = false
   let current-item = ""
+  let rejected = ()
 
   for char in input.clusters() {
     if char == "{" {
+      if in-braces { rejected.push("{") }
       in-braces = true
       current-item = ""
     } else if char == "}" {
       if in-braces and current-item != "" {
         braced-items.push(current-item)
+      } else {
+        rejected.push("}")
       }
       in-braces = false
       current-item = ""
@@ -255,8 +259,9 @@
       cleaned += char
     }
   }
+  if in-braces { rejected.push("{" + current-item) }
 
-  (braced-items: braced-items, cleaned: cleaned)
+  (braced-items: braced-items, cleaned: cleaned, rejected: rejected)
 }
 
 // Helper function to categorize braced items into affricates, aspirated plosives, and aspirated affricates
@@ -264,6 +269,7 @@
   let affricates = ()
   let aspirated-plosives = ()
   let aspirated-affricates = ()
+  let rejected = ()
 
   for item in braced-items {
     // Convert IPA notation to Unicode (spaces are required for diacritics like \h)
@@ -276,14 +282,16 @@
       aspirated-plosives.push(converted)
     } else if converted in affricate-data {
       affricates.push(converted)
+    } else {
+      rejected.push("{" + item + "}")
     }
-    // Unknown braced items are silently ignored
   }
 
   (
     affricates: affricates,
     aspirated-plosives: aspirated-plosives,
     aspirated-affricates: aspirated-affricates,
+    rejected: rejected,
   )
 }
 
@@ -315,6 +323,10 @@
   assert(args.named().len() == 0,
     message: "consonants: unexpected named argument(s): " + args.named().keys().join(", "))
   let consonant-string = args.pos().at(0, default: none)
+  // An unfinished inventory should stay quiet while the user is typing.
+  if lang == none and (consonant-string == none or consonant-string.trim() == "") {
+    return none
+  }
 
   // Determine which consonants to plot
   let consonants-to-plot = ""
@@ -322,6 +334,10 @@
   let custom-aspirated-plosives-string = ""
   let custom-aspirated-affricates-string = ""
   let error-msg = none
+  let inventory-error = [
+    *Error:* Available presets: #(language-consonants.keys().map(raw).join(", ")).
+    Use a listed preset or provide only consonant symbols.
+  ]
   let ui-locale = resolve-ui-lang(ui-lang)
 
   if ui-locale == none {
@@ -336,19 +352,27 @@
     if lang in language-consonants {
       consonants-to-plot = language-consonants.at(lang)
     } else {
-      let available = language-consonants.keys().join(", ")
-      error-msg = [*Error:* Language "#lang" not available. \ Available languages: #available]
+      return inventory-error
     }
   } else if consonant-string != none and consonant-string != "" {
     // Use as manual consonant specification
     // Extract braced content first (affricates, aspirated consonants, etc.)
-    let extracted = extract-braced-content(consonant-string)
+    let extracted = extract-braced-content(consonant-string.replace(regex("\\s+"), " "))
 
     // Convert IPA notation to Unicode for consonants (excluding braced items)
     consonants-to-plot = ipa-to-unicode(extracted.cleaned)
 
     // Categorize braced items into their respective types
     let categorized = categorize-braced-items(extracted.braced-items)
+    let rejected = (extracted.rejected + categorized.rejected
+      + consonants-to-plot.clusters().filter(c => c not in consonant-data)
+    )
+    if rejected.dedup().len() > 0 {
+      return inventory-error
+    }
+    if consonants-to-plot == "" and extracted.braced-items.len() == 0 {
+      return inventory-error
+    }
     // Note: .join("") returns none for empty arrays in Typst, so we check length first
     if categorized.affricates.len() > 0 {
       custom-affricates-string = categorized.affricates.join("")
@@ -360,7 +384,7 @@
       custom-aspirated-affricates-string = categorized.aspirated-affricates.join("")
     }
   } else {
-    error-msg = [*Error:* Either provide consonant string or language name]
+    error-msg = inventory-error
   }
 
   // If there's an error, display it and return
