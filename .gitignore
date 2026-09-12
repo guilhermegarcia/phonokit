@@ -27,3 +27,6 @@ zenodo-badge.svg
 extras/*
 !extras/*.pdf
 !extras/*.csv
+
+# Local test scripts
+tests/
