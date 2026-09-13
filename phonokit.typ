@@ -293,7 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
-`0.5.16` - `#vowels()` and `#consonants()` now validate inventories; new `circle-size` argument for `#vowels()` highlights\
+`0.5.16` - `circle-size` argument in `#vowels()`; inventory check: `#vowels()` & `#consonants()`\
 `0.5.15` - Alignment is now more accurate for `#consonants()`\
 `0.5.14` - General improvements and bug fixes\
 `0.5.13` - `#vowels()` and `#consonants()` now accept the `phoneme-colors`\
