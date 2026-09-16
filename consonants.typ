@@ -182,7 +182,7 @@
   "german": "pbmntdkɡfvszʃʒçxhʁlj",
   "italian": "pbmnɲtdkɡfvszʃʎlrj",
   "japanese": "pbmnɲtdkɡçɸsʃzʒhɾj",
-  "portuguese": "pbmnɲtdkɡfvszʃʒʎxlɾjw",
+  "portuguese": "pbmnɲtdkɡfvszʃʒʎlrɾjw",
   "russian": "pbmntdkɡfvszʃʒxlrj",
   "arabic": "btdkqʔmnfwðszʃxɣħʕhlrj",
 )
@@ -198,7 +198,7 @@
   "german": "pfts",
   "italian": "tsdztʃdʒ",
   "japanese": "", // Do not include allophones
-  "portuguese": "tʃdʒ",
+  "portuguese": "", // [tʃ dʒ] are allophones of /t d/ before [i]
   "russian": "tstʃ",
   "arabic": "", // No native affricates
 )
@@ -432,6 +432,11 @@
       }
     }
   }
+
+  // No affricates to plot (e.g., Portuguese, French): don't add an empty row
+  let affricates = (
+    affricates and (affricates-to-plot.replace("͡", "") != "" or aspirated-affricates-to-plot != "")
+  )
 
   // If simplify is true, auto-delete empty columns and rows
   if simplify {
