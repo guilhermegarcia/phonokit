@@ -107,7 +107,7 @@
   "italian": "iɔeaouɛ",
   "english": "iɪaeɛæɑɔoʊuʌə",
   "french": "iœɑɔøeaouɛyə",
-  "german": "iyʊuɪʏeøoɔɐaɛœ",
+  "german": "iyʊuɪʏeøoɔɐaɛœə",
   "japanese": "ieaou",
   "russian": "iɨueoa",
   "arabic": "aiu",
