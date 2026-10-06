@@ -46,13 +46,19 @@
   let base = cluster.codepoints().at(0)
 
   // Check if base is a vowel
+  // Covers the full IPA vowel inventory (see vowels.typ), plus rhotacized ɚ/ɝ
   let base-is-vowel = (
     base
-      in ("a", "e", "i", "o", "u", "ɚ", "ɝ", "ɯ", "ɐ", "ɒ", "æ", "ɛ", "ɪ", "ɔ", "ø", "œ", "ɨ", "ʉ", "ʊ", "ə", "ʌ", "ɑ")
+      in (
+        "a", "e", "i", "o", "u", "y", "ɚ", "ɝ", "ɯ", "ɐ", "ɒ", "æ", "ɛ", "ɪ", "ɔ", "ø", "œ", "ɨ", "ʉ", "ʊ", "ə", "ʌ",
+        "ɑ", "ʏ", "ɘ", "ɵ", "ɤ", "ɜ", "ɞ", "ɶ",
+      )
   )
 
   // Also check for diphthongs and precomposed forms as complete clusters
-  let cluster-is-vowel = cluster in ("aɪ", "eɪ", "oɪ", "aʊ", "oʊ", "ã", "ẽ", "õ", "ɛ̃", "ɔ̃", "œ̃", "ɑ̃")
+  let cluster-is-vowel = (
+    cluster in ("aɪ", "eɪ", "oɪ", "aʊ", "oʊ", "ã", "ẽ", "ĩ", "õ", "ũ", "ỹ", "ɛ̃", "ɔ̃", "œ̃", "ɑ̃")
+  )
 
   // Check if cluster contains syllabicity marker (̩ U+0329)
   // Syllabic consonants (like m̩, n̩, l̩) function as vowels/nuclei
