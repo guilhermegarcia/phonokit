@@ -44,7 +44,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.19": *
+/// #import "@preview/phonokit:0.5.20": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -211,7 +211,8 @@
 /// - input (string): A single syllable (e.g., "ka" or "'va")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (σ) (default: ("σ",))
-/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
+/// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
 ///
 /// Returns: CeTZ drawing of syllable structure
 ///
@@ -228,7 +229,8 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (σ, μ) (default: ("σ", "μ"))
-/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
+/// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
 ///
 /// Returns: CeTZ drawing of moraic structure
 ///
@@ -246,7 +248,8 @@
 /// - input (string): Syllables separated by dots (e.g., "ka.'va.lo")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (Σ, σ) (default: ("Σ", "σ"))
-/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
+/// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
 ///
 /// Returns: CeTZ drawing of foot structure
 ///
@@ -264,7 +267,8 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (Σ, σ, μ) (default: ("Σ", "σ", "μ"))
-/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
+/// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
 ///
 /// Returns: CeTZ drawing of moraic foot structure
 ///
@@ -284,7 +288,8 @@
 /// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (ω, Σ, σ) (default: ("ω", "Σ", "σ"))
-/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
+/// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
 ///
 /// Returns: CeTZ drawing of prosodic structure
 ///
@@ -306,7 +311,8 @@
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (ω, Σ, σ, μ) (default: ("ω", "Σ", "σ", "μ"))
-/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)` (default: none)
+/// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
+/// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
 ///
 /// Returns: CeTZ drawing of moraic prosodic structure
 ///

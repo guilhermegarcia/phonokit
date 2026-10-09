@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.19`]
+#let version = text(size: 0.8em)[`v 0.5.20`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.5.20` - Better spacing in prosody-related functions\
 `0.5.19` - General bug fixes\
 `0.5.18` - German vowels: adds /ə/\
 `0.5.17` - Portuguese consonants: /r/ vs. /ɾ/, no affricates\
@@ -372,7 +373,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.5.19": *
+  #import "@preview/phonokit:0.5.20": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -1078,7 +1079,7 @@ Geminates are also represented by the functions `#foot()` and `#foot-mora()`. In
 )
 
 
-Extreme cases are important to test how adaptable the function is when it comes to line crossings, a key problem in prosodic representations. When the head of a domain (the foot here) is at an edge of a long string, it is challenging to avoid crossing or overlapping lines. As can be seen in @fig-ft7, the height of $Sigma$ is proportional to the width of the representation to avoid superposition of lines.
+Extreme cases are important to test how adaptable the function is when it comes to line crossings, a key problem in prosodic representations. When the head of a domain (the foot here) is at an edge of a long string, it is challenging to avoid crossing or overlapping lines. As can be seen in @fig-ft7, the height of $Sigma$ is proportional to the width of the representation to avoid superposition of lines (this is the default behavior, `spacing: "auto"`, discussed below).
 
 
 #figure(
@@ -1133,7 +1134,9 @@ It is worth noting that _all_ lines are straight in the prosody module (this is 
   word("xa.(xa.xa)(xa.xa)(xa.xa)(xa.xa)", scale: 0.7),
 ) <fig-extreme>
 
-As of version 0.5.3, you can also adjust the vertical spacing between prosodic levels in the functions discussed above. While each function is designed to optimize vertical spacing, you might have your own preferences, so the argument `distance` allows for some adjustments in the form of an array where you specify the level you wish to target and the change in the spacing. Levels begin from 0 and from the top, so when using `#word()`, level 0 targets the prosodic word, level 1 targets the foot (if it's present), and so on. The distance is then relative to the defaults, such that `distance: ((0, 1.2),)` would increase the distance of the prosodic word level by 20%. Some dynamic lower bounds have been added to avoid obviously problematic choices, so negative numbers aren't allowed, for example.
+As of version 0.5.3, you can also adjust the vertical spacing between prosodic levels in the functions discussed above. While each function is designed to optimize vertical spacing, you might have your own preferences, so the argument `distance` allows for some adjustments in the form of an array where you specify the level you wish to target and the change in the spacing. Levels begin from 0 and from the top, so when using `#word()`, level 0 targets the prosodic word, level 1 targets the foot (if it's present), and so on. The distance is then relative to the defaults, such that `distance: ((0, 1.2),)` would increase the distance of the prosodic word level by 20%, and `distance: ((0, 0.8),)` would reduce it by 20%. What is scaled is the visible line between two levels, and that line never gets shorter than a small minimum, so you can't make a line disappear (negative numbers aren't allowed, either).
+
+As of version 0.5.20, vertical spacing adapts to each representation by default (`spacing: "auto"`): a line never gets shorter than the line directly below it, wider branches get more height so they don't flatten out, and levels that aren't present (e.g., feet in `#word("trist")`) take up no space. If you'd rather have constant spacing, for instance to align two representations side by side, use `spacing: "fixed"`. In both cases, `distance` is applied on top.
 
 #grid(
   columns: (1fr, 1fr),
@@ -3236,7 +3239,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.5.19": *
+    #import "@preview/phonokit:0.5.20": *
     ```
 
     Now you can use any function you want:
@@ -3248,7 +3251,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.19": *` to your `typ` document if you plan on using #logo (assuming version `0.5.19`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.20": *` to your `typ` document if you plan on using #logo (assuming version `0.5.20`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3278,7 +3281,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.5.19": *
+  #import "@preview/phonokit:0.5.20": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3328,7 +3331,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.5.19": *
+  #import "@preview/phonokit:0.5.20": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF

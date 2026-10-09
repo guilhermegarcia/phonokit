@@ -135,6 +135,46 @@
 }
 
 // Helper function to draw syllable internal structure
+// Vertical spacing shared by the prosodic trees. Each gap between two tiers is
+//   (clearance below the upper label) + (visible line) + (clearance above the lower label).
+// `distance` scales only the visible line, which never drops below `min-tier-line`,
+// so the same lower bound applies at every level of every function.
+#let min-tier-line = 0.15
+
+// With spacing: "auto", a branch spanning a horizontal run h gets at least
+// branch-slope × h of vertical line (≈ the angle of the original default trees)
+#let branch-slope = 0.28
+
+#let tier-line(natural, distance, level) = {
+  let factor = 1.0
+  if distance != none {
+    for entry in distance {
+      if entry.at(0) == level {
+        factor = calc.max(0, entry.at(1))
+      }
+    }
+  }
+  calc.max(min-tier-line, natural * factor)
+}
+
+// Long vowels: horizontal distance between their two moras
+#let long-mora-spacing = 0.4
+
+// In moraic trees, non-moraic segments hang straight from σ, skipping the μ tier.
+// Minimum horizontal distance from the nucleus to the nearest such segment so that
+// its line clears the nucleus μ label(s); depends on the actual tier heights.
+#let moraic-reach(sigma-y, mora-y, terminal-y, long: false) = {
+  let top = sigma-y + 0.25
+  let f = (top - (mora-y + 0.2)) / (top - (terminal-y + 0.30))
+  let mora-edge = (if long { long-mora-spacing / 2 } else { 0 }) + 0.15
+  (mora-edge + 0.15) / f
+}
+
+#let check-spacing(spacing) = assert(
+  spacing in ("auto", "fixed"),
+  message: "spacing must be \"auto\" or \"fixed\"",
+)
+
 #let draw-syllable-structure(
   x-offset,
   sigma-y,
@@ -229,7 +269,7 @@
         line((onset-x, or-level - 0.35), (seg-x, terminal-y + line-offset))
         content(
           (seg-x, terminal-y + text-offset),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -253,7 +293,7 @@
     line((nucleus-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
     content(
       (seg-x, terminal-y + text-offset),
-      context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+      context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
       anchor: "north",
     )
   }
@@ -282,7 +322,7 @@
         line((coda-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
         content(
           (seg-x, terminal-y + text-offset),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -292,7 +332,8 @@
 
 // Visualizes a single syllable's internal structure (On/Rh/Nu/Co)
 // Now accepts IPA-style input like "k a" or "'t a"
-#let syllable(input, scale: 1.0, symbol: ("σ",), distance: none) = {
+#let syllable(input, scale: 1.0, symbol: ("σ",), distance: none, spacing: "auto") = {
+  check-spacing(spacing)
   // Check for syllable boundary markers
   if input.contains(".") {
     return text(fill: red, weight: "bold")[⚠ Warning: For more than one syllable, use \#foot() or \#word().]
@@ -356,26 +397,22 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
-    // Distance multiplier lookup (floor: 1.0 for all sub-syllable levels)
-    let dist-mult(level) = {
-      let result = 1.0
-      if distance != none {
-        for entry in distance {
-          if entry.at(0) == level {
-            result = calc.max(1.0, entry.at(1))
-          }
-        }
-      }
-      result
-    }
+    let line-len(natural, level) = tier-line(natural, distance, level)
 
     let sigma-y = 0
     let x-offset = 0
 
+    // Default lines never get shorter going up the tree (each is at least as
+    // long as the one directly below it); explicit `distance` factors are
+    // applied afterwards. No upper tiers here, so `spacing` has no effect.
+
     // Sub-syllable level positions (0=σ→O/R, 1=O/R→N/C, 2=N/C→segments)
-    let or-level = sigma-y - 0.75 * dist-mult(0)
-    let n-level = or-level - 1.25 * dist-mult(1)
-    let terminal-y = n-level - 1.50 * dist-mult(2)
+    let n-seg-line = 0.55
+    let or-n-line = calc.max(0.55, n-seg-line)
+    let sigma-or-line = calc.max(0.70, or-n-line)
+    let or-level = sigma-y + 0.25 - line-len(sigma-or-line, 0) - 0.30
+    let n-level = or-level - 0.35 - line-len(or-n-line, 1) - 0.35
+    let terminal-y = n-level - 0.25 - line-len(n-seg-line, 2) - 0.70
 
     // Standalone syllable spacing: Nu/Co positioned lower (halfway between Rh and segments)
     let line-offset = 0.70
@@ -438,7 +475,7 @@
         line((onset-x, or-level - 0.35), (seg-x, terminal-y + line-offset))
         content(
           (seg-x, terminal-y + text-offset),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -461,7 +498,7 @@
       line((nucleus-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
       content(
         (seg-x, terminal-y + text-offset),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
         anchor: "north",
       )
     }
@@ -479,7 +516,7 @@
         line((coda-x, n-level - 0.25), (seg-x, terminal-y + line-offset))
         content(
           (seg-x, terminal-y + text-offset),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -491,7 +528,8 @@
 // Onsets: non-moraic (connect directly to σ)
 // Nucleus: always moraic (connects to μ, which connects to σ)
 // Coda: optionally moraic (coda: false → connects to σ; coda: true → connects to μ)
-#let mora(input, coda: false, scale: 1.0, symbol: ("σ", "μ"), distance: none) = {
+#let mora(input, coda: false, scale: 1.0, symbol: ("σ", "μ"), distance: none, spacing: "auto") = {
+  check-spacing(spacing)
   // Check for syllable boundary markers
   if input.contains(".") {
     return text(fill: red, weight: "bold")[⚠ Warning: For more than one syllable, use \#foot() or \#word().]
@@ -549,18 +587,7 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
-    // Distance multiplier lookup (floor: 0.5 for all mora levels)
-    let dist-mult(level) = {
-      let result = 1.0
-      if distance != none {
-        for entry in distance {
-          if entry.at(0) == level {
-            result = calc.max(0.5, entry.at(1))
-          }
-        }
-      }
-      result
-    }
+    let line-len(natural, level) = tier-line(natural, distance, level)
 
     let sigma-y = 0
     let segment-spacing = 0.35
@@ -581,18 +608,25 @@
     let num-nucleus = nucleus-segments.len()
     let num-coda = coda-segments.len()
 
+    // Default lines never get shorter going up the tree (each is at least as
+    // long as the one directly below it); explicit `distance` factors are
+    // applied afterwards. No upper tiers here, so `spacing` has no effect.
+
     // Position calculations (σ→μ = level 0, μ→segments = level 1)
-    let mora-base-gap = 1.62
-    let terminal-y = sigma-y + 0.35 - mora-base-gap * (dist-mult(0) + dist-mult(1))
-    let mora-y = sigma-y + 0.54 - mora-base-gap * 1.4 * dist-mult(0)
+    let mu-seg-line = 0.55
+    let sigma-mu-line = calc.max(0.70, mu-seg-line)
+    let mora-y = sigma-y + 0.25 - line-len(sigma-mu-line, 0) - 0.35
+    let terminal-y = mora-y - 0.35 - line-len(mu-seg-line, 1) - 0.30
     let nucleus-mora-x = x-offset
 
     // Onset position (left of nucleus mora)
     // Adaptive positioning: move left based on number of segments to avoid crossings
+    let reach = moraic-reach(sigma-y, mora-y, terminal-y, long: parsed.nucleus.contains("ː"))
     let onset-x = if num-onset > 0 {
       let min-offset = (num-onset - 1) * segment-spacing / 2 + 0.8
       let default-offset = 1.2
-      nucleus-mora-x - calc.max(min-offset, default-offset)
+      let clear-offset = reach + (num-onset - 1) * segment-spacing / 2
+      nucleus-mora-x - calc.max(min-offset, default-offset, clear-offset)
     } else {
       nucleus-mora-x
     }
@@ -602,7 +636,9 @@
     let coda-x = if num-coda > 0 {
       let min-offset = (num-coda - 1) * segment-spacing / 2 + 0.8
       let default-offset = 1.2
-      nucleus-mora-x + calc.max(min-offset, default-offset)
+      // A non-moraic coda hangs from σ like an onset
+      let clear-offset = if coda { 0 } else { reach + (num-coda - 1) * segment-spacing / 2 }
+      nucleus-mora-x + calc.max(min-offset, default-offset, clear-offset)
     } else {
       nucleus-mora-x
     }
@@ -617,7 +653,7 @@
         line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
         content(
           (seg-x, terminal-y),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -629,7 +665,7 @@
     // Draw NUCLEUS MORA(E) - one mora for short vowel, two for long vowel
     if has-long-vowel {
       // Long vowel: draw TWO morae that branch from σ and converge on Vː
-      let mora-spacing = 0.6
+      let mora-spacing = long-mora-spacing
       let mora1-x = nucleus-mora-x - mora-spacing / 2
       let mora2-x = nucleus-mora-x + mora-spacing / 2
 
@@ -652,7 +688,7 @@
         line((mora2-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
         content(
           (seg-x, terminal-y),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -673,7 +709,7 @@
         line((nucleus-mora-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
         content(
           (seg-x, terminal-y),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -702,7 +738,7 @@
           // Draw segment
           content(
             (seg-x, terminal-y),
-            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
             anchor: "north",
           )
         }
@@ -716,7 +752,7 @@
           line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
           content(
             (seg-x, terminal-y),
-            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
             anchor: "north",
           )
         }
@@ -759,11 +795,13 @@
   let nucleus-mora-x = x-offset
 
   // Adaptive onset position (same formula as draw-syllable-structure for uniform spacing)
+  let reach = moraic-reach(sigma-y, mora-y, terminal-y, long: has-long-vowel)
   let onset-x = if num-onset > 0 {
     let min-gap = 0.75
     let min-offset = (num-onset - 1) * segment-spacing / 2 + (num-nucleus - 1) * segment-spacing / 2 + min-gap
     let default-offset = 0.7
-    if min-offset > default-offset { nucleus-mora-x - min-offset } else { nucleus-mora-x - default-offset }
+    let clear-offset = reach + (num-onset - 1) * segment-spacing / 2
+    nucleus-mora-x - calc.max(min-offset, default-offset, clear-offset)
   } else {
     nucleus-mora-x
   }
@@ -773,7 +811,9 @@
     let min-gap = 0.75
     let min-offset = (num-nucleus + num-coda - 2) * segment-spacing / 2 + min-gap
     let default-offset = 0.7
-    if min-offset > default-offset { nucleus-mora-x + min-offset } else { nucleus-mora-x + default-offset }
+    // A non-moraic coda hangs from σ like an onset
+    let clear-offset = if coda { 0 } else { reach + (num-coda - 1) * segment-spacing / 2 }
+    nucleus-mora-x + calc.max(min-offset, default-offset, clear-offset)
   } else {
     nucleus-mora-x
   }
@@ -794,7 +834,7 @@
         line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
         content(
           (seg-x, terminal-y),
-          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+          context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
           anchor: "north",
         )
       }
@@ -804,7 +844,7 @@
   // Draw NUCLEUS MORA(E)
   if has-long-vowel {
     // Long vowel: TWO morae
-    let mora-spacing = 0.6
+    let mora-spacing = long-mora-spacing
     let mora1-x = nucleus-mora-x - mora-spacing / 2
     let mora2-x = nucleus-mora-x + mora-spacing / 2
 
@@ -823,7 +863,7 @@
       line((mora2-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
       content(
         (seg-x, terminal-y),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
         anchor: "north",
       )
     }
@@ -843,7 +883,7 @@
       line((nucleus-mora-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
       content(
         (seg-x, terminal-y),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
         anchor: "north",
       )
     }
@@ -870,7 +910,7 @@
           line((coda-x, mora-y - 0.35), (seg-x, terminal-y + 0.30))
           content(
             (seg-x, terminal-y),
-            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
             anchor: "north",
           )
         }
@@ -891,7 +931,7 @@
           line((x-offset, sigma-y + 0.25), (seg-x, terminal-y + 0.30))
           content(
             (seg-x, terminal-y),
-            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#segment],
+            context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#segment],
             anchor: "north",
           )
         }
@@ -902,7 +942,8 @@
 
 // Visualizes foot and syllable levels
 // Now accepts IPA-style input like "k a.'v a.l o"
-#let foot(input, scale: 1.0, symbol: ("Σ", "σ"), distance: none) = {
+#let foot(input, scale: 1.0, symbol: ("Σ", "σ"), distance: none, spacing: "auto") = {
+  check-spacing(spacing)
   // Check for parentheses (foot should not have multiple feet)
   if input.contains("(") or input.contains(")") {
     return text(
@@ -996,19 +1037,7 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
-    // Distance multiplier lookup (floor: 0.5 for levels 0–1, 1.0 for levels 2+)
-    let dist-mult(level) = {
-      let result = 1.0
-      if distance != none {
-        let floor = if level <= 1 { 0.5 } else { 1.0 }
-        for entry in distance {
-          if entry.at(0) == level {
-            result = calc.max(floor, entry.at(1))
-          }
-        }
-      }
-      result
-    }
+    let line-len(natural, level) = tier-line(natural, distance, level)
 
     let segment-spacing = 0.35
     let min-gap-between-sylls = 0.8
@@ -1082,17 +1111,32 @@
 
     let foot-x = start-x + syllable-positions.at(head-idx)
 
-    // Vertical level positions
+    // Default lines never get shorter going up the tree (each is at least as
+    // long as the one directly below it); explicit `distance` factors are
+    // applied afterwards. spacing: "auto" additionally lengthens upper lines
+    // to fit wide branches; "fixed" keeps them constant so trees align.
+    let fit = spacing == "auto"
+
+    // Sub-syllable tiers (σ → O/R → N/C → segments)
+    let n-seg-line = 0.40
+    let or-n-line = calc.max(0.25, n-seg-line)
+    let sigma-or-line = calc.max(0.70, or-n-line)
     let sigma-y = -2.4
     let sigma-y-label = sigma-y + 0.54
-    let base-ft-height = -0.9 + (syllables.len() * 0.3)
-    let ft-sigma-gap = base-ft-height - sigma-y-label
-    let ft-height = sigma-y-label + ft-sigma-gap * dist-mult(0)
+    let or-y = sigma-y-label - 0.29 - line-len(sigma-or-line, 1) - 0.30
+    let n-y = or-y - 0.35 - line-len(or-n-line, 2) - 0.30
+    let terminal-y = n-y - 0.25 - line-len(n-seg-line, 3) - 0.30
+    let below-sigma-line = sigma-or-line
 
-    // Sub-syllable level positions
-    let or-y = sigma-y - 0.75 * dist-mult(1)
-    let n-y = or-y - 0.90 * dist-mult(2)
-    let terminal-y = n-y - 0.95 * dist-mult(3)
+    // Σ → σ: "auto" fits the line to the widest branch; "fixed" grows it with the syllable count
+    let foot-run = 0
+    for (i, _) in syllables.enumerate() {
+      foot-run = calc.max(foot-run, calc.abs(start-x + syllable-positions.at(i) - foot-x))
+    }
+    let foot-line = if fit {
+      calc.max(0.45, branch-slope * foot-run, below-sigma-line)
+    } else { below-sigma-line }
+    let ft-height = sigma-y-label + 0.26 + line-len(foot-line, 0) + 0.25
 
     // Draw Ft node above the head
     content((foot-x, ft-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
@@ -1163,7 +1207,7 @@
     for gem in geminates {
       content(
         (gem.gem-x, terminal-y),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#gem.gem-text],
         anchor: "north",
       )
     }
@@ -1172,7 +1216,8 @@
 
 // Visualizes word, foot, and syllable levels
 // Now accepts IPA-style input like "(k a.'v a).l o"
-#let word(input, foot: "R", scale: 1.0, symbol: ("ω", "Σ", "σ"), distance: none) = {
+#let word(input, foot: "R", scale: 1.0, symbol: ("ω", "Σ", "σ"), distance: none, spacing: "auto") = {
+  check-spacing(spacing)
   // Convert IPA-style input to Unicode
   let converted = convert-prosody-input(input)
 
@@ -1297,30 +1342,24 @@
     let min-gap-between-sylls = 0.8
     let default-spacing = 1.6
 
-    // Distance multiplier lookup (floor: 0.5 for levels 0–1, 1.0 for levels 2–4)
-    let dist-mult(level) = {
-      let result = 1.0
-      if distance != none {
-        let floor = if level <= 1 { 0.5 } else { 1.0 }
-        for entry in distance {
-          if entry.at(0) == level {
-            result = calc.max(floor, entry.at(1))
-          }
-        }
-      }
-      result
-    }
+    let line-len(natural, level) = tier-line(natural, distance, level)
 
-    // Vertical level positions (built top-down from σ)
+    // Default lines never get shorter going up the tree (each is at least as
+    // long as the one directly below it); explicit `distance` factors are
+    // applied afterwards. spacing: "auto" additionally lengthens upper lines
+    // to fit wide branches; "fixed" keeps them constant so trees align.
+    let fit = spacing == "auto"
+
+    // Sub-syllable tiers (σ → O/R → N/C → segments)
+    let n-seg-line = 0.40
+    let or-n-line = calc.max(0.25, n-seg-line)
+    let sigma-or-line = calc.max(0.70, or-n-line)
     let sigma-y = -2.4
     let sigma-y-label = sigma-y + 0.54
-    let base-gap = 0.96
-    let foot-y = sigma-y-label + base-gap * dist-mult(1)
-
-    // Sub-syllable level positions
-    let or-y = sigma-y - 0.75 * dist-mult(2)
-    let n-y = or-y - 0.90 * dist-mult(3)
-    let terminal-y = n-y - 0.95 * dist-mult(4)
+    let or-y = sigma-y-label - 0.29 - line-len(sigma-or-line, 2) - 0.30
+    let n-y = or-y - 0.35 - line-len(or-n-line, 3) - 0.30
+    let terminal-y = n-y - 0.25 - line-len(n-seg-line, 4) - 0.30
+    let below-sigma-line = sigma-or-line
 
 
     // Calculate extents for each syllable
@@ -1416,36 +1455,67 @@
       pwd-x = start-x + syllable-positions.at(target-idx)
     }
 
-    // Calculate minimum PWd height
-    let clearance-margin = 0.5
-    let min-pwd-height = foot-y + base-gap * 1.5
+    // Upper tiers (ω, Σ). With spacing: "auto", a branch spanning a horizontal
+    // run h gets at least slope × h of vertical line (≈ the angle of the default
+    // trees), and vertical branches get a short line. With spacing: "fixed",
+    // lines are constant so trees with the same tiers align exactly.
 
+    let foot-xs = ()
+    for ft in feet {
+      let head-idx = ft.at(0)
+      for syll-idx in ft {
+        if syllables.at(syll-idx).stressed {
+          head-idx = syll-idx
+          break
+        }
+      }
+      foot-xs.push(start-x + syllable-positions.at(head-idx))
+    }
+
+    // Σ → σ
+    let foot-run = 0
+    for (j, ft) in feet.enumerate() {
+      for syll-idx in ft {
+        foot-run = calc.max(foot-run, calc.abs(start-x + syllable-positions.at(syll-idx) - foot-xs.at(j)))
+      }
+    }
+    let foot-line = if fit { calc.max(0.45, branch-slope * foot-run, below-sigma-line) } else { below-sigma-line }
+    let foot-y = sigma-y-label + 0.26 + line-len(foot-line, 1) + 0.25
+
+    // ω → Σ, or ω → σ directly when there are no feet
+    let sigma-top = sigma-y-label + 0.21
+    let below-top = if feet.len() > 0 { foot-y + 0.25 } else { sigma-top }
+    let pwd-line = if fit {
+      let need = if feet.len() > 0 { foot-line } else { below-sigma-line }
+      for fx in foot-xs {
+        need = calc.max(need, branch-slope * calc.abs(fx - pwd-x))
+      }
+      // Unfooted σ hang from ω across the whole ω–σ distance
+      for (i, syll) in syllables.enumerate() {
+        if i not in in-foot-set {
+          let run = calc.abs(start-x + syllable-positions.at(i) - pwd-x)
+          need = calc.max(need, branch-slope * run - (below-top - sigma-top))
+        }
+      }
+      need
+    } else if feet.len() > 0 { foot-line } else { below-sigma-line }
+    let pwd-height = below-top + line-len(pwd-line, 0) + 0.3
+
+    // ω lines to unfooted σ must pass clear above any Σ lying between them
+    let clearance-margin = 0.25
     for (i, syll) in syllables.enumerate() {
       if i not in in-foot-set {
         let syll-x = start-x + syllable-positions.at(i)
-
-        for ft in feet {
-          let head-idx = ft.at(0)
-          for syll-idx in ft {
-            if syllables.at(syll-idx).stressed {
-              head-idx = syll-idx
-              break
-            }
-          }
-          let foot-x = start-x + syllable-positions.at(head-idx)
-
-          let is-between = (pwd-x < foot-x and foot-x < syll-x) or (syll-x < foot-x and foot-x < pwd-x)
-
+        for fx in foot-xs {
+          let is-between = (pwd-x < fx and fx < syll-x) or (syll-x < fx and fx < pwd-x)
           if is-between and calc.abs(syll-x - pwd-x) > 0.01 {
-            let t = (foot-x - pwd-x) / (syll-x - pwd-x)
-            let required-height = (1.35 * t - 0.35 + clearance-margin) / (1 - t)
-            min-pwd-height = calc.max(min-pwd-height, required-height)
+            let t = (fx - pwd-x) / (syll-x - pwd-x)
+            let required = 0.3 + (foot-y + 0.25 + clearance-margin - t * sigma-top) / (1 - t)
+            pwd-height = calc.max(pwd-height, required)
           }
         }
       }
     }
-
-    let pwd-height = calc.max(min-pwd-height, min-pwd-height * dist-mult(0))
 
     content((pwd-x, pwd-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_word])
 
@@ -1569,7 +1639,7 @@
     for gem in geminates {
       content(
         (gem.gem-x, terminal-y),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#gem.gem-text],
         anchor: "north",
       )
     }
@@ -1578,7 +1648,8 @@
 
 // Visualizes foot with moraic structure
 // Now accepts IPA-style input like "k a.'v a.l o"
-#let foot-mora(input, coda: false, scale: 1.0, symbol: ("Σ", "σ", "μ"), distance: none) = {
+#let foot-mora(input, coda: false, scale: 1.0, symbol: ("Σ", "σ", "μ"), distance: none, spacing: "auto") = {
+  check-spacing(spacing)
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
@@ -1675,18 +1746,16 @@
     import cetz.draw: *
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
-    // Distance multiplier lookup (floor: 0.5 for all mora levels)
-    let dist-mult(level) = {
-      let result = 1.0
-      if distance != none {
-        for entry in distance {
-          if entry.at(0) == level {
-            result = calc.max(0.5, entry.at(1))
-          }
-        }
-      }
-      result
-    }
+    let line-len(natural, level) = tier-line(natural, distance, level)
+
+    // Mora tiers (σ → μ = level 1, μ → segments = level 2)
+    let mu-seg-line = 0.55
+    let sigma-mu-line = calc.max(0.70, mu-seg-line)
+    let sigma-y = -2.4
+    let sigma-y-label = sigma-y + 0.54
+    let mora-y = sigma-y-label - 0.29 - line-len(sigma-mu-line, 1) - 0.35
+    let terminal-y = mora-y - 0.35 - line-len(mu-seg-line, 2) - 0.30
+    let below-sigma-line = sigma-mu-line
 
     let segment-spacing = 0.35
     let min-gap-between-sylls = 0.8 // Same as foot() to prevent overlap
@@ -1704,16 +1773,20 @@
 
       // Calculate constituent positions (simplified like word())
       // Use segment-based extents without mora adjustments for uniform spacing
+      // Non-moraic onsets/codas must clear the μ labels (same rule as draw-moraic-structure)
+      let reach = moraic-reach(sigma-y, mora-y, terminal-y, long: syll.nucleus.contains("ː"))
       let onset-x-rel = if has-onset {
         let min-offset = (num-onset - 1) * segment-spacing / 2 + (num-nucleus - 1) * segment-spacing / 2 + min-gap
         let default-offset = 0.7
-        if min-offset > default-offset { -min-offset } else { -default-offset }
+        let clear-offset = reach + (num-onset - 1) * segment-spacing / 2
+        -calc.max(min-offset, default-offset, clear-offset)
       } else { 0 }
 
       let coda-x-rel = if has-coda {
         let min-offset = (num-nucleus + num-coda - 2) * segment-spacing / 2 + 0.4
         let default-offset = 0.7
-        if min-offset > default-offset { min-offset } else { default-offset }
+        let clear-offset = if coda { 0 } else { reach + (num-coda - 1) * segment-spacing / 2 }
+        calc.max(min-offset, default-offset, clear-offset)
       } else { 0 }
 
       // Calculate segment widths
@@ -1762,16 +1835,22 @@
     let foot-x = start-x + syllable-positions.at(head-idx)
 
     // Vertical level positions
-    let sigma-y = -2.4
-    let sigma-y-label = sigma-y + 0.54
-    let base-ft-height = -0.9 + (syllables.len() * 0.3)
-    let ft-sigma-gap = base-ft-height - sigma-y-label
-    let ft-height = sigma-y-label + ft-sigma-gap * dist-mult(0)
+    // Default lines never get shorter going up the tree (each is at least as
+    // long as the one directly below it); explicit `distance` factors are
+    // applied afterwards. spacing: "auto" additionally lengthens upper lines
+    // to fit wide branches; "fixed" keeps them constant so trees align.
+    let fit = spacing == "auto"
 
-    // Mora level positions (σ→μ = level 1, μ→segments = level 2)
-    let mora-base-gap = 1.57
-    let mora-y = sigma-y-label - mora-base-gap * 1.2 * dist-mult(1)
-    let terminal-y = mora-y - mora-base-gap * dist-mult(2)
+
+    // Σ → σ: "auto" fits the line to the widest branch; "fixed" grows it with the syllable count
+    let foot-run = 0
+    for (i, _) in syllables.enumerate() {
+      foot-run = calc.max(foot-run, calc.abs(start-x + syllable-positions.at(i) - foot-x))
+    }
+    let foot-line = if fit {
+      calc.max(0.45, branch-slope * foot-run, below-sigma-line)
+    } else { below-sigma-line }
+    let ft-height = sigma-y-label + 0.26 + line-len(foot-line, 0) + 0.25
 
     // Draw Ft node above the head
     content((foot-x, ft-height), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
@@ -1837,7 +1916,7 @@
     for gem in geminates {
       content(
         (gem.gem-x, terminal-y),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#gem.gem-text],
         anchor: "north",
       )
     }
@@ -1846,7 +1925,8 @@
 
 // Visualizes word with moraic structure
 // Now accepts IPA-style input like "(k a.'v a).l o"
-#let word-mora(input, foot: "R", coda: false, scale: 1.0, symbol: ("ω", "Σ", "σ", "μ"), distance: none) = {
+#let word-mora(input, foot: "R", coda: false, scale: 1.0, symbol: ("ω", "Σ", "σ", "μ"), distance: none, spacing: "auto") = {
+  check-spacing(spacing)
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
@@ -1976,18 +2056,16 @@
 
     set-style(stroke: 0.7 * diagram-scale * 1pt)
 
-    // Distance multiplier lookup (floor: 0.5 for all mora levels)
-    let dist-mult(level) = {
-      let result = 1.0
-      if distance != none {
-        for entry in distance {
-          if entry.at(0) == level {
-            result = calc.max(0.5, entry.at(1))
-          }
-        }
-      }
-      result
-    }
+    let line-len(natural, level) = tier-line(natural, distance, level)
+
+    // Mora tiers (σ → μ = level 2, μ → segments = level 3)
+    let mu-seg-line = 0.55
+    let sigma-mu-line = calc.max(0.70, mu-seg-line)
+    let sigma-y = -2.4
+    let sigma-y-label = sigma-y + 0.54
+    let mora-y = sigma-y-label - 0.29 - line-len(sigma-mu-line, 2) - 0.35
+    let terminal-y = mora-y - 0.35 - line-len(mu-seg-line, 3) - 0.30
+    let below-sigma-line = sigma-mu-line
 
     let segment-spacing = 0.35
     let min-gap-between-sylls = 0.6
@@ -2006,16 +2084,20 @@
       // Use segment-based extents without mora adjustments for uniform spacing
       let min-gap = 0.75
 
+      // Non-moraic onsets/codas must clear the μ labels (same rule as draw-moraic-structure)
+      let reach = moraic-reach(sigma-y, mora-y, terminal-y, long: syll.nucleus.contains("ː"))
       let onset-x-rel = if has-onset {
         let min-offset = (num-onset - 1) * segment-spacing / 2 + (num-nucleus - 1) * segment-spacing / 2 + min-gap
         let default-offset = 0.7
-        if min-offset > default-offset { -min-offset } else { -default-offset }
+        let clear-offset = reach + (num-onset - 1) * segment-spacing / 2
+        -calc.max(min-offset, default-offset, clear-offset)
       } else { 0 }
 
       let coda-x-rel = if has-coda {
         let min-offset = (num-nucleus + num-coda - 2) * segment-spacing / 2 + 0.4
         let default-offset = 0.7
-        if min-offset > default-offset { min-offset } else { default-offset }
+        let clear-offset = if coda { 0 } else { reach + (num-coda - 1) * segment-spacing / 2 }
+        calc.max(min-offset, default-offset, clear-offset)
       } else { 0 }
 
       // Calculate segment widths
@@ -2092,51 +2174,74 @@
       pwd-x = start-x + syllable-positions.at(target-idx)
     }
 
-    // Vertical level positions
-    let sigma-y = -2.4
-    let sigma-y-label = sigma-y + 0.54
-    let base-gap = 0.96
-    let ft-y = sigma-y-label + base-gap * dist-mult(1)
+    // Default lines never get shorter going up the tree (each is at least as
+    // long as the one directly below it); explicit `distance` factors are
+    // applied afterwards. spacing: "auto" additionally lengthens upper lines
+    // to fit wide branches; "fixed" keeps them constant so trees align.
+    let fit = spacing == "auto"
 
-    // Mora level positions (σ→μ = level 2, μ→segments = level 3)
-    let mora-base-gap = 1.57
-    let mora-y = sigma-y-label - mora-base-gap * 1.2 * dist-mult(2)
-    let terminal-y = mora-y - mora-base-gap * dist-mult(3)
 
-    // Calculate minimum PWd height
-    let clearance-margin = 0.5
-    let min-pwd-height = ft-y + base-gap * 1.5
+    // Upper tiers (ω, Σ). With spacing: "auto", a branch spanning a horizontal
+    // run h gets at least slope × h of vertical line (≈ the angle of the default
+    // trees), and vertical branches get a short line. With spacing: "fixed",
+    // lines are constant so trees with the same tiers align exactly.
 
-    // Check geometric constraints for unfooted syllables
+    let foot-xs = ()
+    for ft in feet {
+      let head-idx = ft.at(0)
+      for syll-idx in ft {
+        if syllables.at(syll-idx).stressed {
+          head-idx = syll-idx
+          break
+        }
+      }
+      foot-xs.push(start-x + syllable-positions.at(head-idx))
+    }
+
+    // Σ → σ
+    let foot-run = 0
+    for (j, ft) in feet.enumerate() {
+      for syll-idx in ft {
+        foot-run = calc.max(foot-run, calc.abs(start-x + syllable-positions.at(syll-idx) - foot-xs.at(j)))
+      }
+    }
+    let foot-line = if fit { calc.max(0.45, branch-slope * foot-run, below-sigma-line) } else { below-sigma-line }
+    let ft-y = sigma-y-label + 0.26 + line-len(foot-line, 1) + 0.25
+
+    // ω → Σ, or ω → σ directly when there are no feet
+    let sigma-top = sigma-y-label + 0.21
+    let below-top = if feet.len() > 0 { ft-y + 0.25 } else { sigma-top }
+    let pwd-line = if fit {
+      let need = if feet.len() > 0 { foot-line } else { below-sigma-line }
+      for fx in foot-xs {
+        need = calc.max(need, branch-slope * calc.abs(fx - pwd-x))
+      }
+      // Unfooted σ hang from ω across the whole ω–σ distance
+      for (i, syll) in syllables.enumerate() {
+        if i not in in-foot-set {
+          let run = calc.abs(start-x + syllable-positions.at(i) - pwd-x)
+          need = calc.max(need, branch-slope * run - (below-top - sigma-top))
+        }
+      }
+      need
+    } else if feet.len() > 0 { foot-line } else { below-sigma-line }
+    let pwd-y = below-top + line-len(pwd-line, 0) + 0.3
+
+    // ω lines to unfooted σ must pass clear above any Σ lying between them
+    let clearance-margin = 0.25
     for (i, syll) in syllables.enumerate() {
       if i not in in-foot-set {
         let syll-x = start-x + syllable-positions.at(i)
-
-        // Check all feet to find those between PWd and this footless syllable
-        for ft in feet {
-          // Find foot's head position
-          let head-idx = ft.at(0)
-          for syll-idx in ft {
-            if syllables.at(syll-idx).stressed {
-              head-idx = syll-idx
-              break
-            }
-          }
-          let foot-x = start-x + syllable-positions.at(head-idx)
-
-          // Check if foot is between PWd and footless syllable
-          let is-between = (pwd-x < foot-x and foot-x < syll-x) or (syll-x < foot-x and foot-x < pwd-x)
-
+        for fx in foot-xs {
+          let is-between = (pwd-x < fx and fx < syll-x) or (syll-x < fx and fx < pwd-x)
           if is-between and calc.abs(syll-x - pwd-x) > 0.01 {
-            let t = (foot-x - pwd-x) / (syll-x - pwd-x)
-            let required-height = (1.35 * t - 0.35 + clearance-margin) / (1 - t)
-            min-pwd-height = calc.max(min-pwd-height, required-height)
+            let t = (fx - pwd-x) / (syll-x - pwd-x)
+            let required = 0.3 + (ft-y + 0.25 + clearance-margin - t * sigma-top) / (1 - t)
+            pwd-y = calc.max(pwd-y, required)
           }
         }
       }
     }
-
-    let pwd-y = calc.max(min-pwd-height, min-pwd-height * dist-mult(0))
 
     // Draw PWd node
     content((pwd-x, pwd-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_word])
@@ -2229,7 +2334,7 @@
     for gem in geminates {
       content(
         (gem.gem-x, terminal-y),
-        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get())[#gem.gem-text],
+        context text(size: 11 * diagram-scale * 1pt, font: phonokit-font.get(), bottom-edge: "descender")[#gem.gem-text],
         anchor: "north",
       )
     }
