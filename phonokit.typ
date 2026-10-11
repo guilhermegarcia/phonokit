@@ -1,5 +1,5 @@
 #import "lib.typ": *
-#import "@preview/fontawesome:0.5.0": *
+#import "@preview/fontawesome:0.6.2": *
 // #phonokit-init(font: "New Computer Modern")
 #show: ex-rules
 
