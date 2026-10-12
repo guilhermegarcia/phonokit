@@ -672,6 +672,46 @@ As is often the case, a figure can quickly become too crowded. Once we start add
   ],
 )
 
+=== 3D vowel space <sec-vowels-3d>
+
+The function `#vowels-3d()` adds a third dimension to the trapezoid: rounding. It is based on the vowel space proposed by #cite(<ladefoged_maddieson1996>, form: "prose", supplement: [p. 283]), where the familiar trapezoid is extruded into a prism. The front face of the prism is unrounded, and the back face is rounded. Front vowels sit on the left face of the prism, back vowels sit on the right face, and their depth reflects their degree of rounding: /i/ is the least rounded vowel and /u/ the most rounded one, while the low vowels /a/ and /ɑ/ meet halfway. Schwa is the only vowel inside the prism, halfway between the two faces. Edges hidden from the current viewpoint are dashed, as in @fig-vowels-3d.
+
+The function supports nine vowels: /i e ɛ a u o ɔ ɑ ə/. By default, all nine are plotted, so `#vowels-3d()` needs no arguments. A custom subset can be passed as the first argument using the same tipa-style input as `#ipa()`, for example `#vowels-3d("ieau")`. Any other vowel produces an error listing the available ones.
+
+The view is controlled by two angles. `rotation` spins the prism around its vertical axis: `0deg` shows it straight-on, positive values send the rounded face to the left, and negative values send it to the right. The default (`30deg`) reproduces the view in #cite(<ladefoged_maddieson1996>, form: "prose"). `tilt` sets how far above the prism we are looking from (default: `20deg`); negative values look at it from below. As with `#vowels()`, `scale`, `width`, `height`, `rows`, and `cols` are also available. The distance between the two faces is set by `depth` (default: `4`).
+
+#grid(
+  columns: (1fr, 1fr),
+  [#align(center + bottom)[
+    #figure(
+      caption: [`#vowels-3d(scale: 0.6)`],
+      vowels-3d(scale: 0.6),
+    ) <fig-vowels-3d>
+  ]],
+  [#align(center + bottom)[
+    #figure(
+      caption: [`#vowels-3d("ieau@", ...)` \ `rotation: -40deg, tilt: 35deg`],
+      vowels-3d("ieau@", rotation: -40deg, tilt: 35deg, scale: 0.6),
+    ) <fig-vowels-3d-rotated>
+  ]],
+)
+
+Because `rotation` is an ordinary argument, a rotating prism can be shown in a presentation by generating one slide per angle. The loop in @code-vowels-3d-spin creates 36 pages, one every 10 degrees, starting at the default view and completing a full turn. Placing the figure inside a box of fixed size keeps it centered as its outline changes from one angle to the next.
+
+#figure(
+  caption: [Rotating `#vowels-3d()` across several pages],
+  supplement: "Code",
+  kind: "code",
+  ```typst
+  #for r in range(30, 390, step: 10) {
+    page(align(center + horizon, box(
+      width: 12cm, height: 7cm,
+      align(center + horizon, vowels-3d(rotation: r * 1deg)),
+    )))
+  }
+  ```,
+) <code-vowels-3d-spin>
+
 = Phonetics <phonetics>
 
 == Sound shifts <sec-sound-shift>

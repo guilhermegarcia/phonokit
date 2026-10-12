@@ -6,6 +6,7 @@
 // - Prosodic structure visualization (syllables, moras, feet, prosodic words)
 // - Autosegmental representations and processes (features and tones)
 // - IPA vowel charts (trapezoid) with language inventories
+// - 3D vowel space (rounding as depth) with adjustable rotation
 // - IPA consonant tables (pulmonic) with language inventories
 // - Optimality Theory (OT) tableaux with violation marking and shading
 // - Harmonic Grammar (HG) tableaux with weighted harmony calculations
@@ -22,6 +23,7 @@
 #import "hasse.typ": *
 #import "extras.typ": *
 #import "vowels.typ": *
+#import "vowels-3d.typ": vowels-3d
 #import "grids.typ": *
 #import "consonants.typ": *
 #import "features.typ": *
@@ -415,6 +417,50 @@
 /// Available languages: english, spanish, portuguese, italian, french, german,
 /// japanese, russian, arabic
 #let vowels = vowels
+
+/// Plot vowels in a rotatable 3D vowel space
+///
+/// Extrudes the IPA vowel trapezoid into a prism along a rounding axis,
+/// following Ladefoged & Maddieson (1996, p. 283). The front face of the prism
+/// is unrounded and the back face is rounded. Front vowels sit on the left face,
+/// back vowels on the right face, at a depth set by their degree of rounding:
+/// /i/ is least rounded, /u/ most rounded, and the low vowels /a/ and /ɑ/ meet
+/// halfway. Schwa is placed inside the prism. Edges hidden from the current
+/// viewpoint are drawn dashed, and are recomputed for every angle.
+///
+/// Arguments:
+/// - vowel-string (string, optional): Vowels to plot in tipa-style IPA, passed
+///   positionally (e.g. `vowels-3d("ieau")`). Only i e E a u o O A @
+///   (i e ɛ a u o ɔ ɑ ə) are supported; any other vowel stops compilation with
+///   an error listing the supported ones. Language presets are not available
+///   (default: "ieEauoOA@", all nine vowels)
+/// - rotation (angle): Spin around the vertical axis. 0deg is a straight-on
+///   view, in which depth edges point straight up; positive angles send the
+///   rounded face to the left, negative angles to the right
+///   (default: 30deg, the Ladefoged & Maddieson view)
+/// - tilt (angle): How far above the prism the viewer is; 0deg is eye level,
+///   90deg looks straight down, negative values look from below (default: 20deg)
+/// - width (float): Base width of trapezoid (default: 8)
+/// - height (float): Base height of trapezoid (default: 6)
+/// - depth (float): Distance between the unrounded and rounded faces (default: 4)
+/// - rows (int): Number of height levels; level lines wrap around all four
+///   side faces (default: 3)
+/// - cols (int): Number of front/back divisions on the front face (default: 2)
+/// - scale (float): Scale factor for entire chart (default: 0.7)
+///
+/// Returns: CeTZ drawing of a 3D vowel prism
+///
+/// Examples:
+/// - `#vowels-3d()` - All nine vowels, Ladefoged & Maddieson view
+/// - `#vowels-3d("ieEauoOA")` - Peripheral vowels only, no schwa
+/// - `#vowels-3d("ieau@", rotation: -40deg, tilt: 35deg)` - Rotated view
+/// - `#vowels-3d(rotation: 0deg, tilt: 0deg)` - Flat front view, as in `#vowels()`
+///
+/// Note: The rotation is computed at compile time, so each call produces a
+/// static image. To show the prism rotating in a presentation, generate one
+/// page per angle (e.g. `for r in range(30, 390, step: 10)`) inside a box of
+/// fixed size so the figure stays centered.
+#let vowels-3d = vowels-3d
 
 /// Plot consonants on an IPA consonant table
 ///
