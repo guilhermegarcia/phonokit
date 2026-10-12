@@ -31,7 +31,7 @@
 #import "autosegmental.typ": *
 #import "multi-tier.typ": *
 #import "sound-shift.typ": *
-#import "ex.typ": ex, ex-rules, ex-num-label, subex-label
+#import "ex.typ": ex, ex-num-label, ex-rules, subex-label
 #import "intonational.typ": *
 #import "geom.typ": *
 #import "phonetics.typ": *
@@ -46,7 +46,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.5.20": *
+/// #import "@preview/phonokit:0.6.0": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -420,33 +420,44 @@
 
 /// Plot vowels in a rotatable 3D vowel space
 ///
-/// Extrudes the IPA vowel trapezoid into a prism along a rounding axis,
+/// Brings the IPA vowel trapezoid into a prism along a rounding axis,
 /// following Ladefoged & Maddieson (1996, p. 283). The front face of the prism
 /// is unrounded and the back face is rounded. Front vowels sit on the left face,
 /// back vowels on the right face, at a depth set by their degree of rounding:
 /// /i/ is least rounded, /u/ most rounded, and the low vowels /a/ and /ɑ/ meet
 /// halfway. Schwa is placed inside the prism. Edges hidden from the current
-/// viewpoint are drawn dashed, and are recomputed for every angle.
+/// viewpoint are drawn dashed, and are recomputed for every angle. Vowels
+/// farther from the viewer are drawn smaller (see `depth-cue`).
 ///
 /// Arguments:
 /// - vowel-string (string, optional): Vowels to plot in tipa-style IPA, passed
 ///   positionally (e.g. `vowels-3d("ieau")`). Only i e E a u o O A @
-///   (i e ɛ a u o ɔ ɑ ə) are supported; any other vowel stops compilation with
-///   an error listing the supported ones. Language presets are not available
+///   (i e ɛ a u o ɔ ɑ ə) are supported: either all nine or a subset of them.
+///   Any other symbol, and any language name (e.g. "english"), stops
+///   compilation with an error listing the supported vowels
 ///   (default: "ieEauoOA@", all nine vowels)
-/// - rotation (angle): Spin around the vertical axis. 0deg is a straight-on
+/// - rotation (angle or number): Spin around the vertical axis. 0deg is a straight-on
 ///   view, in which depth edges point straight up; positive angles send the
-///   rounded face to the left, negative angles to the right
+///   rounded face to the left, negative angles to the right. A plain number is
+///   read as degrees, so `30` and `30deg` are equivalent
 ///   (default: 30deg, the Ladefoged & Maddieson view)
-/// - tilt (angle): How far above the prism the viewer is; 0deg is eye level,
-///   90deg looks straight down, negative values look from below (default: 20deg)
+/// - tilt (angle or number): How far above the prism the viewer is; 0deg is eye level,
+///   90deg looks straight down, negative values look from below. A plain
+///   number is read as degrees (default: 20deg)
 /// - width (float): Base width of trapezoid (default: 8)
 /// - height (float): Base height of trapezoid (default: 6)
-/// - depth (float): Distance between the unrounded and rounded faces (default: 4)
 /// - rows (int): Number of height levels; level lines wrap around all four
 ///   side faces (default: 3)
 /// - cols (int): Number of front/back divisions on the front face (default: 2)
 /// - scale (float): Scale factor for entire chart (default: 0.7)
+/// - depth-cue (bool): Draws vowels farther from the viewer smaller, so the
+///   view reads as 3D: in angled views such as the default, the farthest
+///   vowel is drawn at 70% size. Only vowels
+///   (symbols and dots) shrink; lines do not. The effect fades out
+///   automatically as the view approaches a flat front or back view, which
+///   then looks like the 2D trapezoid with all vowels at the same size. Top,
+///   bottom and side views keep it. Use false to turn it off in every view
+///   (default: true)
 ///
 /// Returns: CeTZ drawing of a 3D vowel prism
 ///
@@ -455,6 +466,7 @@
 /// - `#vowels-3d("ieEauoOA")` - Peripheral vowels only, no schwa
 /// - `#vowels-3d("ieau@", rotation: -40deg, tilt: 35deg)` - Rotated view
 /// - `#vowels-3d(rotation: 0deg, tilt: 0deg)` - Flat front view, as in `#vowels()`
+/// - `#vowels-3d(depth-cue: false)` - All vowels at the same size
 ///
 /// Note: The rotation is computed at compile time, so each call produces a
 /// static image. To show the prism rotating in a presentation, generate one

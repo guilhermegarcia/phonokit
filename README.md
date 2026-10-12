@@ -21,16 +21,16 @@
 <table>
 <tr>
   <td align="center" width="33%">
-    <a href="gallery/ipa_example.typ"><img src="gallery/ipa_example.png" width="100%" alt="IPA transcription example"></a>
-    <br><sub>IPA transcription based on <code>tipa</code></sub>
-  </td>
-  <td align="center" width="33%">
     <a href="gallery/consonants_example.typ"><img src="gallery/consonants_example.png" width="100%" alt="Consonant inventory table"></a>
-    <br><sub>Consonant inventories (with pre-defined languages)</sub>
+    <br><sub>Consonant inventories (with pre-defined languages, simplified)</sub>
   </td>
   <td align="center" width="33%">
     <a href="gallery/vowels_example.typ"><img src="gallery/vowels_example.png" width="100%" alt="Vowel trapezoid chart"></a>
     <br><sub>Vowel trapezoids (with pre-defined languages and arrows)</sub>
+  </td>
+  <td align="center" width="33%">
+    <a href="gallery/vowels3d_example.typ"><img src="gallery/vowels3d_example.png" width="100%" alt="3D vowel space"></a>
+    <br><sub>3D vowel space (with adjustable rotation)</sub>
   </td>
 </tr>
 <tr>
@@ -88,6 +88,7 @@ See [**manual**](https://doi.org/10.5281/zenodo.18260076) for a comprehensive de
 - **tipa-style input**: Use familiar LaTeX tipa notation instead of hunting for Unicode symbols
 - **Comprehensive symbol support**: most common IPA consonants, vowels, and diacritics
 - **Vowel charts**: Plot vowels on the IPA vowel trapezoid with accurate positioning
+- **3D vowel space**: Plot vowels in a rotatable prism with rounding as depth (Ladefoged & Maddieson 1996), with adjustable rotation and tilt
 - **Consonant tables**: Display consonants in the pulmonic IPA consonant table
 - **Scalable charts**: Adjust size to fit your document layout (scaling includes text as expected)
 

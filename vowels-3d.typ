@@ -1,10 +1,20 @@
 #import "@preview/cetz:0.5.2": canvas, draw
 #import "ipa.typ": ipa-to-unicode
 #import "_config.typ": phonokit-font
-#import "vowels.typ": vowel-data
+#import "vowels.typ": language-vowels, vowel-data
 
 // Vowels supported by the 3D chart (Ladefoged & Maddieson 1996, p. 283)
 #let vowels-3d-inventory = ("i", "e", "ɛ", "a", "u", "o", "ɔ", "ɑ", "ə")
+
+// Distance between the unrounded (front) and rounded (back) faces; fixed by design
+#let vowels-3d-depth = 4
+
+// Accept an angle, or a plain number read as degrees (30 = 30deg)
+#let to-angle(value, name) = {
+  if type(value) == angle { value } else if type(value) in (int, float) { value * 1deg } else {
+    panic("vowels-3d: " + name + " must be an angle (e.g. 30deg) or a number of degrees (e.g. 30)")
+  }
+}
 
 // Roundedness score (depth): 0 = front face (least rounded), 1 = back face (most rounded)
 // High vowels sit at the extremes (i least, u most rounded); low vowels meet at 0.5
@@ -30,30 +40,41 @@
 
 #let vowels-3d(
   ..args, // Optional positional vowel string (tipa-style); default: all 9 vowels
-  rotation: 30deg, // Spin around the vertical axis (0deg = straight-on; positive = depth recedes left)
-  tilt: 20deg, // Viewing angle from above (0deg = eye level)
+  rotation: 30deg, // Spin around the vertical axis (0deg = straight-on; positive = depth recedes left); number = degrees
+  tilt: 20deg, // Viewing angle from above (0deg = eye level); number = degrees
   width: 8,
   height: 6,
-  depth: 4, // Distance between the unrounded (front) and rounded (back) faces
   rows: 3,
   cols: 2,
   scale: 0.7,
+  depth-cue: true, // Draw farther vowels smaller; fades out automatically in flat front/back views
 ) = {
+  assert(type(depth-cue) == bool, message: "vowels-3d: depth-cue must be true or false")
   assert(args.pos().len() <= 1,
     message: "vowels-3d: expected at most one positional argument (the vowel string)")
+  assert(args.named().len() == 0,
+    message: "vowels-3d: unexpected named argument(s): " + args.named().keys().join(", "))
   let vowel-string = args.pos().at(0, default: "ieEauoOA@")
+  let rotation = to-angle(rotation, "rotation")
+  let tilt = to-angle(tilt, "tilt")
+  let supported = "i e ɛ a u o ɔ ɑ ə (tipa: i e E a u o O A @)"
+  assert(
+    type(vowel-string) != str or lower(vowel-string) not in language-vowels,
+    message: "vowels-3d: language names are not accepted (got \"" + str(vowel-string)
+      + "\"). Use the nine default vowels or a subset of " + supported,
+  )
   let scale-factor = scale // `scale` is shadowed by the built-in inside canvas closures
   let vowels-to-plot = ipa-to-unicode(vowel-string).clusters().filter(v => v.trim() != "")
   for v in vowels-to-plot {
     assert(
       v in vowels-3d-inventory,
-      message: "vowels-3d: unsupported vowel \"" + v + "\". Available: " + vowels-3d-inventory.join(" "),
+      message: "vowels-3d: unsupported symbol \"" + v + "\". Only the nine default vowels or a subset of them are accepted: " + supported,
     )
   }
 
   let scaled-width = width * scale
   let scaled-height = height * scale
-  let scaled-depth = depth * scale
+  let scaled-depth = vowels-3d-depth * scale
   let scaled-font-size = 22 * scale
   let scaled-line-thickness = 0.85 * scale
 
@@ -153,14 +174,33 @@
       }
     }
 
-    for vp in vowel-points {
+    // Depth cue: vowels farther from the viewer are drawn smaller (lines are unchanged).
+    // Distance is normalized between the nearest and farthest prism corners.
+    // Strength fades to 0 only as the line of sight approaches the rounding axis
+    // (flat front or back view, which looks like the 2D trapezoid). Top, bottom and
+    // side views keep the cue. m = 1 when looking straight along that axis.
+    let max-shrink = 0.3 // Farthest vowel at 70% size
+    let full-at = 0.15 // 1 - m at which the cue reaches full strength (default view: ~0.19)
+    let m = calc.abs(proj((0, 0, 1)).at(2))
+    let t = calc.min(1, (1 - m) / full-at)
+    let strength = if depth-cue { max-shrink * t * t * (3 - 2 * t) } else { 0 } // smoothstep
+    let corner-depths = corners.map(c => (proj((..c, z0)).at(2), proj((..c, z1)).at(2))).flatten()
+    let near = calc.min(..corner-depths)
+    let far = calc.max(..corner-depths)
+    let size-at(p) = if far - near < 1e-9 { 1 } else {
+      1 - strength * (proj(p).at(2) - near) / (far - near)
+    }
+
+    // Draw farthest first, so nearer vowels overlap farther ones
+    for vp in vowel-points.sorted(key: vp => -proj(vp.pos).at(2)) {
       let (sx, sy) = to-screen(vp.pos)
-      circle((sx, sy), radius: scaled-line-thickness * 0.12, fill: black, stroke: none)
+      let k = size-at(vp.pos)
+      circle((sx, sy), radius: scaled-line-thickness * 0.12 * k, fill: black, stroke: none)
       content(
-        (sx + 0.15 * scale-factor, sy + 0.15 * scale-factor),
+        (sx + 0.15 * scale-factor * k, sy + 0.15 * scale-factor * k),
         anchor: "south-west",
         context text(
-          size: scaled-font-size * 1pt,
+          size: scaled-font-size * k * 1pt,
           font: phonokit-font.get(),
           top-edge: "x-height",
           bottom-edge: "baseline",

@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.5.20`]
+#let version = text(size: 0.8em)[`v 0.6.0`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.6.0` - New function `#vowels-3d()`: rotatable 3D vowel space\
 `0.5.20` - Better spacing in prosody-related functions\
 `0.5.19` - General bug fixes\
 `0.5.18` - German vowels: adds /ə/\
@@ -373,7 +374,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.5.20": *
+  #import "@preview/phonokit:0.6.0": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -674,11 +675,11 @@ As is often the case, a figure can quickly become too crowded. Once we start add
 
 === 3D vowel space <sec-vowels-3d>
 
-The function `#vowels-3d()` adds a third dimension to the trapezoid: rounding. It is based on the vowel space proposed by #cite(<ladefoged_maddieson1996>, form: "prose", supplement: [p. 283]), where the familiar trapezoid is extruded into a prism. The front face of the prism is unrounded, and the back face is rounded. Front vowels sit on the left face of the prism, back vowels sit on the right face, and their depth reflects their degree of rounding: /i/ is the least rounded vowel and /u/ the most rounded one, while the low vowels /a/ and /ɑ/ meet halfway. Schwa is the only vowel inside the prism, halfway between the two faces. Edges hidden from the current viewpoint are dashed, as in @fig-vowels-3d.
+As of version `0.6.0`, the function `#vowels-3d()` adds a third dimension to the trapezoid: rounding. It is based on the vowel space proposed by #cite(<ladefoged_maddieson1996>, form: "prose", supplement: [p. 283]), where the familiar trapezoid is extruded into a prism. The front face of the prism is unrounded, and the back face is rounded. Front vowels sit on the left face of the prism, back vowels sit on the right face, and their depth reflects their degree of rounding: /i/ is the least rounded vowel and /u/ the most rounded one, while the low vowels /a/ and /ɑ/ meet halfway. Schwa is the only vowel inside the prism, halfway between the two faces. Edges hidden from the current viewpoint are dashed, as in @fig-vowels-3d.
 
-The function supports nine vowels: /i e ɛ a u o ɔ ɑ ə/. By default, all nine are plotted, so `#vowels-3d()` needs no arguments. A custom subset can be passed as the first argument using the same tipa-style input as `#ipa()`, for example `#vowels-3d("ieau")`. Any other vowel produces an error listing the available ones.
+The function supports nine vowels: /i e ɛ a u o ɔ ɑ ə/. By default, all nine are plotted, so `#vowels-3d()` needs no arguments. A subset of them can be passed as the first argument using the same tipa-style input as `#ipa()`, for example `#vowels-3d("ieau")`. Unlike `#vowels()`, the function does not accept language names: any other vowel, or a name such as `"english"`, produces an error listing the nine available vowels.
 
-The view is controlled by two angles. `rotation` spins the prism around its vertical axis: `0deg` shows it straight-on, positive values send the rounded face to the left, and negative values send it to the right. The default (`30deg`) reproduces the view in #cite(<ladefoged_maddieson1996>, form: "prose"). `tilt` sets how far above the prism we are looking from (default: `20deg`); negative values look at it from below. As with `#vowels()`, `scale`, `width`, `height`, `rows`, and `cols` are also available. The distance between the two faces is set by `depth` (default: `4`).
+The view is controlled by two angles. `rotation` spins the prism around its vertical axis: `0deg` shows it straight-on, positive values send the rounded face to the left, and negative values send it to the right. The default (`30deg`) reproduces the view in #cite(<ladefoged_maddieson1996>, form: "prose"). `tilt` sets how far above the prism we are looking from (default: `20deg`); negative values look at it from below. Both arguments accept either an angle or a plain number of degrees, so `rotation: 30` is the same as `rotation: 30deg`. As with `#vowels()`, `scale`, `width`, `height`, `rows`, and `cols` are also available.
 
 #grid(
   columns: (1fr, 1fr),
@@ -690,9 +691,27 @@ The view is controlled by two angles. `rotation` spins the prism around its vert
   ]],
   [#align(center + bottom)[
     #figure(
-      caption: [`#vowels-3d("ieau@", ...)` \ `rotation: -40deg, tilt: 35deg`],
+      caption: [`#vowels-3d(.., tilt: 35deg, ..)`],
       vowels-3d("ieau@", rotation: -40deg, tilt: 35deg, scale: 0.6),
     ) <fig-vowels-3d-rotated>
+  ]],
+)
+
+To reinforce the 3D effect, vowels farther from the viewer are drawn smaller: in angled views such as the default, a vowel at the very back of the prism is drawn at 70% of its size, and vowels in between shrink gradually. Distance is recomputed for every combination of `rotation` and `tilt`, so the same vowel can be large in one view and small in another. In @fig-vowels-3d-cue, for example, the prism is rotated by `60deg`, which brings the unrounded front vowels close to the viewer and pushes the rounded back vowels away: compare the size of /e/ and /o/ in the two figures. Only vowel symbols and their dots are affected: lines keep their length and thickness, and nearer vowels are drawn on top of farther ones when they overlap. The effect fades out automatically as the view approaches a flat front (or back) view, where the prism looks like a regular trapezoid and differences in size would have no visible depth to explain them: `#vowels-3d(rotation: 0, tilt: 0)`, for instance, shows all vowels at the same size. Views from the top, the bottom, or the side keep the effect, since there the size of each vowel conveys the dimension that is hidden (height or front/back position). To turn the effect off in any view, use `depth-cue: false`.
+
+#grid(
+  columns: (1fr, 1fr),
+  [#align(center + bottom)[
+    #figure(
+      caption: [`rotation: 60deg, depth-cue: false`],
+      vowels-3d(rotation: 60deg, depth-cue: false, scale: 0.5),
+    )
+  ]],
+  [#align(center + bottom)[
+    #figure(
+      caption: [`rotation: 60deg, depth-cue: true`],
+      vowels-3d(rotation: 60deg, scale: 0.5),
+    ) <fig-vowels-3d-cue>
   ]],
 )
 
@@ -706,7 +725,7 @@ Because `rotation` is an ordinary argument, a rotating prism can be shown in a p
   #for r in range(30, 390, step: 10) {
     page(align(center + horizon, box(
       width: 12cm, height: 7cm,
-      align(center + horizon, vowels-3d(rotation: r * 1deg)),
+      align(center + horizon, vowels-3d(rotation: r)),
     )))
   }
   ```,
@@ -3279,7 +3298,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.5.20": *
+    #import "@preview/phonokit:0.6.0": *
     ```
 
     Now you can use any function you want:
@@ -3291,7 +3310,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.5.20": *` to your `typ` document if you plan on using #logo (assuming version `0.5.20`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.6.0": *` to your `typ` document if you plan on using #logo (assuming version `0.6.0`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3321,7 +3340,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.5.20": *
+  #import "@preview/phonokit:0.6.0": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3371,7 +3390,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.5.20": *
+  #import "@preview/phonokit:0.6.0": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF
