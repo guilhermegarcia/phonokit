@@ -60,9 +60,10 @@
     cluster in ("aɪ", "eɪ", "oɪ", "aʊ", "oʊ", "ã", "ẽ", "ĩ", "õ", "ũ", "ỹ", "ɛ̃", "ɔ̃", "œ̃", "ɑ̃")
   )
 
-  // Check if cluster contains syllabicity marker (̩ U+0329)
+  // Check if cluster contains syllabicity marker (̩ U+0329, or ̍ U+030D,
+  // which ipa-to-unicode uses instead on descenders: ŋ̍, ɲ̍)
   // Syllabic consonants (like m̩, n̩, l̩) function as vowels/nuclei
-  let is-syllabic = cluster.contains("̩")
+  let is-syllabic = cluster.contains("\u{0329}") or cluster.contains("\u{030D}")
 
   base-is-vowel or cluster-is-vowel or is-syllabic
 }
