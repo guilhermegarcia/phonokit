@@ -341,7 +341,7 @@ This vignette introduces #logo and its functions. If you haven't used Typst yet 
 
 == Installation <sec-installation>
 
-Typst packages are always loaded the same way: using the `#import` function at the top of your `typ` document, as shown in @code-import1. Replace `X.X.X` with the version you wish to import. The `*` simply states that we want to import all functions from the package in question. See package's page on Typst's website #link("https://typst.app/universe/package/phonokit")[here].
+Typst packages are always loaded the same way: using the `#import` function at the top of your `typ` document, as shown in @code-import1. Replace `X.X.X` with the version you wish to import. The `*` simply states that we want to import all functions from the package in question. See package's page on Typst's website #link("https://typst.app/universe/package/phonokit")[here]. This manual documents the latest version on GitHub, which may be ahead of the latest version on Typst Universe. If an import from `@preview` fails with a "package not found" error, use the version listed on the package's page instead, or load the package locally (@code-import2).
 
 #figure(
   caption: [Loading a package in Typst using the official repository],
