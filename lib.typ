@@ -573,7 +573,9 @@
 /// - constraints (array): Array of constraint names
 /// - weights (array): Array of constraint weights (numbers)
 /// - violations (array): 2D array of violation counts (numbers)
-/// - visualize (bool): Whether to show probability bars (default: true)
+/// - visualize (bool): Whether to show probability bars (default: true). The bars are drawn in the
+///   right margin, outside the table bounds, so a centered tableau stays centered on the table.
+///   On standalone pages with `width: auto`, leave at least 2cm of right margin or the bars are cut off
 /// - sort (bool): Whether to sort candidates by probability, most to least (default: false)
 /// - scale (number, optional): Scale factor for the tableau (default: none)
 /// - letters (bool): Use letter labels (a, b, c, ...) for candidates (default: false)
