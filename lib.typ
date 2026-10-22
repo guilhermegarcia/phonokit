@@ -494,7 +494,7 @@
 /// - aspirated (bool): Show aspirated plosive/affricate rows (default: false)
 /// - abbreviate (bool): Use abbreviated place/manner labels (default: false)
 /// - simplify (bool): Automatically drop empty rows and columns (default: false)
-/// - delete-cols (array): 0-indexed column indices to remove (0=Bilabial ... 10=Glottal)
+/// - delete-cols (array): 0-indexed column positions to remove, in drawn order (0=Bilabial ... 5=Retroflex, 6=Alveolo-palatal, 7=Palatal ... 11=Glottal)
 /// - delete-rows (array): 0-indexed row indices to remove (0=Plosive ... 7=Lateral approximant)
 /// - cell-width (float): Width of each cell (default: 1.8)
 /// - cell-height (float): Height of each cell (default: 0.9)
@@ -514,7 +514,10 @@
 /// - `#consonants("ptk", phoneme-colors: ("p": red, "t": blue))` - Color selected phonemes
 ///
 /// Notes:
-/// - /w/ (labiovelar) appears in both bilabial and velar columns when /ɰ/ is not present; otherwise only bilabial
+/// - Double articulations /w/, /ɥ/ (approximants) and /ʍ/ (fricative, as in the IPA) appear under both of their places
+/// - Alveolo-palatals /ɕ ʑ tɕ dʑ tɕʰ/ get their own column after Retroflex, shown only when used (delete-cols position 6)
+/// - When a double articulation would share a cell with another consonant, its row splits into storeys (dotted lines); the top storey always matches the IPA row
+/// - Retroflex affricates may be typed with a plain stop: `{tʂ}`, `{dʐ}` and `{tʂ \\h}` are drawn as /ʈʂ ɖʐ ʈʂʰ/
 /// - Affricates appear in a separate row when affricates: true (displayed without tie bars)
 /// - Aspirated consonants appear in separate rows when aspirated: true (e.g., "Plosive (aspirated)")
 /// - Both aspirated consonants and affricates must be wrapped with curly brackets: {p \\h} will produce an aspirated p, and {ts} will produce a voiceless alveolar affricate

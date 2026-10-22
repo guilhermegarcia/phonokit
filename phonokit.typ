@@ -415,24 +415,38 @@ See @sec-ipa for a reference table with the main IPA symbols available. For a mo
 
 === Consonants <sec-consonants>
 
-Two additional functions allow users to quickly create consonant tables and vowel trapezoids given a string of phonemes. @fig-consonants-it shows the consonant inventory for Italian, for example. The function mirrors the pulmonic consonants table in the IPA chart with some minor changes. For example, affricates are shown when `affricates: true`, and #ipa("/w/") is shown in the approximant row under both bilabial and velar columns (when #ipa("/ \\mw /") is not present, in which case #ipa("/w/") appears only under bilabial). The argument `abbreviate: true` shortens labels for both rows and columns.
+Two additional functions allow users to quickly create consonant tables and vowel trapezoids given a string of phonemes. @fig-consonants-all shows every consonant the function supports, using the preset `all`. The function mirrors the pulmonic consonants table in the IPA chart with some minor changes. For example, affricates are shown when `affricates: true`, and doubly articulated consonants such as #box(ipa("/w/")) are shown inside the table (see below). Paired symbols represent voiceless and voiced consonants, respectively. A single centered symbol is used where no voicing pair is represented in that place--manner cell (e.g., sonorants, aspirated consonants, or #box(ipa("/ʍ/")) when it is alone in its cell). Shaded areas, as in the IPA chart, mark articulations judged impossible (e.g., a voiced glottal stop). The argument `abbreviate: true` shortens labels for both rows and columns.
 
 Aspirated consonants are shown when `aspirated: true`. In cases where neither `affricates` nor `aspirated` are set to `true`, the function will omit both groups and fewer rows will be printed.
 
-The user can either input a language#footnote[Available languages: Arabic, English, French, German, Italian, Japanese, Portuguese, Russian and Spanish (all language names are lowercase in the function). You can also use `all` to display all consonants. The same applies to the function `#vowels()`.] (see caption of @fig-consonants-it) or a string of consonants to create a custom inventory (@fig-consonants-custom) --- the input follows the same format used by the `#ipa()` function discussed in @sec-ipa-trans, so `#ipa("\\*r")` generates "#ipa("\\*r")". Note, however, that both affricates and aspirated consonants require curly braces around them as well as `affricates: true` and `aspirated: true`, as shown in the caption of @fig-consonants-custom. As of version `0.5.13`, individual consonant symbols can be colored with `phoneme-colors`, for example `#consonants("ptk", phoneme-colors: ("p": red, "t": blue))`. Finally, the function also allows for flexible sizing with the `scale` argument.
+The user can either input a language#footnote[Available languages: Arabic, English, French, German, Italian, Japanese, Portuguese, Russian and Spanish (all language names are lowercase in the function). You can also use `all` to display all consonants. The same applies to the function `#vowels()`.] (e.g., `#consonants("italian")`) or a string of consonants to create a custom inventory (@fig-consonants-custom) --- the input follows the same format used by the `#ipa()` function discussed in @sec-ipa-trans, so `#ipa("\\*r")` generates "#ipa("\\*r")". Note, however, that both affricates and aspirated consonants require curly braces around them as well as `affricates: true` and `aspirated: true`, as shown in the caption of @fig-consonants-custom. As of version `0.5.13`, individual consonant symbols can be colored with `phoneme-colors`, for example `#consonants("ptk", phoneme-colors: ("p": red, "t": blue))`. Finally, the function also allows for flexible sizing with the `scale` argument.
 
 
 #figure(
-  caption: [Italian consonants - `#consonants("italian", affricates: true, abbreviate: true)`],
-  consonants("italian", affricates: true, abbreviate: true, scale: 0.65),
-) <fig-consonants-it>
+  caption: [`#consonants("all", affricates: true, aspirated: true, abbreviate: true)`],
+  consonants("all", affricates: true, aspirated: true, abbreviate: true, scale: 0.65),
+) <fig-consonants-all>
 
 #figure(
   caption: [`#consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true)`],
   consonants("ts{ts}psS \\*r g{tS} {k \\h}", affricates: true, aspirated: true, scale: 0.65),
 ) <fig-consonants-custom>
 
-As of version 0.5.3, you can delete rows or columns to create a more minimal table. The relevant arguments are `delete-cols` and `delete-rows`. Both accept an array of positions (starting from 0). For example, you could create a minimal table for English consonants, shown in @fig-c-min. You can also use `simplify: true` to remove all rows and columns without consonants in them.
+The function follows the IPA in how it classifies consonants, but it also shows some of the IPA's "other symbols" in the same table. These are the doubly articulated #box(ipa("/w/")), #box(ipa("/ɥ/")) and #box(ipa("/ʍ/")), which the IPA chart lists outside the pulmonic table because each of its columns stands for a single place of articulation.#footnote[The same reasoning explains why #box(ipa("/j/")) is in the table and #box(ipa("/w/")) is not: #box(ipa("/j/")) has a single (palatal) constriction, while #box(ipa("/w/")) combines a labial and a velar one.] In `#consonants()`, each of these symbols appears under both of its places of articulation: #box(ipa("/w/")) under bilabial and velar, #box(ipa("/ɥ/")) under bilabial and palatal, and #box(ipa("/ʍ/")) under bilabial and velar. The row is the one the IPA assigns: #box(ipa("/w/")) and #box(ipa("/ɥ/")) are approximants, and #box(ipa("/ʍ/")) is a voiceless labial-velar _fricative_, so it appears in the fricative row rather than next to #box(ipa("/w/")).#footnote[Some descriptions treat #box(ipa("/ʍ/")) as a voiceless approximant (i.e., #box(ipa("[ \\r w]"))), the voiceless counterpart of #box(ipa("/w/")). The function uses the IPA label instead, but see #cite(<ladefoged_maddieson1996>, form: "prose", supplement: [p. 326]), who describe the #box(ipa("/ʍ/")) of Scottish English (e.g., _whether_) as non-fricative and argue that the voiceless counterpart of #box(ipa("/w/")) cannot have friction at both the labial and the velar places of articulation: if it is a fricative, it is better described as a voiceless labialized velar fricative, #box(ipa("[xʷ]")).] The alveolo-palatals #box(ipa("/ɕ \\s ʑ/")) are also "other symbols" in the IPA chart, but they have a single place of articulation. They therefore get their own column, between retroflex and palatal, together with the affricates #box(ipa("/tɕ \\s dʑ/")) and #box(ipa("/tɕʰ/")). This column is only shown when the inventory contains at least one of these symbols.
+
+A doubly articulated consonant may need a cell that is already taken. In French, for example, #box(ipa("/ɥ/")) competes with #box(ipa("/w/")) for the bilabial approximant cell and with #box(ipa("/j/")) for the palatal one. In such cases, the row is split into _storeys_, separated by dotted lines (@fig-consonants-storeys). On the right, #box(ipa("/ʍ/")) competes with #box(ipa("/x/")) for the voiceless velar fricative cell. The top storey always matches the IPA row, and each doubly articulated consonant goes in the highest storey whose cells are free under both of its places. In @fig-consonants-all, for instance, #box(ipa("/w/")) sits below #box(ipa("/ɰ/")), and #box(ipa("/ʍ/")) below #box(ipa("/ɸ/")) and #box(ipa("/x/")). Storeys are only added when needed: most inventories (English, for instance) fit in a single storey per row, and their tables look exactly like the IPA chart plus #box(ipa("/w/")).
+
+#figure(
+  caption: [`#consonants("french")` (left) and `#consonants("ptkfsxj \\*w w")` (right), both with `simplify: true`],
+  grid(
+    columns: 2,
+    column-gutter: 1em,
+    align: horizon,
+    consonants("french", simplify: true, scale: 0.6), consonants("ptkfsxj \\*w w", simplify: true, scale: 0.6),
+  ),
+) <fig-consonants-storeys>
+
+As of version 0.5.3, you can delete rows or columns to create a more minimal table. The relevant arguments are `delete-cols` and `delete-rows`. Both accept an array of positions (starting from 0). Positions follow the order of the full table, from bilabial (0) to glottal (11), with the alveolo-palatal column at position 6 even when it is not shown. For example, you could create a minimal table for English consonants, shown in @fig-c-min. You can also use `simplify: true` to remove all rows and columns without consonants in them.
 
 #align(center)[
   #grid(
@@ -443,7 +457,7 @@ As of version 0.5.3, you can delete rows or columns to create a more minimal tab
       #figure(
         caption: [Concise consonant table for English],
         [
-          #consonants("english", affricates: true, delete-cols: (5, 8, 9), delete-rows: (2, 3, 5))
+          #consonants("english", affricates: true, delete-cols: (5, 9, 10), delete-rows: (2, 3, 5))
         ],
       ) <fig-c-min>
     ],
@@ -453,7 +467,7 @@ As of version 0.5.3, you can delete rows or columns to create a more minimal tab
         supplement: "Code",
         kind: "code",
         ```typst
-          #consonants("english", affricates: true, delete-cols: (5, 8, 9), delete-rows: (2, 3, 5))
+          #consonants("english", affricates: true, delete-cols: (5, 9, 10), delete-rows: (2, 3, 5))
 
         // Alternatively, use the simplify argument:
           #consonants("english", affricates: true, simplify: true)

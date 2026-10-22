@@ -51,6 +51,9 @@
   "z": (place: 3, manner: 4, voicing: true),
   "ʃ": (place: 4, manner: 4, voicing: false),
   "ʒ": (place: 4, manner: 4, voicing: true),
+  // Alveolo-palatal (IPA "other symbols"): own column, shown only when used
+  "ɕ": (place: 11, manner: 4, voicing: false),
+  "ʑ": (place: 11, manner: 4, voicing: true),
   "ʂ": (place: 5, manner: 4, voicing: false),
   "ʐ": (place: 5, manner: 4, voicing: true),
   "ç": (place: 6, manner: 4, voicing: false),
@@ -67,7 +70,10 @@
   "ɬ": (place: 3, manner: 5, voicing: false),
   "ɮ": (place: 3, manner: 5, voicing: true),
   // Approximants (row 6)
-  "w": (place: 0, manner: 6, voicing: true), // labiovelar, shown under bilabial
+  // Double articulations: shown under both places, in the lowest free storey
+  "w": (place: 0, place2: 7, manner: 6, voicing: true),
+  "ɥ": (place: 0, place2: 6, manner: 6, voicing: true),
+  "ʍ": (place: 0, place2: 7, manner: 4, voicing: false), // IPA: voiceless labial-velar fricative
   "ʋ": (place: 1, manner: 6, voicing: true),
   "ɹ": (place: 3, manner: 6, voicing: true),
   "ɻ": (place: 5, manner: 6, voicing: true),
@@ -108,8 +114,8 @@
   "ʈʂ": (place: 5, voicing: false),
   "ɖʐ": (place: 5, voicing: true),
   // Alveolo-palatal affricates
-  "tɕ": (place: 4, voicing: false), // Use postalveolar column
-  "dʑ": (place: 4, voicing: true),
+  "tɕ": (place: 11, voicing: false),
+  "dʑ": (place: 11, voicing: true),
 )
 
 // Aspirated affricate data (shown when both affricates: true AND aspirated: true)
@@ -118,7 +124,7 @@
   "tsʰ": (place: 3, voicing: false),
   "tʃʰ": (place: 4, voicing: false),
   "ʈʂʰ": (place: 5, voicing: false),
-  "tɕʰ": (place: 4, voicing: false), // Alveolo-palatal
+  "tɕʰ": (place: 11, voicing: false), // Alveolo-palatal
 )
 
 // Column labels (places of articulation)
@@ -134,6 +140,7 @@
   "Uvular",
   "Pharyngeal",
   "Glottal",
+  "Alveolo-palatal", // index 11, but drawn after Retroflex (see col-order)
 )
 
 #let places-short = (
@@ -148,6 +155,7 @@
   "Uvu",
   "Phar",
   "Glot",
+  "Alvpal",
 )
 
 // Row labels (manners of articulation)
@@ -175,10 +183,10 @@
 
 // Language consonant inventories
 #let language-consonants = (
-  "all": "pbtdʈɖcɟkɡqɢʔmɱnɳɲŋɴʙrʀⱱɾɽɸβfvθðszʃʒʂʐçʝxɣχʁħʕhɦɬɮʋɹɻjɰwlɭʎʟ",
+  "all": "pbtdʈɖcɟkɡqɢʔmɱnɳɲŋɴʙrʀⱱɾɽɸβfvθðszʃʒʂʐɕʑçʝxɣχʁħʕhɦɬɮʋɹɻjɰwɥʍlɭʎʟ",
   "english": "pbmnŋtdkɡfvθðszʃʒhlɹwj",
   "spanish": "pbmnɲtdkɡfθsxlrɾj",
-  "french": "pbmnɲtdkɡfrvszʃʒljw",
+  "french": "pbmnɲtdkɡfrvszʃʒljwɥ",
   "german": "pbmntdkɡfvszʃʒçxhʁlj",
   "italian": "pbmnɲtdkɡfvszʃʎlrj",
   "japanese": "pbmnɲtdkɡçɸsʃzʒhɾj",
@@ -189,9 +197,8 @@
 
 // Language affricate inventories (used when affricates: true)
 // Note: No tie bars needed - the "Affricate" row label makes it clear
-// Note: Only one affricate pair per place - "all" uses more common variants
 #let language-affricates = (
-  "all": "pfbvtsdztʃdʒʈʂɖʐ", // tʃ/dʒ chosen over tɕ/dʑ (more common)
+  "all": "pfbvtsdztʃdʒʈʂɖʐtɕdʑ",
   "english": "tʃdʒ",
   "spanish": "tʃ",
   "french": "", // No native affricates
@@ -264,6 +271,8 @@
   (braced-items: braced-items, cleaned: cleaned, rejected: rejected)
 }
 
+#let retroflex-affricate-aliases = ("tʂ": "ʈʂ", "dʐ": "ɖʐ", "tʂʰ": "ʈʂʰ")
+
 // Helper function to categorize braced items into affricates, aspirated plosives, and aspirated affricates
 #let categorize-braced-items(braced-items) = {
   let affricates = ()
@@ -274,6 +283,8 @@
   for item in braced-items {
     // Convert IPA notation to Unicode (spaces are required for diacritics like \h)
     let converted = ipa-to-unicode(item)
+    // Retroflex affricates are often written with a plain stop (e.g., Mandarin /tʂ/)
+    converted = retroflex-affricate-aliases.at(converted, default: converted)
 
     // Check which category this belongs to
     if converted in aspirated-affricate-data {
@@ -328,6 +339,11 @@
     return none
   }
 
+  // Columns are drawn in this order; the alveolo-palatal column (index 11) sits after Retroflex.
+  // `delete-cols` positions follow the drawn order, so map them to internal place indices.
+  let col-order = (0, 1, 2, 3, 4, 5, 11, 6, 7, 8, 9, 10)
+  let delete-cols = delete-cols.filter(i => i >= 0 and i < col-order.len()).map(i => col-order.at(i))
+
   // Determine which consonants to plot
   let consonants-to-plot = ""
   let custom-affricates-string = ""
@@ -368,7 +384,11 @@
       + consonants-to-plot.clusters().filter(c => c not in consonant-data)
     )
     if rejected.dedup().len() > 0 {
-      return inventory-error
+      return [
+        *Error:* Unknown symbol(s): #rejected.dedup().map(raw).join(", "). \
+        Available presets: #(language-consonants.keys().map(raw).join(", ")).
+        Use a listed preset or provide only consonant symbols.
+      ]
     }
     if consonants-to-plot == "" and extracted.braced-items.len() == 0 {
       return inventory-error
@@ -449,13 +469,9 @@
       if consonant in consonant-data {
         let info = consonant-data.at(consonant)
         if info.place not in used-places { used-places.push(info.place) }
+        if "place2" in info and info.place2 not in used-places { used-places.push(info.place2) }
         if info.manner not in used-manners { used-manners.push(info.manner) }
       }
-    }
-
-    // Special /w/ handling: also occupies velar column if /ɰ/ is absent
-    if consonants-to-plot.contains("w") and not consonants-to-plot.contains("ɰ") {
-      if 7 not in used-places { used-places.push(7) }
     }
 
     // Scan aspirated plosives
@@ -504,12 +520,40 @@
     }
   }
 
+  // Storeys: double articulations (IPA "other symbols") go in the lowest
+  // storey of their row where their voicing slot is free at both places
+  let is-double(i) = "place2" in i
+  let places-of(i) = if "place2" in i { (i.place, i.place2) } else { (i.place,) }
+  let slot(place, manner, storey, voicing) = str(place) + "-" + str(manner) + "-" + str(storey) + "-" + repr(voicing)
+  let occupied = ()
+  for c in consonants-to-plot.clusters() {
+    if c in consonant-data and not is-double(consonant-data.at(c)) {
+      let i = consonant-data.at(c)
+      occupied.push(slot(i.place, i.manner, 0, i.voicing))
+    }
+  }
+  let storey-of = (:)
+  let storey-count = (:)
+  for (c, i) in consonant-data {
+    if is-double(i) and consonants-to-plot.contains(c) {
+      let st = 0
+      while places-of(i).any(pl => slot(pl, i.manner, st, i.voicing) in occupied) { st += 1 }
+      for pl in places-of(i) { occupied.push(slot(pl, i.manner, st, i.voicing)) }
+      storey-of.insert(c, st)
+      storey-count.insert(str(i.manner), calc.max(storey-count.at(str(i.manner), default: 1), st + 1))
+    }
+  }
+
   // Select label sets based on abbreviation setting
   let place-labels = if abbreviate { labels.places_short } else { labels.places }
   let manner-labels = if abbreviate { labels.manners_short } else { labels.manners }
 
   // Filter deleted columns and build column remapping
-  let kept-cols = range(places.len()).filter(i => i not in delete-cols)
+  // Alveolo-palatal column (index 11) is drawn after Retroflex, and only when used
+  let alveolo-palatals = ("ɕ", "ʑ", "tɕ", "dʑ", "tɕʰ")
+  let all-plotted = consonants-to-plot + affricates-to-plot.replace("͡", "") + aspirated-affricates-to-plot
+  if not alveolo-palatals.any(c => all-plotted.contains(c)) { delete-cols.push(11) }
+  let kept-cols = col-order.filter(i => i not in delete-cols)
   let display-places = kept-cols.map(i => place-labels.at(i))
   let col-remap = (:)
   for (new-i, orig-i) in kept-cols.enumerate() {
@@ -537,6 +581,11 @@
       display-manners.push(manner-labels.at(base-row))
       manner-to-row.insert(str(base-row), current-row)
       current-row += 1
+      for st in range(1, storey-count.at(str(base-row), default: 1)) {
+        display-manners.push("")
+        manner-to-row.insert(str(base-row) + "." + str(st), current-row)
+        current-row += 1
+      }
     }
 
     // Insert aspirated plosive row after Plosive (base 0)
@@ -627,12 +676,17 @@
       for (i, manner) in display-manners.enumerate() {
         let x = resolved-label-width - 0.2
         let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height) - (scaled-cell-height / 2)
+        let extra = 0
+        while i + extra + 1 < display-manners.len() and display-manners.at(i + extra + 1) == "" { extra += 1 }
+        y -= extra * scaled-cell-height / 2
 
         content((x, y), text(size: scaled-label-font-size * 1pt, font: phonokit-font.get(), manner), anchor: "east")
       }
 
       // Row indices for grid drawing (from the remapping built above)
-      let fricative-display-row = manner-to-row.at("4", default: -1)
+      // Rows where dental/alveolar/postalveolar are separate cells (every storey)
+      let split-rows = manner-to-row.pairs().filter(((k, r)) => k.split(".").at(0) == "4").map(((k, r)) => r)
+      split-rows += (affricate-row, aspirated-affricate-row).filter(r => r >= 0)
 
       // Draw grid lines
       // Vertical lines
@@ -654,7 +708,7 @@
         if is-special {
           // Draw line segments only for fricative and affricate rows
           for row in range(num-rows) {
-            if row == fricative-display-row or row == affricate-row or row == aspirated-affricate-row {
+            if row in split-rows {
               let row-y1 = total-height / 2 - scaled-label-height - (row * scaled-cell-height)
               let row-y2 = row-y1 - scaled-cell-height
               line((x, row-y1), (x, row-y2), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
@@ -671,7 +725,8 @@
         let y = total-height / 2 - scaled-label-height - (i * scaled-cell-height)
         let x1 = resolved-label-width
         let x2 = total-width
-        line((x1, y), (x2, y), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt))
+        let inner = i < num-rows and display-manners.at(i) == ""
+        line((x1, y), (x2, y), stroke: (paint: gray.lighten(20%), thickness: scaled-line-thickness * 1pt, dash: if inner { "dotted" } else { none }))
       }
 
     // Gray out impossible consonant cells
@@ -723,6 +778,16 @@
       )
     }
 
+    // Impossible cells extend to every storey of their row
+    for (storey-key, storey-row) in manner-to-row {
+      if storey-key.contains(".") {
+        let base-row = manner-to-row.at(storey-key.split(".").at(0))
+        impossible-cells += impossible-cells
+          .filter(cell => cell.at(0) == base-row)
+          .map(cell => (storey-row, cell.at(1), cell.at(2)))
+      }
+    }
+
     for (row, orig-col, half) in impossible-cells {
       if row < 0 or str(orig-col) not in col-remap {
         // Row or column was deleted, skip
@@ -767,28 +832,22 @@
     for consonant in consonants-to-plot.clusters() {
       if consonant in consonant-data {
         let info = consonant-data.at(consonant)
-        let key = str(info.place) + "-" + str(info.manner)
+        let st = storey-of.at(consonant, default: 0)
+        let manner-key = str(info.manner) + if st > 0 { "." + str(st) } else { "" }
+        for pl in if "place2" in info { (info.place, info.place2) } else { (info.place,) } {
+          let key = str(pl) + "-" + manner-key
 
-        if key not in cell-consonants {
-          cell-consonants.insert(key, (voiceless: none, voiced: none))
-        }
+          if key not in cell-consonants {
+            cell-consonants.insert(key, (voiceless: none, voiced: none))
+          }
 
-        if info.voicing {
-          cell-consonants.at(key).voiced = consonant
-        } else {
-          cell-consonants.at(key).voiceless = consonant
+          if info.voicing {
+            cell-consonants.at(key).voiced = consonant
+          } else {
+            cell-consonants.at(key).voiceless = consonant
+          }
         }
       }
-    }
-
-    // Special handling for /w/ (labiovelar approximant)
-    // If /w/ is present but /ɰ/ (velar approximant) is not, show /w/ in both bilabial and velar columns
-    if consonants-to-plot.contains("w") and not consonants-to-plot.contains("ɰ") {
-      let velar-approx-key = "7-6" // place 7 (velar), manner 6 (approximant)
-      if velar-approx-key not in cell-consonants {
-        cell-consonants.insert(velar-approx-key, (voiceless: none, voiced: none))
-      }
-      cell-consonants.at(velar-approx-key).voiced = "w"
     }
 
     // Collect aspirated plosives if enabled
@@ -855,12 +914,13 @@
     for (key, pair) in cell-consonants {
       let parts = key.split("-")
       let orig-col = int(parts.at(0))
-      let orig-manner = int(parts.at(1))
+      let manner-key = parts.at(1)
+      let orig-manner = int(manner-key.split(".").at(0))
 
       // Skip if column or row was deleted
-      if str(orig-col) in col-remap and str(orig-manner) in manner-to-row {
+      if str(orig-col) in col-remap and manner-key in manner-to-row {
         let col = col-remap.at(str(orig-col))
-        let row = manner-to-row.at(str(orig-manner))
+        let row = manner-to-row.at(manner-key)
 
         let col-width = column-widths.at(col)
         let cell-x = col-starts.at(col)
@@ -871,8 +931,12 @@
         // Check if this is a sonorant manner (not contrastive for voicing, should be centered)
         // Manners: 1=Nasal, 2=Trill, 3=Tap/Flap, 6=Approximant, 7=Lateral Approximant
         let is-sonorant = orig-manner in (1, 2, 3, 6, 7)
+        // A double articulation alone in its cell (e.g., /ʍ/) has no voicing pair represented: center it
+        let lone-double = (
+          pair.voiced == none and pair.voiceless != none and is-double(consonant-data.at(pair.voiceless))
+        )
 
-        if is-sonorant {
+        if is-sonorant or lone-double {
           // Center the consonant (sonorants are always voiced in typical inventories)
           if pair.voiced != none {
             let pos = (cell-center-x, cell-center-y)
@@ -918,10 +982,9 @@
           let cell-center-x = cell-x + (col-width / 2)
           let cell-center-y = cell-y - (scaled-cell-height / 2)
 
-          let offset = col-width * 0.25
-
+          // Aspirated consonants are always voiceless: no voicing pair represented, so centered
           if pair.voiceless != none {
-            let pos = (cell-center-x - offset, cell-center-y)
+            let pos = (cell-center-x, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
             content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }
@@ -974,10 +1037,9 @@
           let cell-center-x = cell-x + (col-width / 2)
           let cell-center-y = cell-y - (scaled-cell-height / 2)
 
-          let offset = col-width * 0.25
-
+          // Aspirated consonants are always voiceless: no voicing pair represented, so centered
           if pair.voiceless != none {
-            let pos = (cell-center-x - offset, cell-center-y)
+            let pos = (cell-center-x, cell-center-y)
             circle(pos, radius: scaled-circle-radius, fill: white, stroke: none)
             content(pos, context phoneme-text(pair.voiceless), anchor: "center")
           }

@@ -37,6 +37,7 @@
       "Uvular",
       "Pharyngeal",
       "Glottal",
+      "Alveolo-palatal",
     ),
     places_short: (
       "Bilab",
@@ -50,6 +51,7 @@
       "Uvu",
       "Phar",
       "Glot",
+      "Alvpal",
     ),
     manners: (
       "Plosive",
@@ -91,6 +93,7 @@
       "Uvulaire",
       "Pharyngale",
       "Glottale",
+      "Alvéolo-palatale",
     ),
     places_short: (
       "Bilab",
@@ -104,6 +107,7 @@
       "Uvul",
       "Phar",
       "Glot",
+      "Alvpal",
     ),
     manners: (
       "Plosive",
@@ -145,6 +149,7 @@
       "Uvular",
       "Faríngea",
       "Glotal",
+      "Alveolopalatal",
     ),
     places_short: (
       "Bilab",
@@ -158,6 +163,7 @@
       "Uvul",
       "Far",
       "Glot",
+      "Alvpal",
     ),
     manners: (
       "Plosiva",
