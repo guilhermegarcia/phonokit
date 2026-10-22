@@ -258,7 +258,7 @@
       for col in range(max-col) {
         content(
           (col * spacing, pad + 0.3),
-          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(col)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "DejaVu Sans Mono", str(col)),
         )
       }
 
@@ -266,7 +266,7 @@
       for level-i in range(num-levels) {
         content(
           (-pad - 0.4, level-y(level-i)),
-          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(level-i)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "DejaVu Sans Mono", str(level-i)),
         )
       }
 
@@ -274,7 +274,7 @@
       for col in range(max-col) {
         content(
           (col * spacing, -(num-levels - 1) * level-spacing - pad - 0.3),
-          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(col)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "DejaVu Sans Mono", str(col)),
         )
       }
 
@@ -282,7 +282,7 @@
       for level-i in range(num-levels) {
         content(
           ((max-col - 1) * spacing + pad + 0.4, level-y(level-i)),
-          text(size: 0.9em * scale-factor, fill: grid-color, font: "Courier New", str(level-i)),
+          text(size: 0.9em * scale-factor, fill: grid-color, font: "DejaVu Sans Mono", str(level-i)),
         )
       }
 
@@ -404,7 +404,7 @@
             text(
               size: 0.75em * scale-factor,
               fill: ref-color,
-              font: "Courier New",
+              font: "DejaVu Sans Mono",
               ref-label,
             ),
           )
