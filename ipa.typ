@@ -495,13 +495,15 @@
 
 #let ipa(input) = {
   let rendered = ipa-to-unicode(input)
+  // Word joiner: never break a line right after an opening slash (e.g., "/ | ɥ/")
+  let shown = if rendered.starts-with("/") { "/\u{2060}" + rendered.slice(1) } else { rendered }
   context {
     metadata(rendered)
     let font = phonokit-font.get()
     // The font may be a name, a fallback list, or (name: .., covers: ..) dicts
     let primary = if type(font) == array { font.first() } else { font }
     if type(primary) == dictionary { primary = primary.name }
-    let body = text(font: font, rendered)
+    let body = text(font: font, shown)
     if lower(primary).starts-with("charis") { charis-spacing(body) } else { body }
   }
 }
