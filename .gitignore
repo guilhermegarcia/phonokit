@@ -28,5 +28,6 @@ extras/*
 !extras/*.pdf
 !extras/*.csv
 
-# Local test scripts
-tests/
+# tytanic test output (refs are tracked)
+tests/**/out/
+tests/**/diff/

@@ -3,7 +3,7 @@ categories = ["utility", "text", "visualization"]
 disciplines = ["linguistics"]
 name = "phonokit"
 version = "0.6.1"
-exclude = ["gallery/"]
+exclude = ["gallery/", "tests/", ".github/"]
 keywords = [
   "linguistics",
   "phonology",
@@ -21,3 +21,7 @@ license = "MIT"
 description = "A toolkit to create phonological representations"
 repository = "https://github.com/guilhermegarcia/phonokit"
 homepage = "https://gdgarcia.ca/phonokit"
+
+[tool.tytanic]
+default.max-delta = 1
+default.max-deviations = 0
