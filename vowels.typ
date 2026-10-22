@@ -546,13 +546,30 @@
       }
     }
 
-    // White mask circles: cut a gap in the grid lines behind every vowel
-    for vp in vowel-positions {
+    // Shifted vowels: (vowel, position, highlighted)
+    let shift-positions = ()
+    for s in shift {
+      let vowel = ipa-to-unicode(s.at(0))
+      let x-off = s.at(1)
+      let y-off = s.at(2)
+      if vowel in vowel-data {
+        let base-pos = get-vowel-position(vowel-data.at(vowel), trapezoid, scaled-width, scaled-height, scaled-offset)
+        shift-positions.push((
+          vowel: vowel,
+          pos: (base-pos.at(0) + x-off, base-pos.at(1) + y-off),
+          highlighted: highlight-shifts.any(h => h.at(0) == vowel and h.at(1) == x-off and h.at(2) == y-off),
+        ))
+      }
+    }
+
+    // White mask circles: cut a gap in the grid lines behind every vowel, shifted ones included.
+    // All masks go before any highlight, so a mask never covers a neighbouring highlight circle.
+    for vp in vowel-positions + shift-positions {
       circle(vp.pos, radius: scaled-circle-radius, fill: white, stroke: none)
     }
 
     // Highlight circles: above the masks, below the minimal-pair bullets and symbols
-    for vp in vowel-positions.filter(vp => vp.vowel in highlight-set) {
+    for vp in vowel-positions.filter(vp => vp.vowel in highlight-set) + shift-positions.filter(sp => sp.highlighted) {
       circle(vp.pos, radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
     }
 
@@ -586,20 +603,9 @@
       content(np.pos, context text(size: scaled-nasal-font-size, font: phonokit-font.get(), fill: nasal-color, top-edge: "x-height", bottom-edge: "baseline", np.label))
     }
 
-    // Draw shifted vowels (on top of regular vowels)
-    for s in shift {
-      let vowel = ipa-to-unicode(s.at(0))
-      let x-off = s.at(1)
-      let y-off = s.at(2)
-      if vowel in vowel-data {
-        let base-pos = get-vowel-position(vowel-data.at(vowel), trapezoid, scaled-width, scaled-height, scaled-offset)
-        let shifted-pos = (base-pos.at(0) + x-off, base-pos.at(1) + y-off)
-        circle(shifted-pos, radius: scaled-circle-radius, fill: white, stroke: none)
-        if highlight-shifts.any(h => h.at(0) == vowel and h.at(1) == x-off and h.at(2) == y-off) {
-          circle(shifted-pos, radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
-        }
-        content(shifted-pos, context shifted-vowel-text(resolved-shift-size, vowel))
-      }
+    // Draw shifted vowel symbols (on top of regular vowels)
+    for sp in shift-positions {
+      content(sp.pos, context shifted-vowel-text(resolved-shift-size, sp.vowel))
     }
   })
 }
