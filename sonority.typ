@@ -196,8 +196,6 @@
 // Main sonority plotting function
 #let sonority(
   word, // Tipa-style string
-  syl: none, // (Legacy/unused directly in calculation now, kept for API compatibility)
-  stressed: none, // Index of stressed syllable
   box-size: 0.8, // Size of phoneme boxes
   scale: 1.0, // Overall scale
   y-range: (0, 17), // Sonority range for y-axis (Parker's scale maxes at 17)

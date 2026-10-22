@@ -80,8 +80,6 @@
 ///
 /// Arguments:
 /// - word (string): Phonemic string in tipa-style (use "." for syllable boundaries)
-/// - syl (none): Legacy parameter, kept for API compatibility
-/// - stressed (int, optional): Index of stressed syllable (default: none)
 /// - box-size (float): Size of individual phoneme boxes (default: 0.8)
 /// - scale (float): Overall scale factor for the diagram (default: 1.0)
 /// - y-range (array): Vertical axis range for plotting (default: (0, 17), matching Parker's scale)
