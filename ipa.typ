@@ -377,6 +377,24 @@
     }
   }
 
+  // Chao tone letters: digits 1-5 (5 = highest), e.g. "ma \tone{51}" → ma˥˩.
+  // \ltone gives left-stem bars; \ntone and \nltone give the dotted (neutral)
+  // right- and left-stem bars. Charis joins sequences into contour glyphs.
+  let tone_letters = (
+    "tone": ("˩", "˨", "˧", "˦", "˥"),
+    "ltone": ("꜖", "꜕", "꜔", "꜓", "꜒"),
+    "ntone": ("꜌", "꜋", "꜊", "꜉", "꜈"),
+    "nltone": ("꜑", "꜐", "꜏", "꜎", "꜍"),
+  )
+  let input = input.replace(regex("\\\\(tone|ltone|ntone|nltone)\\{([^}]*)\\}"), m => {
+    let (kind, levels) = m.captures
+    assert(
+      levels.len() > 0 and levels.clusters().all(d => d in ("1", "2", "3", "4", "5")),
+      message: "\\" + kind + "{" + levels + "}: tone levels must be digits 1-5",
+    )
+    levels.clusters().map(d => tone_letters.at(kind).at(int(d) - 1)).join()
+  })
+
   // Split by spaces and process each token
   let tokens = input.split(" ")
   let result = ""
