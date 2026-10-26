@@ -453,6 +453,15 @@
 // Main IPA function: converts tipa-style notation to IPA
 #import "_config.typ": phonokit-font
 
+// SIL fonts (Charis and others) join a level tone pair (˥˥) into one bar only
+// at the end of a text run: box tone sequences so ma˥˥ ma˧˥ merges like a
+// final ma˥˥. Word joiners keep a line from breaking at the box (ma | ˥˥).
+// Fonts without contour support are unaffected
+#let tone-runs(body) = {
+  show regex("[\u{02E5}-\u{02E9}\u{A708}-\u{A716}]+"): it => "\u{2060}" + box(it) + "\u{2060}"
+  body
+}
+
 // Spacing fixes tuned by eye for Charis; other fonts keep their native spacing
 #let charis-spacing(body) = {
   // ʲ's tail curls left under the base glyph (pʲ, bʲ): nudge it right
@@ -521,7 +530,7 @@
     // The font may be a name, a fallback list, or (name: .., covers: ..) dicts
     let primary = if type(font) == array { font.first() } else { font }
     if type(primary) == dictionary { primary = primary.name }
-    let body = text(font: font, shown)
+    let body = tone-runs(text(font: font, shown))
     if lower(primary).starts-with("charis") { charis-spacing(body) } else { body }
   }
 }

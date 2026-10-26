@@ -407,8 +407,8 @@ As can be seen in @fig-ipa-examples, symbols introduced by two backslashes `\\` 
     [_Pick, chat, please_],
 
     [`#ipa("'lIt \\v l \\s 'b2R \\schwar ,flaI")`], ipa("'lIt \\v l \\s 'b2R \\schwar ,flaI"), [_Little butterfly_],
-    [`#ipa("ma \\tone{55} \\s ma \\tone{35}")`], ipa("ma \\tone{55} \\s ma \\tone{35}"), [_Mandarin tones 1--2_],
-    [`#ipa("ma \\tone{214} \\s ma \\tone{51}")`], ipa("ma \\tone{214} \\s ma \\tone{51}"), [_Mandarin tones 3--4_],
+    [`#ipa("/ma \\tone{55} \\s ma \\tone{35}/")`], ipa("/ma \\tone{55} \\s ma \\tone{35}/"), [_Mandarin tones 1--2_],
+    [`#ipa("/ma \\tone{214} \\s ma \\tone{51}/")`], ipa("/ma \\tone{214} \\s ma \\tone{51}/"), [_Mandarin tones 3--4_],
   ),
 ) <fig-ipa-examples>
 
@@ -3127,7 +3127,7 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 #pagebreak()
 
 #figure(
-  caption: [Tone letters: levels 5 (highest) to 1 (lowest), then sample contours. Dotted letters are not part of the IPA. Charis joins contours of undotted letters only.],
+  caption: [Tone letters: levels 5 (highest) to 1 (lowest), then sample contours. Dotted letters are not part of the IPA.],
   text(size: 9pt, table(
     columns: 16,
     inset: 4.6pt,

@@ -1,4 +1,4 @@
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": ipa-to-unicode, tone-runs
 #import "_config.typ": phonokit-font
 
 // Helper function to parse string-based input like "te2.ne1.see3"
@@ -50,7 +50,7 @@
 
         // If ipa mode is enabled and text-content is a string, convert it
         if ipa and type(text-content) == str {
-          text-content = context text(font: phonokit-font.get(), ipa-to-unicode(text-content))
+          text-content = context tone-runs(text(font: phonokit-font.get(), ipa-to-unicode(text-content)))
         }
 
         data.push((text: text-content, level: level))
