@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # tytanic 0.4.1 targets Typst 0.15.1
       - name: Install tytanic
-        uses: taiki-e/cache-cargo-install-action@v2
+        uses: taiki-e/cache-cargo-install-action@v3
         with:
           tool: tytanic@0.4.1
 
@@ -24,7 +24,7 @@ jobs:
         run: tt run --no-fail-fast --font-path tests/fonts
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: artifacts
