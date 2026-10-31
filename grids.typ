@@ -1,4 +1,4 @@
-#import "ipa.typ": ipa-to-unicode, tone-runs
+#import "ipa.typ": ipa-to-unicode, tone-letters, tone-runs
 #import "_config.typ": phonokit-font
 
 // Helper function to parse string-based input like "te2.ne1.see3"
@@ -25,22 +25,30 @@
 // Main metrical grid function - creates metrical grid representations
 // Supports two input formats:
 //
-// 1. String format (simple, not IPA-compatible):
+// 1. String format (plain text unless ipa: true):
 //    met-grid("te2.ne1.see3.Ti3.tans1")
+//    met-grid("te2.ne1.si3.Ti3.t\\~ans1", ipa: true)  // Converts syllables to IPA
 //    Format: syllable + level number, separated by dots
 //
-// 2. Array format (IPA-compatible):
-//    met-grid(("te", 2), ("ne", 1), ("see", 3))
-//    met-grid(("te", 2), ("ne", 1), ("see", 3), ipa: true)  // Auto-converts strings to IPA
+// 2. Array format (IPA by default):
+//    met-grid(("te", 2), ("ne", 1), ("see", 3))  // Auto-converts strings to IPA
+//    met-grid(("te", 2), ("ne", 1), ("see", 3), ipa: false)
 //    Format: array of (content, level) tuples
 //
-#let met-grid(..args, ipa: true) = {
+// ipa: auto converts arrays but not strings. Tone commands (\tone{51}) are
+// converted in both formats, even with ipa: false
+//
+#let met-grid(..args, ipa: auto) = {
+  assert(ipa == auto or type(ipa) == bool, message: "met-grid: ipa must be auto, true or false")
   let data = ()
 
   // Determine input format
   if args.pos().len() == 1 and type(args.pos().at(0)) == str {
     // String format: "te2.ne1.see3"
-    data = parse-grid-string(args.pos().at(0))
+    data = parse-grid-string(args.pos().at(0)).map(item => {
+      let syllable = if ipa == true { ipa-to-unicode(item.text) } else { tone-letters(item.text) }
+      (text: context tone-runs(text(font: phonokit-font.get(), syllable)), level: item.level)
+    })
   } else {
     // Array format: ("te", 2), ("ne", 1), ...
     for arg in args.pos() {
@@ -49,8 +57,9 @@
         let level = arg.at(1)
 
         // If ipa mode is enabled and text-content is a string, convert it
-        if ipa and type(text-content) == str {
-          text-content = context tone-runs(text(font: phonokit-font.get(), ipa-to-unicode(text-content)))
+        if type(text-content) == str {
+          let converted = if ipa != false { ipa-to-unicode(text-content) } else { tone-letters(text-content) }
+          text-content = context tone-runs(text(font: phonokit-font.get(), converted))
         }
 
         data.push((text: text-content, level: level))

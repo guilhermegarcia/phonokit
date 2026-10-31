@@ -46,7 +46,7 @@
 ///
 /// Example:
 /// ```
-/// #import "@preview/phonokit:0.7.0": *
+/// #import "@preview/phonokit:0.8.0": *
 /// #phonokit-init(font: "Libertinus Serif")
 /// ```
 #let phonokit-init = phonokit-init
@@ -213,6 +213,7 @@
 /// - symbol (array): Domain labels top-down: (σ) (default: ("σ",))
 /// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
 /// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
+/// - empty-nucleus (bool): Draw a syllable without a vowel or syllabic consonant with an empty N instead of a warning, as in Government Phonology/CVCV analyses (default: false)
 ///
 /// Returns: CeTZ drawing of syllable structure
 ///
@@ -250,6 +251,7 @@
 /// - symbol (array): Domain labels top-down: (Σ, σ) (default: ("Σ", "σ"))
 /// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
 /// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
+/// - empty-nucleus (bool): Draw a syllable without a vowel or syllabic consonant with an empty N instead of a warning, as in Government Phonology/CVCV analyses (default: false)
 ///
 /// Returns: CeTZ drawing of foot structure
 ///
@@ -284,12 +286,13 @@
 /// Stressed syllables are marked with an apostrophe before the syllable.
 ///
 /// Arguments:
-/// - input (string): Syllables with optional foot markers in parentheses
-/// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
+/// - input (string): Syllables with optional foot markers in parentheses; ' (primary) or , (secondary) marks the head of each foot
+/// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment when no foot, or more than one, has primary stress ' (default: "R")
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (ω, Σ, σ) (default: ("ω", "Σ", "σ"))
 /// - distance (array, optional): Per-level vertical spacing adjustments as (level, factor) tuples, e.g. `((0, 1.2),)`; the factor scales the line between two levels, which never gets shorter than a small visible minimum (default: none)
 /// - spacing (string): "auto" adapts vertical spacing to the tree (lines never get shorter going up; wide branches get more height); "fixed" uses constant spacing so trees with the same levels align (default: "auto")
+/// - empty-nucleus (bool): Draw a syllable without a vowel or syllabic consonant with an empty N instead of a warning, as in Government Phonology/CVCV analyses (default: false)
 ///
 /// Returns: CeTZ drawing of prosodic structure
 ///
@@ -306,8 +309,8 @@
 /// Stressed syllables are marked with an apostrophe before the syllable.
 ///
 /// Arguments:
-/// - input (string): Syllables with optional foot markers in parentheses
-/// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment (default: "R")
+/// - input (string): Syllables with optional foot markers in parentheses; ' (primary) or , (secondary) marks the head of each foot
+/// - foot (string): "R" (right-aligned) or "L" (left-aligned) for PWd alignment when no foot, or more than one, has primary stress ' (default: "R")
 /// - coda (bool): Whether codas contribute to weight (default: false)
 /// - scale (float): Scale factor for the diagram (default: 1.0)
 /// - symbol (array): Domain labels top-down: (ω, Σ, σ, μ) (default: ("ω", "Σ", "σ", "μ"))
@@ -328,29 +331,31 @@
 /// metrical prominence tier.
 ///
 /// Supports two input formats:
-/// 1. String format (simple, but not IPA-compatible):
+/// 1. String format (plain text unless `ipa: true`):
 ///    - Syllables separated by dots, each ending with a stress level number
-/// 2. Array format (IPA-compatible):
+/// 2. Array format (IPA by default):
 ///    - Array of (syllable, level) tuples
 ///
 /// Arguments:
 /// - ..args: Either a single string or multiple (syllable, level) tuples
 ///   - String format: syllables separated by dots, each ending with stress level (e.g., "te2.ne1.see3")
 ///   - Tuple format: pairs of (syllable, level) passed as separate arguments
-/// - ipa (bool): Automatically convert strings to IPA notation (default: true)
+/// - ipa (auto or bool): Convert syllables to IPA notation. `auto` (default)
+///   converts tuples but not strings. Tone commands (`\\tone{51}`) are always converted
 ///
 /// Returns: Table showing syllables with stacked × marks indicating stress levels
 ///
 /// Examples:
 /// - `#met-grid("bu3.tter1.fly2")` - String format
+/// - `#met-grid("ma\\tone{55}3.ma\\tone{35}1", ipa: true)` - String format with IPA
 /// - `#met-grid(
 ///          ("b2", 3),
 ///          ("R \\schwar", 1),
 ///          ("flaI", 2),
 ///        )` - Array format
 ///
-/// Note: The string format uses numbers to indicate stress levels, which conflicts
-/// with IPA numeric symbols. For IPA compatibility, use the array format.
+/// Note: The string format reads only the last character of each syllable as
+/// its stress level, so levels go from 1 to 9.
 #let met-grid = met-grid
 
 
@@ -920,16 +925,24 @@
 /// - nodes (array): Array of dictionaries describing nodes. Each node needs
 ///   `at: (x, y)` and `label:`. When `label` is a string, it also serves as
 ///   the node identifier by default. Use `id:` only when labels are duplicated
-///   or when the visible label should differ from the reference key.
+///   or when the visible label should differ from the reference key. A node
+///   can also set `fill` (background), `radius`, `size` (font size), and
+///   `text-fill`.
 /// - arrows (array): Array of arrow specs. Each arrow can be a `(from, to)`
 ///   tuple or a dictionary with `from:` and `to:`. Endpoints can be node ids
-///   or raw coordinate pairs.
+///   or raw coordinate pairs. Arrows stop short of each label (and of its
+///   fill or highlight). A dictionary can also set `curved`, `curve`, `ctrl`,
+///   `color`, `width`, `style`, `arrow-size`, and `start-gap`/`end-gap`: the
+///   space between the label's edge and the arrow (default: a small margin)
 /// - highlights (array): Node ids or coordinate pairs to highlight with a
 ///   background circle (default: ())
 /// - node-size (length): Default IPA font size for nodes (default: 2.2em)
 /// - text-fill (color): Default node color (default: black)
-/// - highlight-fill (fill): Default node/highlight fill (default: `luma(230)`)
-/// - highlight-radius (float): Default circle radius in canvas units (default: 0.42)
+/// - highlight-fill (fill): Fill for `highlights` (default: `luma(230)`). To shade a single
+///   node in its own color, give that node `fill:` instead
+/// - highlight-radius (float): Circle radius in canvas units for highlights, and for filled
+///   nodes without their own `radius:` (default: 0.42). A label wider than the circle gets a
+///   rounded box that covers all of its ink instead
 /// - arrow-color (color): Default arrow color (default: black)
 /// - arrow-style (str): Default arrow style: `"solid"`, `"dashed"`, or `"dotted"`
 /// - arrow-width (length): Default arrow stroke width (default: 0.8pt)

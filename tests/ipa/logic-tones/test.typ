@@ -22,7 +22,15 @@
 #assert.eq(ipa-to-unicode("ma\\tone{55} \\s ma\\tone{35}"), "ma˥˥ ma˧˥")
 #assert.eq(ipa-to-unicode("\\~ a\\tone{3}"), "a\u{303}˧")
 #assert.eq(ipa-to-unicode("t \\h a\\tone{51}"), "tʰa˥˩")
-#assert.eq(ipa-to-unicode("ta\\tone{2}\\ntone{2}"), "ta˨꜋")
+#assert.eq(ipa-to-unicode("ta\\tone{2}\\ntone{2}"), "ta˨\u{200C}꜋")
+
+// Each command is one tone: adjacent commands (spaces aside) are kept apart by a
+// zero-width non-joiner; one command, or tones typed as raw letters, stay one run
+#assert.eq(ipa-to-unicode("ma \\tone{214}\\tone{214}"), "ma˨˩˦\u{200C}˨˩˦")
+#assert.eq(ipa-to-unicode("ma \\tone{55} \\tone{11}"), "ma˥˥\u{200C}˩˩")
+#assert.eq(ipa-to-unicode("ma \\tone{5511}"), "ma˥˥˩˩")
+#assert.eq(ipa-to-unicode("ma˨˩˦˨˩˦"), "ma˨˩˦˨˩˦")
+#assert.eq(ipa-to-unicode("ma \\tone{55} \\s ma"), "ma˥˥ ma")
 
 // Raw Unicode tone letters pass through unchanged
 #assert.eq(ipa-to-unicode("ma˥˩"), "ma˥˩")

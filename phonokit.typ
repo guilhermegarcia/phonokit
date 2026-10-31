@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.7.0`]
+#let version = text(size: 0.8em)[`v 0.8.0`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.8.0` - Tones (#box(ipa("[ma \\tone{51}]")), accents), #box(ipa("\\apicals")) #box(ipa("\\apicalr")), `,` stress, `empty-nucleus`; `#sound-shift()` labels; fixes\
 `0.7.0` - `#consonants()`: #box(ipa("/ɥ/")), #box(ipa("/ʍ/")), alveolo-palatal column, renumbered `delete-cols`; fixes\
 `0.6.1` - Prosodic trees: syllabic consonants on descenders (e.g., ŋ̍) go in the nucleus\
 `0.6.0` - New function `#vowels-3d()`: rotatable 3D vowel space\
@@ -376,7 +377,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.7.0": *
+  #import "@preview/phonokit:0.8.0": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -412,7 +413,11 @@ As can be seen in @fig-ipa-examples, symbols introduced by two backslashes `\\` 
   ),
 ) <fig-ipa-examples>
 
-Tones are written with Chao's tone letters @Chao1930. As in `tipa`, `\\tone{}` takes pitch levels as digits from 1 (lowest) to 5 (highest): `\\tone{5}` gives #ipa("\\tone{5}"), and `\\tone{214}` gives the contour #ipa("\\tone{214}"). Use `\\ltone{}` for left-stem tone letters (#ipa("\\ltone{15}")), which mark tone sandhi. The dotted letters from `\\ntone{}` and `\\nltone{}` (#ipa("\\ntone{3}"), #ipa("\\nltone{3}")) are not part of the IPA; some transcribers use them for neutral tone. Like other commands, tone letters are separated from the rest of the input by spaces (e.g., `#ipa("ma \\tone{51}")`). Contours are drawn by the font: Charis joins a sequence of tone letters into a single glyph, but other fonts may print the letters one by one.
+Tones are written with Chao's tone letters @Chao1930. As in `tipa`, `\\tone{}` takes pitch levels as digits from 1 (lowest) to 5 (highest): `\\tone{5}` gives #ipa("\\tone{5}"), and `\\tone{214}` gives the contour #ipa("\\tone{214}"). Use `\\ltone{}` for left-stem tone letters (#ipa("\\ltone{15}")), which are often used for tone sandhi. The dotted letters from `\\ntone{}` and `\\nltone{}` (#ipa("\\ntone{3}"), #ipa("\\nltone{3}")) are not part of the IPA; some transcribers use them for neutral tone. Like other commands, tone letters are separated from the rest of the input by spaces (e.g., `#ipa("ma \\tone{51}")`). Contours are drawn by the font: Charis joins a sequence of tone letters into a single glyph, but other fonts may print the letters one by one. @app-tones summarizes how tones work across #logo.
+
+Tones can also be marked with accents over the vowel. Accents can be typed directly (`#ipa("tá tǎ")`), also on shortcuts (`É` gives #ipa("É")), or written with commands that go before the vowel, like `\\~`: `\\'` (high, #ipa("\\' a")), #raw("\\\\`") (low, #ipa("\\` a")), `\\=` (mid, #ipa("\\= a")), `\\falling` or `\\^` (#ipa("\\^ a")), `\\rising` (#ipa("\\rising a")), `\\doubleacute` (extra high, #ipa("\\doubleacute a")) and `\\doublegrave` or `\\textdoublegrave` (extra low, #ipa("\\doublegrave a")). In prosodic representations, accented vowels are nuclei like any other vowel, and `\\'` is not read as a stress mark.
+
+For Chinese languages, the sinological apical vowels are also available, although they are not part of the IPA: `\\apicals` gives #ipa("\\apicals") (e.g., #ipa("[s \\apicals \\tone{51}]")) and `\\apicalr` gives #ipa("\\apicalr") (e.g., #ipa("[ \\:s \\apicalr \\tone{51}]")). The TIPA-style names `\\textlhtlongi` and `\\textrhtlongi` work too. Both symbols count as nuclei in prosodic representations, but they are not plotted by `#vowels()`. Some analyses treat these sounds as syllabic consonants instead (see @app-tones).
 
 See @sec-ipa for a reference table with the main IPA symbols available. For a more comprehensive list, visit the package's repository and download `ipa_reference.pdf` inside the `extras` directory.
 
@@ -1061,6 +1066,31 @@ Vowel length is also represented in both `#syllable()` and `#mora()`, as can be 
   ]],
 )
 
+Tone letters (@sec-ipa-trans) can be added to any syllable. Since Chao letters describe the syllable as a whole, all prosodic representations show them as a subscript on #sym.sigma, wherever they were typed: `man \\tone{51}` and `ma \\tone{51}n` give the same tree. Tone letters are never segments, so they never project a mora (@fig-syl-tone and @fig-mora-tone). See @app-tones for tones in other functions.
+
+#grid(
+  columns: (1fr, 1.3fr),
+  [#align(center + bottom)[
+    #figure(
+      caption: [`#syllable("man \\tone{51}")`],
+      syllable("man \\tone{51}", scale: 0.9),
+    ) <fig-syl-tone>
+  ]],
+  [#align(center + bottom)[
+    #figure(
+      caption: [`#mora("man \\tone{51}", coda: true)`],
+      mora("man \\tone{51}", coda: true, scale: 0.9),
+    ) <fig-mora-tone>
+  ]],
+)
+
+Every syllable needs a nucleus: a vowel or a syllabic consonant (e.g., `\\v m`). If none is found, the prosodic functions show a warning instead of a tree. Analyses with empty nuclei, as in Government Phonology @kaye1990constituent, can use `empty-nucleus: true` in `#syllable()`, `#foot()` and `#word()`, which draws an N with no segment under it. @fig-empty-nucleus shows French _petit_ #ipa("[pti]") with an empty nucleus in its first syllable. The moraic functions don't have this option.
+
+#figure(
+  caption: [`#foot("p.'ti", empty-nucleus: true)`],
+  foot("p.'ti", empty-nucleus: true, scale: 0.9),
+) <fig-empty-nucleus>
+
 
 The dimensions of each representation adjust as a function of how many segments are found in the input. As such, more complex onsets, nuclei or codas result in wider representations that respect a safe and consistent between-segment distance. @fig-syl3 illustrates this with an extreme example.
 
@@ -1099,7 +1129,7 @@ We often need to adjust the size of a representation as a whole. But doing so ca
 
 == Feet
 
-Next, we examine metrical feet (@fig-ft1 and @fig-ft2). These functions are designed to deal with a single foot where all syllables are footed by definition, since unfooted syllables have nowhere to attach to (see @sec-pwd). A period `.` is used in the code to indicate syllabification and a single apostrophe `'` is used to indicate which syllable is the head of the foot. This allows us to easily create trochees and iambs. Naturally, you are free to generate non-binary feet, as the function can handle them as well (dactyls in @fig-ft3 and @fig-ft4).
+Next, we examine metrical feet (@fig-ft1 and @fig-ft2). These functions are designed to deal with a single foot where all syllables are footed by definition, since unfooted syllables have nowhere to attach to (see @sec-pwd). A period `.` is used in the code to indicate syllabification and a single apostrophe `'` is used to indicate which syllable is the head of the foot (a comma `,` for secondary stress works too). A foot has a single head, so marking two of its syllables gives a warning, as does a stress mark anywhere other than the start of a syllable. This allows us to easily create trochees and iambs. Naturally, you are free to generate non-binary feet, as the function can handle them as well (dactyls in @fig-ft3 and @fig-ft4).
 
 #v(2em)
 #important(title: "Can I choose my own symbols?")[
@@ -1169,7 +1199,7 @@ Extreme cases are important to test how adaptable the function is when it comes 
 
 == Prosodic words <sec-pwd>
 
-Finally, we arrive at prosodic words (PWd), which bring together syllables and feet. This is where the user has more options, given the metrical parameters involved. Parentheses `()` are used to define feet, which means that any syllable _outside_ the foot will be linked directly to the PWd. Next, an apostrophe `'` symbolizing stress (both primary _and_ secondary) is used to indicate the head of each foot. Finally, the argument `foot: "R"` or `foot: "L"` is used to determine which foot in the PWd contains the primary stress in the word (in cases where more than one foot is present in a given PWd).
+Finally, we arrive at prosodic words (PWd), which bring together syllables and feet. This is where the user has more options, given the metrical parameters involved. Parentheses `()` are used to define feet, which means that any syllable _outside_ the foot will be linked directly to the PWd. Next, an apostrophe `'` (primary stress) or a comma `,` (secondary stress) is used to indicate the head of each foot. The foot that contains `'` is the head of the PWd. If no foot contains `'`, or if more than one does, the argument `foot: "R"` or `foot: "L"` determines which foot contains the primary stress in the word (@fig-wd4 and @fig-wd3). For example, `#word("(,po.Ra).('ma.pa)", foot: "L")` still has its PWd head on the second foot.
 
 
 
@@ -1301,6 +1331,8 @@ The function `#met-grid()` allows you to create a metrical grid using $times$ to
   ```,
 ) <fig-grid>
 
+By default, tuples are converted to IPA and strings are not. Use `ipa: true` to convert strings as well (e.g., `#met-grid("Si3.t \\h a1", ipa: true)`), or `ipa: false` to keep tuples as typed. Tone letters are converted in both formats, so `#met-grid("ma\\tone{55}2.ma\\tone{35}1")` shows #ipa("ma \\tone{55}") and #ipa("ma \\tone{35}") under the grid. With `ipa: false` and in strings without `ipa: true`, spaces are kept as typed, so write `ma\\tone{55}`, not `ma \\tone{55}` (see @app-tones).
+
 
 
 
@@ -1388,7 +1420,7 @@ Multiple links are easy to implement. @fig-metaphony shows an example of metapho
 
 == Tones
 
-One of the arguments in `#autoseg()` is `tone` (`true` or `false`). This allows us to "flip" the representation vertically to show tones above the segmental tier. Take a look at @fig-ebe, which shows a case of low tone spreading without delinking in Nupe @zsiga2013sounds. We can easily add multiple instances of the function to represent processes with relatively concise code.
+One of the arguments in `#autoseg()` is `tone` (`true` or `false`). This allows us to "flip" the representation vertically to show tones above the segmental tier. Take a look at @fig-ebe, which shows a case of low tone spreading without delinking in Nupe @zsiga2013sounds. We can easily add multiple instances of the function to represent processes with relatively concise code. Tone labels are plain text (e.g., `H`, `L`), but tone commands are converted, so `features: ("\\tone{5}", "\\tone{1}")` gives Chao letters on the tonal tier (see @app-tones).
 
 
 #grid(
@@ -2385,7 +2417,9 @@ One nice feature of `#tableau()` is that the function automatically shades cells
 ) <tab-letters>
 
 
-Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[This also applies to other constraint-based functions in the package, discussed later in this manual.] You can pass prosodic function calls as content using square brackets, e.g., `[#syllable("mat")]`. This is the recommended approach because it avoids conflicts with the single quote character, which is also used for stress marking in prosodic notation. @tab-prosody shows an example with `#word()` candidates. When passing content directly, you control the scale via the function's own `scale` argument (this is key because prosodic structures are often too large for a tableau). @tab-prosody also shows the `gloss` argument in case more information is needed for the input. This argument requires two strings (orthographic form and translation).
+Additionally, `#tableau()` supports prosodic structures as candidates.#footnote[This also applies to other constraint-based functions in the package, discussed later in this manual.] You can pass prosodic function calls as content using square brackets, e.g., `[#syllable("mat")]`. This is the recommended approach, since you can then use any of the function's arguments (e.g., `scale` or `coda`). @tab-prosody shows an example with `#word()` candidates. When passing content directly, you control the scale via the function's own `scale` argument (this is key because prosodic structures are often too large for a tableau). @tab-prosody also shows the `gloss` argument in case more information is needed for the input. This argument requires two strings (orthographic form and translation).
+
+Prosodic calls can also be written inside a string candidate, e.g., `"#word('('pra.to)')"`, in which case they are drawn at `prosody-scale` (0.5 by default) and take no other arguments. As of version `0.8.0`, stress marks work in this form too. If a string candidate is ill-formed (e.g., a foot with two stressed syllables, or a syllable without a nucleus), the tableau shows #text(fill: red, weight: "bold")[Ill-formed: see manual] in its place, so that a long warning doesn't stretch the tableau. The same call outside a tableau shows the full warning, which explains the problem (see @sec-prosody).
 
 
 #figure(
@@ -2828,7 +2862,7 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 
 #figure(
   caption: [IPA Reference Guide (*only main symbols shown*)],
-  text(size: 9pt, table(
+  text(size: 8.2pt, table(
     columns: 16,
     inset: 4.6pt,
     align: (right, left) * 8,
@@ -3086,7 +3120,10 @@ Typst is still in its infancy, and I believe most linguists do not know about it
     ipa("\\epsilonr"),
     raw("\\\\closeepsilon"),
     ipa("\\closeepsilon"),
-    table.cell(colspan: 4)[],
+    raw("\\\\apicals"),
+    ipa("\\apicals"),
+    raw("\\\\apicalr"),
+    ipa("\\apicalr"),
     // --- DIACRITICS & STRESS ---
     table.cell(colspan: 16, align: center)[_*Diacritics, suprasegmentals, archiphonemes*_],
     raw("'ta"),
@@ -3127,7 +3164,7 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 #pagebreak()
 
 #figure(
-  caption: [Tone letters: levels 5 (highest) to 1 (lowest), then sample contours. Dotted letters are not part of the IPA.],
+  caption: [Tone letters: levels 5 (highest) to 1 (lowest), then sample contours. Dotted letters are not part of the IPA. Tone accents go before the vowel.],
   text(size: 9pt, table(
     columns: 16,
     inset: 4.6pt,
@@ -3202,8 +3239,25 @@ Typst is still in its infancy, and I believe most linguists do not know about it
     ipa("\\nltone{51}"),
     raw("\\\\nltone{214}"),
     ipa("\\nltone{214}"),
+    table.cell(colspan: 16, align: center)[_*Tone accents*_],
+    raw("\\\\' a"),
+    ipa("\\' a"),
+    raw("\\\\` a"),
+    ipa("\\` a"),
+    raw("\\\\= a"),
+    ipa("\\= a"),
+    raw("\\\\^ a"),
+    ipa("\\^ a"),
+    raw("\\\\falling a"),
+    ipa("\\falling a"),
+    raw("\\\\rising a"),
+    ipa("\\rising a"),
+    raw("\\\\doubleacute a"),
+    ipa("\\doubleacute a"),
+    raw("\\\\doublegrave a"),
+    ipa("\\doublegrave a"),
   )),
-)
+) <tab-tones>
 
 // #show raw.where(block: false): it => {
 //   let content = if it.lang == none and it.text.starts-with("#") {
@@ -3223,6 +3277,88 @@ Typst is still in its infancy, and I believe most linguists do not know about it
 //
 
 #set page(flipped: false)
+
+= Tones <app-tones>
+
+As of version `0.8.0`, #logo supports tones, both as Chao tone letters @Chao1930 and as accents over vowels. This appendix brings together what is spread across the manual: how to type tones, and what each function does with them. All available tone letters are listed in @tab-tones.
+
+== Tone letters
+
+Tone letters are typed with `\\tone{}`, which takes pitch levels as digits from 1 (lowest) to 5 (highest): `#ipa("ma \\tone{51}")` gives #ipa("ma \\tone{51}"). A contour can have any number of levels (e.g., `\\tone{214}`, `\\tone{5353}`). Left-stem letters come from `\\ltone{}` (#ipa("\\ltone{15}")). In Chao's original system, the side of the stem was meaningful: a curve to the left of the stem stood for a toneme, and the same curve to its right for the tone's phonetic value #cite(<Chao1930>, supplement: "p. 25"). Today, left-stem letters are often used for tones that result from sandhi. The dotted letters from `\\ntone{}` and `\\nltone{}` (#ipa("\\ntone{2}"), #ipa("\\nltone{2}")) are not part of the IPA, but some transcribers use them for neutral tone. Any digit other than 1--5 gives an error.
+
+Each command is one tone. Two commands in a row are shown as two tones, with or without a space between them, while a single command is always one contour:
+
+#align(
+  center,
+)[`\\tone{214}\\tone{214}` gives #ipa("\\tone{214}\\tone{214}") #h(3em) `\\tone{214214}` gives #ipa("\\tone{214214}")]
+
+The first case is what you want in a constraint name such as `*\\tone{214}\\tone{214}`, which penalizes two third tones in a row in Mandarin. Tone letters can also be typed directly (e.g., `#ipa("ma˥˩")`), in which case a sequence of letters is read as one contour.
+
+Contours are drawn by the font. SIL fonts such as Charis, the default font in #logo, join a sequence of tone letters into a single glyph. Other fonts may print the letters one by one (see @sec-font).
+
+== Tone accents
+
+Tones can also be marked with accents. Accented vowels can be typed directly (`#ipa("tá tà")`), and this works with shortcuts too: `É` gives #ipa("É"), and `Ó` gives #ipa("Ó"). The alternative is to use one of the commands in @tab-accents, which go before the vowel, like `\\~`. Commands can be combined with other diacritics on the same symbol: #raw("\\\\` \\\\v m") gives #ipa("\\` \\v m"), a syllabic nasal with a low tone. TIPA uses `\\H` for the double acute, but in #logo `\\H` is an archiphoneme (@sec-ipa), so the extra tones use `\\doubleacute` and `\\doublegrave` instead. As in the IPA, the accents are not iconic: the acute means high even though it looks like a rise, and rising and falling tones have marks of their own, as in #ipa("\\rising e") and #ipa("\\^ e") #cite(<ipa1999handbook>, supplement: "p. 14").
+
+#figure(
+  caption: [Tone accents (the vowel follows the command)],
+  table(
+    columns: 3,
+    align: (left, center, left),
+    stroke: 0.5pt + luma(200),
+    table.header([*Command*], [*Output*], [*Tone*]),
+    [`\\'`], ipa("\\' a"), [high],
+    [#raw("\\\\`")], ipa("\\` a"), [low],
+    [`\\=`], ipa("\\= a"), [mid],
+    [`\\falling` or `\\^`], ipa("\\falling a"), [falling],
+    [`\\rising`], ipa("\\rising a"), [rising],
+    [`\\doubleacute`], ipa("\\doubleacute a"), [extra high],
+    [`\\doublegrave` or `\\textdoublegrave`], ipa("\\doublegrave a"), [extra low],
+  ),
+) <tab-accents>
+
+== Apical vowels
+
+Descriptions of Chinese languages often use the sinological apical vowels #ipa("\\apicals") and #ipa("\\apicalr"), as in Mandarin #ipa("[s \\apicals \\tone{51}]") and #ipa("[ \\:s \\apicalr \\tone{51}]"). They are not part of the IPA, and they don't appear in the symbol tables of the IPA Handbook, which also list withdrawn symbols and some that are not IPA usage #cite(<ipa1999handbook>, supplement: "pp. 161–185"). Not every analysis uses them, either: #cite(<duanmu2007phonology>, form: "prose", supplement: "pp. 34–35"), for example, treats these sounds as syllabic consonants, #ipa("[s \\v z]") and #ipa("[ \\:s \\v \\:z ]"), which can be typed with `\\v` (@sec-ipa). #ipa("\\apicals") is typed with `\\apicals` or `\\textlhtlongi`, and #ipa("\\apicalr") with `\\apicalr` or `\\textrhtlongi`. TIPA only has `\\textlhtlongi`; `\\textrhtlongi` follows the same pattern. Both vowels are nuclei in prosodic representations, but `#vowels()` doesn't plot them, since they have no agreed position in the vowel space.
+
+== Tones across functions
+
+@tab-tone-functions shows what each function does with tones. In prosodic representations, tone letters are shown as a subscript on #sym.sigma, since Chao letters describe the syllable as a whole (@fig-word-tone).
+
+#figure(
+  caption: [Tones in each function],
+  text(size: 9pt, table(
+    columns: (auto, 1fr),
+    align: left,
+    stroke: 0.5pt + luma(200),
+    table.header([*Function*], [*Tones*]),
+    [`#ipa()`], [Shown as typed.],
+    [`#syllable()` \ `#mora()` \ `#foot()` \ `#foot-mora()` \ `#word()` \ `#word-mora()`],
+    [Tone letters are a subscript on #sym.sigma, wherever they were typed in the syllable. They are never segments, so they don't project moras or block geminates. Accented vowels are nuclei.],
+
+    [`#tableau()` \ `#maxent()` \ `#hg()` \ `#nhg()`],
+    [Allowed in inputs, candidates and constraint names. Subscripts and superscripts after a tone or an accent are not pulled left. `\\^` is the falling tone, while `^{...}` is a superscript.],
+
+    [`#met-grid()`], [Tone commands are converted in both formats, even with `ipa: false`.],
+    [`#autoseg()`],
+    [Tone commands in `features` give Chao letters on the tonal tier. Other labels, such as `H` and `L`, are shown as typed.],
+
+    [`#sonority()`],
+    [Tone letters go on the sonority peak of their syllable (e.g., #ipa("a \\tone{51}")), which keeps its value. Accented vowels have the sonority of their base vowel.],
+
+    [`#geom()` \ `#geom-group()`],
+    [The tone is ignored when loading a preset but kept in the label: `ph: "a \\tone{5}"` loads the preset for #ipa("a").],
+
+    [`#vowels()` \ `#consonants()` \ `#feat-matrix()`], [Tones are not accepted, since tone letters are not segments.],
+  )),
+) <tab-tone-functions>
+
+#figure(
+  caption: [`#word("('ma \\tone{55}.ma \\tone{35}).ma \\tone{214}")`],
+  word("('ma \\tone{55}.ma \\tone{35}).ma \\tone{214}", scale: 0.9),
+) <fig-word-tone>
+
+#pagebreak()
 
 = Symbols in prosodic representations <sec-symbols>
 
@@ -3313,7 +3449,7 @@ As of version `0.3.7`, users can decide which symbols are used for prosodic word
 #set page(flipped: true)
 = Wider tableaux <app-ot>
 
-As of version 0.5.3, you can have curly braces, commas, as well as superscript and subscript in input and output forms. Content inside `{...}` isn't parsed by the `#ipa()` function. Actual curly braces must be escaped: `\\{...\\}`. Constraint names can now have up to 20 characters. The number of characters allowed in constraint names, as well as the maximum number of constraints in a tableau, has been relaxed, so it's now up to the user to decide what a reasonable tableau should look like. See @code-wide.
+As of version 0.5.3, you can have curly braces, commas, as well as superscript and subscript in input and output forms. Content inside `{...}` isn't parsed by the `#ipa()` function, except for tone commands such as `\\tone{51}`. Actual curly braces must be escaped: `\\{...\\}`. Constraint names can now have up to 20 characters. The number of characters allowed in constraint names, as well as the maximum number of constraints in a tableau, has been relaxed, so it's now up to the user to decide what a reasonable tableau should look like. See @code-wide.
 
 #align(center)[
   #grid(
@@ -3410,7 +3546,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.7.0": *
+    #import "@preview/phonokit:0.8.0": *
     ```
 
     Now you can use any function you want:
@@ -3422,7 +3558,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.7.0": *` to your `typ` document if you plan on using #logo (assuming version `0.7.0`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.8.0": *` to your `typ` document if you plan on using #logo (assuming version `0.8.0`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3452,7 +3588,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.7.0": *
+  #import "@preview/phonokit:0.8.0": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3502,7 +3638,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.7.0": *
+  #import "@preview/phonokit:0.8.0": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF

@@ -3,7 +3,7 @@
 
 #import "@preview/cetz:0.5.3"
 #import "_config.typ": phonokit-font
-#import "ipa.typ": ipa as ipa-convert
+#import "ipa.typ": as-typed, ipa as ipa-convert
 
 #let multi-tier(
   levels: (),
@@ -145,7 +145,7 @@
 
   let resolve-node-ref(ref, arg-name: "reference") = {
     if type(ref) == str {
-      assert(ref in name-to-node, message: arg-name + " references unknown multi-tier node `" + ref + "`")
+      assert(ref in name-to-node, message: arg-name + " references unknown multi-tier node `" + as-typed(ref) + "`")
       name-to-node.at(ref)
     } else {
       assert(type(ref) == array and ref.len() == 2, message: arg-name + " node references must be `(level, col)` or a string key")

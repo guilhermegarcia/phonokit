@@ -1,7 +1,7 @@
 // Features module - Distinctive feature matrices from Hayes (2009)
 // Based on Hayes, B. (2009). Introductory Phonology. Wiley-Blackwell.
 
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": as-typed, ipa-to-unicode
 #import "_config.typ": phonokit-font
 #import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-feature-label
 
@@ -2090,7 +2090,7 @@
 
   // Look up features
   if symbol not in feature-data {
-    return text(fill: red)[*Error:* No feature data for "#symbol"]
+    return text(fill: red)[*Error:* No feature data for "#as-typed(symbol)"]
   }
 
   let features = feature-data.at(symbol)

@@ -27,6 +27,7 @@ zenodo-badge.svg
 extras/*
 !extras/*.pdf
 !extras/*.csv
+!extras/ipa_reference.typ
 
 # tytanic test output (refs are tracked)
 tests/**/out/

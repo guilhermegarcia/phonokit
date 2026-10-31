@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.5.3": canvas, draw
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": as-typed, ipa-to-unicode, unknown-commands
 #import "_config.typ": phonokit-font
 
 // Vowel data with relative positions (0-1 scale)
@@ -185,10 +185,11 @@
   let vowels-to-plot = ""
   let nasal-target-vowels = ()
   let error-msg = none
-  let inventory-error = [
-    *Error:* Available presets: #(language-vowels.keys().map(raw).join(", ")).
+  let presets = [
+    Available presets: #(language-vowels.keys().map(raw).join(", ")).
     Use a listed preset or provide only vowel symbols.
   ]
+  let inventory-error = [*Error:* #presets]
 
   // Check if vowel-string is actually a language name
   if vowel-string != none and vowel-string in language-vowels {
@@ -199,15 +200,18 @@
     if lang in language-vowels {
       vowels-to-plot = language-vowels.at(lang)
     } else {
-      // Language not available - prepare error message
-      return inventory-error
+      return [*Error:* Unknown language #raw(as-typed(lang)). \ #presets]
     }
   } else if vowel-string != none and vowel-string != "" {
     // Use as manual vowel specification - keep oral bases for plotting and
     // remember which vowels were explicitly nasalized in the input.
+    let unknown = unknown-commands(vowel-string)
+    if unknown.len() > 0 {
+      return [*Error:* Unknown command(s): #unknown.map(c => raw(as-typed(c))).join(", "). \ #presets]
+    }
     let parsed = _collect-custom-vowels(vowel-string)
     if parsed.rejected.len() > 0 {
-      return inventory-error
+      return [*Error:* Unknown symbol(s): #parsed.rejected.map(r => raw(as-typed(r))).join(", "). \ #presets]
     }
     if parsed.oral == "" {
       return inventory-error

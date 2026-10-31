@@ -1,6 +1,6 @@
 #import "ipa.typ": *
 #import "_config.typ": phonokit-font
-#import "prosody.typ": foot, foot-mora, mora, syllable, word, word-mora
+#import "prosody.typ": foot, foot-mora, mora, short-warnings, syllable, word, word-mora
 
 #let finger = text(size: 14pt)[☞]
 #let viol-sym = text(size: 1.2em)[#sym.ast]
@@ -17,10 +17,10 @@
     let after = bracket-match.captures.at(2)
 
     // Compose the parts
-    [#smallcaps(before)\[#inside\]#if after != "" { smallcaps(after) }]
+    tone-runs[#smallcaps(before)\[#inside\]#if after != "" { smallcaps(after) }]
   } else {
     // No brackets: all smallcaps
-    smallcaps(name)
+    tone-runs(smallcaps(name))
   }
 }
 
@@ -38,13 +38,20 @@
 // --- Helper: Parse string with rich formatting ---
 // - _{...} or _x: subscript (not IPA-parsed)
 // - ^{...} or ^x: superscript (not IPA-parsed)
-// - {...}: raw text (not IPA-parsed)
+// - {...}: raw text (not IPA-parsed), except after a tone command (\\tone{51})
 // - \\{ and \\}: literal brace characters
 // - \\,: literal comma (since , maps to secondary stress)
 // - everything else: IPA-parsed as usual
 #let _ends-with-space(s) = {
   let cls = s.clusters()
   cls.len() > 0 and cls.at(cls.len() - 1) == " "
+}
+
+// Scripts are pulled left onto the preceding letter, except after a tone
+// (\tone{51}, ˥˩) or an accented letter (á), where they would hit the mark
+#let _keeps-scripts-apart(s) = {
+  let last = ipa-to-unicode(s).clusters().at(-1, default: "")
+  last.match(regex(tone-letter-class)) != none or last.normalize(form: "nfd").codepoints().len() > 1
 }
 
 #let parse-ot-string(s) = {
@@ -77,8 +84,8 @@
       let lit = if tighten { [#h(before-kern)#lit] } else { lit }
       parts.push(if tighten-after { [#lit#h(after-kern)] } else { lit })
       i += 2
-    } else if (ch == "_" or ch == "^") and i + 1 < len {
-      let tighten = buf != "" and not _ends-with-space(buf)
+    } else if (ch == "_" or ch == "^") and i + 1 < len and not buf.ends-with("\\") {
+      let tighten = buf != "" and not _ends-with-space(buf) and not _keeps-scripts-apart(buf)
       if buf != "" {
         parts.push(ipa(buf))
         buf = ""
@@ -117,6 +124,16 @@
           parts.push(if tighten { [#h(-0.25em)#script] } else { script })
         }
       }
+    } else if ch == "{" and buf.match(regex("\\\\n?l?tone$")) != none {
+      // \tone{51}, \ltone{..}, etc.: the braces belong to the IPA command
+      while i < len and clusters.at(i) != "}" {
+        buf += clusters.at(i)
+        i += 1
+      }
+      if i < len {
+        buf += "}"
+        i += 1
+      }
     } else if ch == "{" {
       let tighten = buf != "" and not _ends-with-space(buf)
       if buf != "" {
@@ -144,16 +161,28 @@
 }
 
 // --- Helper: Dispatch prosody function by name ---
+// A candidate that would give a prosody warning shows only "Ill-formed: see
+// manual" (short-warnings), so a long message never stretches the tableau
 #let dispatch-prosody(func-name, arg, ps) = {
-  if func-name == "syllable" { syllable(arg, scale: ps) } else if func-name == "mora" { mora(arg, scale: ps) } else if (
-    func-name == "foot"
-  ) { foot(arg, scale: ps) } else if func-name == "foot-mora" { foot-mora(arg, scale: ps) } else if (
-    func-name == "word"
-  ) { word(arg, scale: ps) } else if func-name == "word-mora" { word-mora(arg, scale: ps) } else { ipa(arg) }
+  let draw = (
+    syllable: syllable,
+    mora: mora,
+    foot: foot,
+    foot-mora: foot-mora,
+    word: word,
+    word-mora: word-mora,
+  ).at(func-name, default: none)
+  if draw == none { return ipa(arg) }
+  short-warnings.update(true)
+  draw(arg, scale: ps)
+  short-warnings.update(false)
 }
 
 // --- Helper: Parse candidate string for prosodic function calls ---
-#let prosody-pattern = regex("#(syllable|mora|foot-mora|foot|word-mora|word)\\('([^']*)'\\)")
+// The argument ends at the first ') rather than the first ', so stress marks
+// can be used inside: #word('('po.Ra).ma'). A stress mark is always followed
+// by a syllable, never by ), so ') can only close the call
+#let prosody-pattern = regex("#(syllable|mora|foot-mora|foot|word-mora|word)\\('(.*?)'\\)")
 
 #let parse-candidate(cand, ps) = {
   if type(cand) != str { return cand }
@@ -189,7 +218,8 @@
     }
   }
 
-  parts.join()
+  // A little space between parts, so two trees side by side don't touch
+  parts.join(h(0.4em))
 }
 
 #let has-prosody(c) = {
@@ -215,7 +245,8 @@
 
   // Truncate constraint names to 20 characters
   let constraints = constraints.map(c => {
-    if c.len() > 20 { c.slice(0, 20) } else { c }
+    let c = tone-letters(c).clusters()
+    if c.len() > 20 { c.slice(0, 20).join() } else { c.join(default: "") }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -416,7 +447,8 @@
 
   // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 15 { c.slice(0, 15) } else { c }
+    let c = tone-letters(c).clusters()
+    if c.len() > 15 { c.slice(0, 15).join() } else { c.join(default: "") }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -581,7 +613,8 @@
 
   // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 15 { c.slice(0, 15) } else { c }
+    let c = tone-letters(c).clusters()
+    if c.len() > 15 { c.slice(0, 15).join() } else { c.join(default: "") }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -794,7 +827,8 @@
 
   // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 15 { c.slice(0, 15) } else { c }
+    let c = tone-letters(c).clusters()
+    if c.len() > 15 { c.slice(0, 15).join() } else { c.join(default: "") }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale
@@ -1059,7 +1093,8 @@
 
   // Truncate constraint names to 15 characters
   let constraints = constraints.map(c => {
-    if c.len() > 15 { c.slice(0, 15) } else { c }
+    let c = tone-letters(c).clusters()
+    if c.len() > 15 { c.slice(0, 15).join() } else { c.join(default: "") }
   })
 
   // Scale: use user-provided scale if given, otherwise auto-scale

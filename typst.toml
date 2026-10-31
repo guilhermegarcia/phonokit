@@ -2,7 +2,7 @@
 categories = ["utility", "text", "visualization"]
 disciplines = ["linguistics"]
 name = "phonokit"
-version = "0.7.0"
+version = "0.8.0"
 exclude = ["gallery/", "tests/", ".github/"]
 keywords = [
   "linguistics",

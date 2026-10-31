@@ -2,7 +2,7 @@
 // Visualize sonority profiles of phonemic transcriptions
 // Based on Parker (2011) sonority scale
 
-#import "ipa.typ": ipa, ipa-to-unicode
+#import "ipa.typ": ipa, ipa-to-unicode, is-tone-cluster, tone-break, tone-runs
 #import "_config.typ": phonokit-font
 #import "@preview/cetz:0.5.3"
 
@@ -142,7 +142,7 @@
   if phoneme in sonority-scale {
     sonority-scale.at(phoneme)
   } else {
-    let base = phoneme.codepoints().at(0)
+    let base = phoneme.normalize(form: "nfd").codepoints().at(0)
     if base in sonority-scale {
       sonority-scale.at(base)
     } else {
@@ -159,11 +159,30 @@
   let position = 0
   let basic-clusters = cleaned.clusters()
   let i = 0
+  // Tone letters are not segments: they go on the sonority peak of the stretch
+  // since the last syllable dot or tone ("ma˥˩n" → m a˥˩ n), and keep its value
+  let stretch-start = 0
 
   while i < basic-clusters.len() {
     let cluster = basic-clusters.at(i)
-    if cluster == "." {
+    if is-tone-cluster(cluster) {
+      let tone = ""
+      while i < basic-clusters.len() and is-tone-cluster(basic-clusters.at(i)) {
+        tone += basic-clusters.at(i)
+        i += 1
+      }
+      let stretch = range(stretch-start, phonemes.len())
+      if stretch.len() > 0 {
+        // First segment with the highest sonority
+        let peak = stretch.fold(stretch.first(), (best, k) => {
+          if get-sonority(phonemes.at(k)) > get-sonority(phonemes.at(best)) { k } else { best }
+        })
+        phonemes.at(peak) += tone
+      }
+      stretch-start = phonemes.len()
+    } else if cluster == "." {
       syllable-boundaries.push(position)
+      stretch-start = phonemes.len()
       i += 1
     } else if cluster == " " or cluster == "-" {
       i += 1
@@ -269,7 +288,7 @@
       // Add phoneme label (always black now)
       content(
         (x, y),
-        context text(size: 10pt * scale-factor, font: phonokit-font.get(), fill: black)[#phoneme],
+        context text(size: 10pt * scale-factor, font: phonokit-font.get(), fill: black)[#if phoneme.contains(tone-break) { tone-runs(phoneme) } else { phoneme }],
         anchor: "center",
       )
     }

@@ -1,6 +1,6 @@
 #import "@preview/cetz:0.5.3"
 #import "@preview/lilaq:0.6.0" as lq
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": ipa-to-unicode, tone-runs
 #import "_config.typ": phonokit-font
 #import "vowels.typ": language-vowels
 #import "ui-lang.typ": resolve-ui-lang, ui-lang-error
@@ -740,7 +740,7 @@
   let text-doc = body => text(size: doc-font-size, font: phonokit-font.get())[#body]
   let text-segment = body => {
     let rendered = if type(body) == str { ipa-to-unicode(body) } else { body }
-    text(size: segment-font-size, font: phonokit-font.get())[#rendered]
+    tone-runs(text(size: segment-font-size, font: phonokit-font.get())[#rendered])
   }
   let canvas-label-width = body => measure(text-label(body)).width / 1cm / scale-factor
   let label-padding = 0.35

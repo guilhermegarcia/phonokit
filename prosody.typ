@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.5.3"
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": as-typed, ipa-to-unicode, is-tone-cluster, tone-break, tone-runs, unknown-commands
 #import "_config.typ": phonokit-font
 
 // Follows the same spacing convention as #ipa():
@@ -16,7 +16,11 @@
 
     // Check if this is a structural marker
     // Note: ' and , are stress markers (not printed, just for structure)
-    if char in ("'", ",", ".", "(", ")") {
+    if char == "\\" and i + 1 < chars.len() and chars.at(i + 1) == "'" {
+      // \' (high tone) is an IPA command, not a stress mark
+      buffer += char + chars.at(i + 1)
+      i += 1
+    } else if char in ("'", ",", ".", "(", ")") {
       // First, process any buffered content
       if buffer != "" {
         result += ipa-to-unicode(buffer)
@@ -43,7 +47,8 @@
 #let is-vowel(cluster) = {
   // Check the base character (first codepoint) to handle both
   // precomposed vowels (like "ã") and combining forms (like "a" + "̃")
-  let base = cluster.codepoints().at(0)
+  // Decomposed first, so precomposed accented vowels (á, ǎ) count as their base
+  let base = cluster.normalize(form: "nfd").codepoints().at(0)
 
   // Check if base is a vowel
   // Covers the full IPA vowel inventory (see vowels.typ), plus rhotacized ɚ/ɝ
@@ -52,6 +57,7 @@
       in (
         "a", "e", "i", "o", "u", "y", "ɚ", "ɝ", "ɯ", "ɐ", "ɒ", "æ", "ɛ", "ɪ", "ɔ", "ø", "œ", "ɨ", "ʉ", "ʊ", "ə", "ʌ",
         "ɑ", "ʏ", "ɘ", "ɵ", "ɤ", "ɜ", "ɞ", "ɶ",
+        "ɿ", "ʅ", // sinological apical vowels (Mandarin sɿ, ʂʅ)
       )
   )
 
@@ -72,48 +78,46 @@
 // 1. Affricates (tie bar U+0361) - merge "t͡" + "ʃ" → "t͡ʃ"
 // 2. Spacing modifiers (like "ʰ") - merge "b" + "ʰ" → "bʰ"
 // 3. Length marks (ː) - merge "a" + "ː" → "aː" as atomic unit
+// Modifiers and length marks stack after any segment, affricates included:
+// "t͡sʰ", "kʷʰ", "aːʰ"
 #let smart-clusters(text) = {
   let basic-clusters = text.clusters()
   let result = ()
   let i = 0
 
   // Define spacing modifiers that should merge with preceding segment
-  let spacing-modifiers = ("ʰ", "ʷ", "ʲ", "ˠ", "ˤ", "̚")
+  let spacing-modifiers = ("ʰ", "ʷ", "ʲ", "ˠ", "ˤ", "̚", "ʼ")
   // Length mark (U+02D0)
   let length-mark = "ː"
 
   while i < basic-clusters.len() {
-    let current = basic-clusters.at(i)
+    let segment = basic-clusters.at(i)
+    i += 1
 
-    // Check if this cluster contains a tie bar
-    if current.contains("͡") {
-      // This cluster has a tie bar - merge with next cluster (affricate)
-      if i + 1 < basic-clusters.len() {
-        result.push(current + basic-clusters.at(i + 1))
-        i += 2 // Skip both clusters
-      } else {
-        result.push(current)
-        i += 1
-      }
-    } else if i + 1 < basic-clusters.len() and basic-clusters.at(i + 1) in spacing-modifiers {
-      // Next cluster is a spacing modifier - merge with current
-      result.push(current + basic-clusters.at(i + 1))
-      i += 2 // Skip both clusters
-    } else if i + 1 < basic-clusters.len() and basic-clusters.at(i + 1) == length-mark {
-      // Next cluster is a length mark - merge with current (atomic long vowel)
-      result.push(current + basic-clusters.at(i + 1))
-      i += 2 // Skip both clusters
-    } else {
-      // Regular cluster
-      result.push(current)
+    // Tie bar: merge with the next cluster (affricate)
+    if segment.contains("͡") and i < basic-clusters.len() {
+      segment += basic-clusters.at(i)
       i += 1
     }
+
+    // Then every spacing modifier and length mark that follows
+    while i < basic-clusters.len() and (basic-clusters.at(i) in spacing-modifiers or basic-clusters.at(i) == length-mark) {
+      segment += basic-clusters.at(i)
+      i += 1
+    }
+
+    result.push(segment)
   }
 
   result
 }
 
 #let parse-syllable(syll) = {
+  // Chao tone letters describe the whole syllable: they are set aside here
+  // (wherever they were typed) and shown next to σ, never as segments
+  let tone = syll.clusters().filter(is-tone-cluster).join(default: "")
+  let syll = syll.clusters().filter(c => not is-tone-cluster(c)).join(default: "")
+
   // Use smart-clusters() to properly handle affricates and combining diacritics
   let clusters = smart-clusters(syll)
   let onset = ""
@@ -132,7 +136,17 @@
     }
   }
 
-  (onset: onset, nucleus: nucleus, coda: coda)
+  (onset: onset, nucleus: nucleus, coda: coda, tone: tone)
+}
+
+// σ label with the syllable's tone as a subscript (σ˥˩). A hidden copy of the
+// tone on the left keeps σ centred over its lines
+#let sigma-label(sym, tone) = {
+  if tone == "" { sym } else {
+    // Boxed only when two tones meet, so they are drawn apart (˨˩˦ ˨˩˦)
+    let t = sub(typographic: false, if tone.contains(tone-break) { tone-runs(tone) } else { tone })
+    [#hide(t)#sym#t]
+  }
 }
 
 // Helper function to draw syllable internal structure
@@ -169,6 +183,67 @@
   let f = (top - (mora-y + 0.2)) / (top - (terminal-y + 0.30))
   let mora-edge = (if long { long-mora-spacing / 2 } else { 0 }) + 0.15
   (mora-edge + 0.15) / f
+}
+
+// Every prosody warning. Inside tableaux (see ot.typ) a candidate that would
+// warn shows only a short note, so the tableau stays readable
+#let short-warnings = state("phonokit-short-warnings", false)
+#let prosody-warning(body) = context {
+  if short-warnings.get() {
+    text(fill: red, weight: "bold")[Ill-formed: see manual]
+  } else {
+    text(fill: red, weight: "bold")[⚠ Warning: #body]
+  }
+}
+
+// A command #ipa() doesn't know would otherwise be drawn letter by letter
+#let unknown-command-warning(input) = {
+  let unknown = unknown-commands(input)
+  if unknown.len() > 0 {
+    prosody-warning[Unknown command(s): #unknown.map(c => raw(as-typed(c))).join(", "). Check the spelling, and leave a space before and after each command.]
+  }
+}
+
+// Every syllable needs a nucleus: a vowel or a syllabic consonant (\v m).
+// Commands are shown as typed in a string (\\v), like everywhere in the manual
+// Onset-rhyme trees can instead draw an empty N with `empty-nucleus: true`
+#let no-nucleus-warning(syll, moraic: false) = prosody-warning[No nucleus in "#as-typed(syll.onset + syll.coda)". Add a vowel or mark a syllabic consonant with `\\v`#if not moraic [, or set `empty-nucleus: true`].]
+
+// Stress mark at the start of a syllable: ' (primary) or , (secondary).
+// Either one makes the syllable the head of its foot; only ' places ω when
+// there are no feet. Any other mark in the syllable (a second one, or one
+// inside it) is misplaced and gets a warning
+#let split-stress(buffer) = {
+  let mark = buffer.clusters().at(0, default: "")
+  let (rest, stressed, primary) = if mark in ("'", ",") {
+    (buffer.slice(mark.len()), true, mark == "'")
+  } else { (buffer, false, false) }
+  (rest, stressed, primary, rest.contains("'") or rest.contains(","))
+}
+
+// Malformed stress: a misplaced mark, or two heads in one foot. Returns the
+// warning, or none. `feet` lists each foot's syllable indices
+#let stress-warning(syllables, feet) = {
+  let warn = prosody-warning
+  for syll in syllables {
+    if syll.misplaced {
+      return warn[Misplaced stress mark in #raw(as-typed(syll.raw)). Put a single `'` or `,` at the start of a syllable.]
+    }
+  }
+  for ft in feet {
+    if ft.filter(k => syllables.at(k).stressed).len() > 1 {
+      return warn[Two stress marks in one foot (#raw(as-typed(ft.map(k => syllables.at(k).raw).join(".")))). A foot has a single head: mark only one syllable with `'` or `,`.]
+    }
+  }
+  none
+}
+
+// Head of a foot (given as syllable indices): its ' syllable, else its ,
+// syllable, else `default`
+#let head-of(syllables, idxs, default) = {
+  let found = idxs.find(k => syllables.at(k).primary)
+  if found == none { found = idxs.find(k => syllables.at(k).stressed) }
+  if found == none { default } else { found }
 }
 
 #let check-spacing(spacing) = assert(
@@ -333,61 +408,58 @@
 
 // Visualizes a single syllable's internal structure (On/Rh/Nu/Co)
 // Now accepts IPA-style input like "k a" or "'t a"
-#let syllable(input, scale: 1.0, symbol: ("σ",), distance: none, spacing: "auto") = {
+#let syllable(input, scale: 1.0, symbol: ("σ",), distance: none, spacing: "auto", empty-nucleus: false) = {
+  let unknown = unknown-command-warning(input)
+  if unknown != none { return unknown }
   check-spacing(spacing)
   // Check for syllable boundary markers
   if input.contains(".") {
-    return text(fill: red, weight: "bold")[⚠ Warning: For more than one syllable, use \#foot() or \#word().]
+    return prosody-warning[For more than one syllable, use \#foot() or \#word().]
   }
 
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
     if input.contains(seq) {
-      return text(fill: red, weight: "bold")[⚠ Warning: Problematic sequence involving diacritics: "#seq"]
+      return prosody-warning[Problematic sequence involving diacritics: #raw(as-typed(seq))]
     }
   }
 
   // Convert IPA-style input to Unicode
   let converted = convert-prosody-input(input)
 
-  // Parse a single syllable
-  // Strip ALL stress markers (' for primary, , for secondary) regardless of position
-  let stressed = converted.starts-with("'") or converted.starts-with(",")
-  let clean-input = converted.replace("'", "").replace(",", "")
+  // Parse a single syllable: one optional stress mark (' or ,) at the start
+  let (clean-input, stressed, _, misplaced) = split-stress(converted)
+  let stress-problem = stress-warning(((misplaced: misplaced, raw: converted),), ())
+  if stress-problem != none { return stress-problem }
 
   let parsed = parse-syllable(clean-input)
 
   // Check for too many codas (limit: 5 to avoid crossing lines)
   let coda-segments-temp = if parsed.coda != "" { smart-clusters(parsed.coda) } else { () }
   if coda-segments-temp.len() > 5 {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: Too many coda consonants (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
+    return prosody-warning[Too many coda consonants (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
   }
 
   // Check for too many onsets (limit: 5 to avoid crossing lines)
   let onset-segments-temp = if parsed.onset != "" { smart-clusters(parsed.onset) } else { () }
   if onset-segments-temp.len() > 5 {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: Too many onset consonants (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
+    return prosody-warning[Too many onset consonants (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
   }
 
   // Check for too many nucleus segments (limit: 5)
   let nucleus-segments-temp = smart-clusters(parsed.nucleus)
+  if nucleus-segments-temp.len() == 0 and not empty-nucleus {
+    return no-nucleus-warning(parsed)
+  }
   if nucleus-segments-temp.len() > 5 {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: Too many nucleus segments (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
+    return prosody-warning[Too many nucleus segments (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
   }
   let syll = (
     onset: parsed.onset,
     nucleus: parsed.nucleus,
     coda: parsed.coda,
+    tone: parsed.tone,
     stressed: stressed,
   )
 
@@ -461,7 +533,7 @@
     content((x-offset, sigma-y + 0.54), context text(
       size: 12 * diagram-scale * 1pt,
       font: phonokit-font.get(),
-    )[#sym_syll])
+    )[#sigma-label(sym_syll, syll.tone)])
 
     // Onset branches (if exists)
     if has-onset {
@@ -530,54 +602,51 @@
 // Nucleus: always moraic (connects to μ, which connects to σ)
 // Coda: optionally moraic (coda: false → connects to σ; coda: true → connects to μ)
 #let mora(input, coda: false, scale: 1.0, symbol: ("σ", "μ"), distance: none, spacing: "auto") = {
+  let unknown = unknown-command-warning(input)
+  if unknown != none { return unknown }
   check-spacing(spacing)
   // Check for syllable boundary markers
   if input.contains(".") {
-    return text(fill: red, weight: "bold")[⚠ Warning: For more than one syllable, use \#foot() or \#word().]
+    return prosody-warning[For more than one syllable, use \#foot() or \#word().]
   }
 
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
     if input.contains(seq) {
-      return text(fill: red, weight: "bold")[⚠ Warning: Problematic sequence involving diacritics: "#seq"]
+      return prosody-warning[Problematic sequence involving diacritics: #raw(as-typed(seq))]
     }
   }
 
   // Convert IPA-style input to Unicode
   let converted = convert-prosody-input(input)
 
-  // Parse syllable
-  // Strip ALL stress markers (' for primary, , for secondary) regardless of position
-  let clean-input = converted.replace("'", "").replace(",", "")
+  // Parse syllable: one optional stress mark (' or ,) at the start
+  let (clean-input, _, _, misplaced) = split-stress(converted)
+  let stress-problem = stress-warning(((misplaced: misplaced, raw: converted),), ())
+  if stress-problem != none { return stress-problem }
 
   let parsed = parse-syllable(clean-input)
 
   // Check for too many codas (limit: 5 to avoid crossing lines)
   let coda-segments-temp = if parsed.coda != "" { smart-clusters(parsed.coda) } else { () }
   if coda-segments-temp.len() > 5 {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: Too many coda consonants (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
+    return prosody-warning[Too many coda consonants (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
   }
 
   // Check for too many onsets (limit: 5 to avoid crossing lines)
   let onset-segments-temp = if parsed.onset != "" { smart-clusters(parsed.onset) } else { () }
   if onset-segments-temp.len() > 5 {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: Too many onset consonants (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
+    return prosody-warning[Too many onset consonants (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
   }
 
   // Check for too many nucleus segments (limit: 5)
   let nucleus-segments-temp = smart-clusters(parsed.nucleus)
+  if nucleus-segments-temp.len() == 0 {
+    return no-nucleus-warning(parsed, moraic: true)
+  }
   if nucleus-segments-temp.len() > 5 {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: Too many nucleus segments (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
+    return prosody-warning[Too many nucleus segments (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
   }
 
   let sym_syll = symbol.at(0, default: "σ")
@@ -598,7 +667,7 @@
     content((x-offset, sigma-y + 0.54), context text(
       size: 12 * diagram-scale * 1pt,
       font: phonokit-font.get(),
-    )[#sym_syll])
+    )[#sigma-label(sym_syll, parsed.tone)])
 
     // Calculate segment counts
     let onset-segments = if parsed.onset != "" { smart-clusters(parsed.onset) } else { () }
@@ -943,14 +1012,13 @@
 
 // Visualizes foot and syllable levels
 // Now accepts IPA-style input like "k a.'v a.l o"
-#let foot(input, scale: 1.0, symbol: ("Σ", "σ"), distance: none, spacing: "auto") = {
+#let foot(input, scale: 1.0, symbol: ("Σ", "σ"), distance: none, spacing: "auto", empty-nucleus: false) = {
+  let unknown = unknown-command-warning(input)
+  if unknown != none { return unknown }
   check-spacing(spacing)
   // Check for parentheses (foot should not have multiple feet)
   if input.contains("(") or input.contains(")") {
-    return text(
-      fill: red,
-      weight: "bold",
-    )[⚠ Warning: foot() is for a single foot. If you need multiple feet, use word() instead.]
+    return prosody-warning[foot() is for a single foot. If you need multiple feet, use word() instead.]
   }
 
   // Convert IPA-style input to Unicode
@@ -967,13 +1035,17 @@
 
     if char == "." {
       if buffer != "" {
-        let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+        let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
         let parsed = parse-syllable(clean-buffer)
         syllables.push((
           onset: parsed.onset,
           nucleus: parsed.nucleus,
           coda: parsed.coda,
-          stressed: buffer.starts-with("'"),
+          tone: parsed.tone,
+          stressed: stressed,
+          primary: primary,
+          misplaced: misplaced,
+          raw: buffer,
         ))
         buffer = ""
       }
@@ -985,49 +1057,44 @@
 
   // Handle remaining buffer
   if buffer != "" {
-    let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+    let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
     let parsed = parse-syllable(clean-buffer)
     syllables.push((
       onset: parsed.onset,
       nucleus: parsed.nucleus,
       coda: parsed.coda,
-      stressed: buffer.starts-with("'"),
+      tone: parsed.tone,
+      stressed: stressed,
+      primary: primary,
+      misplaced: misplaced,
+      raw: buffer,
     ))
   }
+
+  let stress-problem = stress-warning(syllables, (range(syllables.len()),))
+  if stress-problem != none { return stress-problem }
 
   // Check for too many onsets/codas/nucleus in any syllable (limit: 5 to avoid crossing lines)
   for (i, syll) in syllables.enumerate() {
     let coda-segments-temp = if syll.coda != "" { smart-clusters(syll.coda) } else { () }
     if coda-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
+      return prosody-warning[Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
     }
     let onset-segments-temp = if syll.onset != "" { smart-clusters(syll.onset) } else { () }
     if onset-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
+      return prosody-warning[Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
     }
     let nucleus-segments-temp = smart-clusters(syll.nucleus)
+    if nucleus-segments-temp.len() == 0 and not empty-nucleus {
+      return no-nucleus-warning(syll)
+    }
     if nucleus-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
+      return prosody-warning[Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
     }
   }
 
   // Find stressed syllable (head of foot)
-  let head-idx = 0
-  for (i, syll) in syllables.enumerate() {
-    if syll.stressed {
-      head-idx = i
-      break
-    }
-  }
+  let head-idx = head-of(syllables, range(syllables.len()), 0)
 
   let sym_foot = symbol.at(0, default: "Σ")
   let sym_syll = symbol.at(1, default: "σ")
@@ -1168,7 +1235,7 @@
       content((x-offset, sigma-y + 0.54), context text(
         size: 12 * diagram-scale * 1pt,
         font: phonokit-font.get(),
-      )[#sym_syll])
+      )[#sigma-label(sym_syll, syll.tone)])
 
       // Line from Ft to σ
       line((foot-x, ft-height - 0.25), (x-offset, sigma-y + 0.8))
@@ -1217,7 +1284,9 @@
 
 // Visualizes word, foot, and syllable levels
 // Now accepts IPA-style input like "(k a.'v a).l o"
-#let word(input, foot: "R", scale: 1.0, symbol: ("ω", "Σ", "σ"), distance: none, spacing: "auto") = {
+#let word(input, foot: "R", scale: 1.0, symbol: ("ω", "Σ", "σ"), distance: none, spacing: "auto", empty-nucleus: false) = {
+  let unknown = unknown-command-warning(input)
+  if unknown != none { return unknown }
   check-spacing(spacing)
   // Convert IPA-style input to Unicode
   let converted = convert-prosody-input(input)
@@ -1239,13 +1308,17 @@
       current-foot = ()
     } else if char == ")" {
       if buffer != "" {
-        let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+        let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
         let parsed = parse-syllable(clean-buffer)
         syllables.push((
           onset: parsed.onset,
           nucleus: parsed.nucleus,
           coda: parsed.coda,
-          stressed: buffer.starts-with("'"),
+          tone: parsed.tone,
+          stressed: stressed,
+          primary: primary,
+          misplaced: misplaced,
+          raw: buffer,
         ))
         current-foot.push(syllables.len() - 1)
         buffer = ""
@@ -1256,13 +1329,17 @@
       in-foot = false
     } else if char == "." {
       if buffer != "" {
-        let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+        let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
         let parsed = parse-syllable(clean-buffer)
         syllables.push((
           onset: parsed.onset,
           nucleus: parsed.nucleus,
           coda: parsed.coda,
-          stressed: buffer.starts-with("'"),
+          tone: parsed.tone,
+          stressed: stressed,
+          primary: primary,
+          misplaced: misplaced,
+          raw: buffer,
         ))
 
         if in-foot {
@@ -1280,13 +1357,17 @@
 
   // Handle remaining buffer
   if buffer != "" {
-    let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+    let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
     let parsed = parse-syllable(clean-buffer)
     syllables.push((
       onset: parsed.onset,
       nucleus: parsed.nucleus,
       coda: parsed.coda,
-      stressed: buffer.starts-with("'"),
+      tone: parsed.tone,
+      stressed: stressed,
+      primary: primary,
+      misplaced: misplaced,
+      raw: buffer,
     ))
 
     if in-foot {
@@ -1294,28 +1375,25 @@
     }
   }
 
+  let stress-problem = stress-warning(syllables, feet)
+  if stress-problem != none { return stress-problem }
+
   // Check for too many onsets/codas/nucleus in any syllable (limit: 5 to avoid crossing lines)
   for (i, syll) in syllables.enumerate() {
     let coda-segments-temp = if syll.coda != "" { smart-clusters(syll.coda) } else { () }
     if coda-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
+      return prosody-warning[Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
     }
     let onset-segments-temp = if syll.onset != "" { smart-clusters(syll.onset) } else { () }
     if onset-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
+      return prosody-warning[Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
     }
     let nucleus-segments-temp = smart-clusters(syll.nucleus)
+    if nucleus-segments-temp.len() == 0 and not empty-nucleus {
+      return no-nucleus-warning(syll)
+    }
     if nucleus-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
+      return prosody-warning[Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
     }
   }
 
@@ -1430,22 +1508,19 @@
     let pwd-x = 0
 
     if feet.len() > 0 {
-      let target-foot = if foot == "L" { feet.at(0) } else { feet.at(-1) }
+      // The foot with ' heads ω; `foot` decides when no foot or several have it
+      let marked = feet.filter(ft => ft.any(k => syllables.at(k).primary))
+      let candidates = if marked.len() > 0 { marked } else { feet }
+      let target-foot = if foot == "L" { candidates.first() } else { candidates.last() }
 
-      let head-idx = target-foot.at(0)
-      for syll-idx in target-foot {
-        if syllables.at(syll-idx).stressed {
-          head-idx = syll-idx
-          break
-        }
-      }
+      let head-idx = head-of(syllables, target-foot, target-foot.at(0))
       pwd-x = start-x + syllable-positions.at(head-idx)
     } else if syllables.len() > 0 {
-      // If the user marked stress with ' (even without using feet), align
-      // the PWd node to that syllable instead of defaulting to L/R extremes.
+      // If the user marked primary stress with ' (even without using feet),
+      // align the PWd node to that syllable instead of defaulting to L/R extremes.
       let stressed-idx = none
       for (idx, syll) in syllables.enumerate() {
-        if syll.stressed {
+        if syll.primary {
           stressed-idx = idx
           break
         }
@@ -1463,13 +1538,7 @@
 
     let foot-xs = ()
     for ft in feet {
-      let head-idx = ft.at(0)
-      for syll-idx in ft {
-        if syllables.at(syll-idx).stressed {
-          head-idx = syll-idx
-          break
-        }
-      }
+      let head-idx = head-of(syllables, ft, ft.at(0))
       foot-xs.push(start-x + syllable-positions.at(head-idx))
     }
 
@@ -1546,7 +1615,7 @@
         content((x-offset, sigma-y + 0.54), context text(
           size: 12 * diagram-scale * 1pt,
           font: phonokit-font.get(),
-        )[#sym_syll])
+        )[#sigma-label(sym_syll, syll.tone)])
         line((pwd-x, pwd-height - 0.3), (x-offset, sigma-y + 0.75))
 
         let gem-coda-x = none
@@ -1582,13 +1651,7 @@
 
     // Draw each foot
     for foot in feet {
-      let head-idx = foot.at(0)
-      for syll-idx in foot {
-        if syllables.at(syll-idx).stressed {
-          head-idx = syll-idx
-          break
-        }
-      }
+      let head-idx = head-of(syllables, foot, foot.at(0))
 
       let foot-x = start-x + syllable-positions.at(head-idx)
 
@@ -1602,7 +1665,7 @@
         content((x-offset, sigma-y + 0.54), context text(
           size: 12 * diagram-scale * 1pt,
           font: phonokit-font.get(),
-        )[#sym_syll])
+        )[#sigma-label(sym_syll, syll.tone)])
         line((foot-x, foot-y - 0.25), (x-offset, sigma-y + 0.8))
 
         let gem-coda-x = none
@@ -1650,12 +1713,14 @@
 // Visualizes foot with moraic structure
 // Now accepts IPA-style input like "k a.'v a.l o"
 #let foot-mora(input, coda: false, scale: 1.0, symbol: ("Σ", "σ", "μ"), distance: none, spacing: "auto") = {
+  let unknown = unknown-command-warning(input)
+  if unknown != none { return unknown }
   check-spacing(spacing)
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
     if input.contains(seq) {
-      return text(fill: red, weight: "bold")[⚠ Warning: Problematic sequence involving diacritics: "#seq"]
+      return prosody-warning[Problematic sequence involving diacritics: #raw(as-typed(seq))]
     }
   }
 
@@ -1673,13 +1738,17 @@
 
     if char == "." {
       if buffer != "" {
-        let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+        let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
         let parsed = parse-syllable(clean-buffer)
         syllables.push((
           onset: parsed.onset,
           nucleus: parsed.nucleus,
           coda: parsed.coda,
-          stressed: buffer.starts-with("'"),
+          tone: parsed.tone,
+          stressed: stressed,
+          primary: primary,
+          misplaced: misplaced,
+          raw: buffer,
         ))
         buffer = ""
       }
@@ -1693,49 +1762,44 @@
 
   // Handle remaining buffer
   if buffer != "" {
-    let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+    let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
     let parsed = parse-syllable(clean-buffer)
     syllables.push((
       onset: parsed.onset,
       nucleus: parsed.nucleus,
       coda: parsed.coda,
-      stressed: buffer.starts-with("'"),
+      tone: parsed.tone,
+      stressed: stressed,
+      primary: primary,
+      misplaced: misplaced,
+      raw: buffer,
     ))
   }
+
+  let stress-problem = stress-warning(syllables, (range(syllables.len()),))
+  if stress-problem != none { return stress-problem }
 
   // Check for too many onsets/codas/nucleus in any syllable (limit: 5 to avoid crossing lines)
   for (i, syll) in syllables.enumerate() {
     let coda-segments-temp = if syll.coda != "" { smart-clusters(syll.coda) } else { () }
     if coda-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
+      return prosody-warning[Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
     }
     let onset-segments-temp = if syll.onset != "" { smart-clusters(syll.onset) } else { () }
     if onset-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
+      return prosody-warning[Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
     }
     let nucleus-segments-temp = smart-clusters(syll.nucleus)
+    if nucleus-segments-temp.len() == 0 {
+      return no-nucleus-warning(syll, moraic: true)
+    }
     if nucleus-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
+      return prosody-warning[Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
     }
   }
 
   // Find stressed syllable (head of foot)
-  let head-idx = 0
-  for (i, syll) in syllables.enumerate() {
-    if syll.stressed {
-      head-idx = i
-      break
-    }
-  }
+  let head-idx = head-of(syllables, range(syllables.len()), 0)
 
   let sym_foot = symbol.at(0, default: "Σ")
   let sym_syll = symbol.at(1, default: "σ")
@@ -1882,7 +1946,7 @@
       content((x-offset, sigma-y + 0.54), context text(
         size: 12 * diagram-scale * 1pt,
         font: phonokit-font.get(),
-      )[#sym_syll])
+      )[#sigma-label(sym_syll, syll.tone)])
 
       // Line from Ft to σ
       line((foot-x, ft-height - 0.25), (x-offset, sigma-y + 0.8))
@@ -1927,12 +1991,14 @@
 // Visualizes word with moraic structure
 // Now accepts IPA-style input like "(k a.'v a).l o"
 #let word-mora(input, foot: "R", coda: false, scale: 1.0, symbol: ("ω", "Σ", "σ", "μ"), distance: none, spacing: "auto") = {
+  let unknown = unknown-command-warning(input)
+  if unknown != none { return unknown }
   check-spacing(spacing)
   // Check for problematic diacritic sequences
   let problematic-sequences = ("''", ",,", "\\* \\*", "\\t \\t", "::", "((", "))")
   for seq in problematic-sequences {
     if input.contains(seq) {
-      return text(fill: red, weight: "bold")[⚠ Warning: Problematic sequence involving diacritics: "#seq"]
+      return prosody-warning[Problematic sequence involving diacritics: #raw(as-typed(seq))]
     }
   }
 
@@ -1956,13 +2022,17 @@
       current-foot = ()
     } else if char == ")" {
       if buffer != "" {
-        let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+        let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
         let parsed = parse-syllable(clean-buffer)
         syllables.push((
           onset: parsed.onset,
           nucleus: parsed.nucleus,
           coda: parsed.coda,
-          stressed: buffer.starts-with("'"),
+          tone: parsed.tone,
+          stressed: stressed,
+          primary: primary,
+          misplaced: misplaced,
+          raw: buffer,
         ))
         current-foot.push(syllables.len() - 1)
         buffer = ""
@@ -1973,13 +2043,17 @@
       in-foot = false
     } else if char == "." {
       if buffer != "" {
-        let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+        let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
         let parsed = parse-syllable(clean-buffer)
         syllables.push((
           onset: parsed.onset,
           nucleus: parsed.nucleus,
           coda: parsed.coda,
-          stressed: buffer.starts-with("'"),
+          tone: parsed.tone,
+          stressed: stressed,
+          primary: primary,
+          misplaced: misplaced,
+          raw: buffer,
         ))
 
         if in-foot {
@@ -1997,13 +2071,17 @@
 
   // Handle remaining buffer
   if buffer != "" {
-    let clean-buffer = if buffer.starts-with("'") { buffer.slice(1) } else { buffer }
+    let (clean-buffer, stressed, primary, misplaced) = split-stress(buffer)
     let parsed = parse-syllable(clean-buffer)
     syllables.push((
       onset: parsed.onset,
       nucleus: parsed.nucleus,
       coda: parsed.coda,
-      stressed: buffer.starts-with("'"),
+      tone: parsed.tone,
+      stressed: stressed,
+      primary: primary,
+      misplaced: misplaced,
+      raw: buffer,
     ))
 
     if in-foot {
@@ -2011,28 +2089,25 @@
     }
   }
 
+  let stress-problem = stress-warning(syllables, feet)
+  if stress-problem != none { return stress-problem }
+
   // Check for too many onsets/codas/nucleus in any syllable (limit: 5 to avoid crossing lines)
   for (i, syll) in syllables.enumerate() {
     let coda-segments-temp = if syll.coda != "" { smart-clusters(syll.coda) } else { () }
     if coda-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
+      return prosody-warning[Too many coda consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #coda-segments-temp.len()]
     }
     let onset-segments-temp = if syll.onset != "" { smart-clusters(syll.onset) } else { () }
     if onset-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
+      return prosody-warning[Too many onset consonants in syllable #(i + 1) (max 5 to avoid line crossings). Found: #onset-segments-temp.len()]
     }
     let nucleus-segments-temp = smart-clusters(syll.nucleus)
+    if nucleus-segments-temp.len() == 0 {
+      return no-nucleus-warning(syll, moraic: true)
+    }
     if nucleus-segments-temp.len() > 5 {
-      return text(
-        fill: red,
-        weight: "bold",
-      )[⚠ Warning: Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
+      return prosody-warning[Too many nucleus segments in syllable #(i + 1) (max 5 to avoid line crossings). Found: #nucleus-segments-temp.len()]
     }
   }
 
@@ -2149,22 +2224,18 @@
     let pwd-x = 0
 
     if feet.len() > 0 {
-      let target-foot = if foot == "L" { feet.at(0) } else { feet.at(-1) }
-      let target-syll-idx = target-foot.at(0)
-      for (i, syll) in target-foot.enumerate() {
-        let this-syll = syllables.at(syll)
-        if this-syll.stressed {
-          target-syll-idx = syll
-          break
-        }
-      }
+      // The foot with ' heads ω; `foot` decides when no foot or several have it
+      let marked = feet.filter(ft => ft.any(k => syllables.at(k).primary))
+      let candidates = if marked.len() > 0 { marked } else { feet }
+      let target-foot = if foot == "L" { candidates.first() } else { candidates.last() }
+      let target-syll-idx = head-of(syllables, target-foot, target-foot.at(0))
       pwd-x = start-x + syllable-positions.at(target-syll-idx)
     } else if syllables.len() > 0 {
-      // If the user marked stress with ' (even without using feet), align
-      // the PWd node to that syllable instead of defaulting to L/R extremes.
+      // If the user marked primary stress with ' (even without using feet),
+      // align the PWd node to that syllable instead of defaulting to L/R extremes.
       let stressed-idx = none
       for (idx, syll) in syllables.enumerate() {
-        if syll.stressed {
+        if syll.primary {
           stressed-idx = idx
           break
         }
@@ -2189,13 +2260,7 @@
 
     let foot-xs = ()
     for ft in feet {
-      let head-idx = ft.at(0)
-      for syll-idx in ft {
-        if syllables.at(syll-idx).stressed {
-          head-idx = syll-idx
-          break
-        }
-      }
+      let head-idx = head-of(syllables, ft, ft.at(0))
       foot-xs.push(start-x + syllable-positions.at(head-idx))
     }
 
@@ -2268,13 +2333,7 @@
     // Draw feet
     for (foot-idx, foot-sylls) in feet.enumerate() {
       // Find head of foot (stressed syllable)
-      let head-idx = foot-sylls.at(0)
-      for syll-idx in foot-sylls {
-        if syllables.at(syll-idx).stressed {
-          head-idx = syll-idx
-          break
-        }
-      }
+      let head-idx = head-of(syllables, foot-sylls, foot-sylls.at(0))
 
       let foot-x = start-x + syllable-positions.at(head-idx)
       content((foot-x, ft-y), context text(size: 12 * diagram-scale * 1pt, font: phonokit-font.get())[#sym_foot])
@@ -2303,7 +2362,7 @@
       content((x-offset, sigma-y + 0.54), context text(
         size: 12 * diagram-scale * 1pt,
         font: phonokit-font.get(),
-      )[#sym_syll])
+      )[#sigma-label(sym_syll, syll.tone)])
 
       // Check for geminate
       let gem-coda-x = none

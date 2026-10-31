@@ -1,3 +1,51 @@
+// Chao tone letters: digits 1-5 (5 = highest), e.g. "ma \tone{51}" → ma˥˩.
+// \ltone gives left-stem bars; \ntone and \nltone give the dotted (neutral)
+// right- and left-stem bars. Charis joins sequences into contour glyphs.
+#let tone-letter-sets = (
+  "tone": ("˩", "˨", "˧", "˦", "˥"),
+  "ltone": ("꜖", "꜕", "꜔", "꜓", "꜒"),
+  "ntone": ("꜌", "꜋", "꜊", "꜉", "꜈"),
+  "nltone": ("꜑", "꜐", "꜏", "꜎", "꜍"),
+)
+
+// Any one tone letter from the four sets above
+#let tone-letter-class = "[\u{02E5}-\u{02E9}\u{A708}-\u{A716}]"
+
+// Separates two tones that follow each other (\tone{214}\tone{214}): an
+// invisible zero-width non-joiner, which tone-runs() turns into two boxes so the
+// font draws ˨˩˦ ˨˩˦, not one 214214 contour. A grapheme extender, so it rides on
+// the preceding tone letter as one cluster
+#let tone-break = "\u{200C}"
+
+// One tone letter as a cluster, with or without a following tone-break
+#let is-tone-cluster(cluster) = cluster.match(regex("^" + tone-letter-class + tone-break + "?$")) != none
+
+// Converts only the \tone{} commands, leaving the rest of the input as typed.
+// For labels that are not IPA (grid syllables, tone-tier labels). Each command
+// is one tone: commands next to each other (spaces aside) stay apart
+#let tone-letters(input) = {
+  input
+    .replace(regex("\\\\(tone|ltone|ntone|nltone)\\{([^}]*)\\}"), m => {
+      let (kind, levels) = m.captures
+      assert(
+        levels.len() > 0 and levels.clusters().all(d => d in ("1", "2", "3", "4", "5")),
+        message: "\\\\" + kind + "{" + levels + "}: tone levels must be digits 1-5",
+      )
+      levels.clusters().map(d => tone-letter-sets.at(kind).at(int(d) - 1)).join() + tone-break
+    })
+    // Keep a break only where another tone follows
+    .replace(regex(tone-break + "( *" + tone-letter-class + ")"), m => "\u{E000}" + m.captures.first())
+    .replace(tone-break, "")
+    .replace("\u{E000}", tone-break)
+}
+
+// Removes tone, both \tone{} commands and tone letters: "a \tone{51}" → "a"
+#let strip-tones(input) = tone-letters(input).replace(regex(tone-letter-class + "+"), "").replace(tone-break, "").trim()
+
+// A string as it is typed inside a Typst string, for messages that echo the
+// user's input: each backslash doubled, so commands read \\v, not \v
+#let as-typed(s) = str(s).replace("\\", "\\\\")
+
 // Convert tipa-style notation to IPA Unicode (without font styling)
 // This is exported separately so other modules can use the conversion logic
 #let ipa-to-unicode(input) = {
@@ -141,13 +189,20 @@
     "6": "ɒ",
     "\\schwar": "ɚ",
     "\\epsilonr": "ɝ",
+    // VOWELS - Apical (sinological, not IPA)
+    // Mandarin [sɿ], [ʂʅ]. TIPA has only
+    // \textlhtlongi; \textrhtlongi mirrors it, \apicals and \apicalr are synonyms
+    "\\textlhtlongi": "ɿ",
+    "\\apicals": "ɿ",
+    "\\textrhtlongi": "ʅ",
+    "\\apicalr": "ʅ",
     // SUPRASEGMENTALS
     "'": "ˈ", // primary stress
     ",": "ˌ", // secondary stress
     ":": "ː", // length mark
     // SPACING
     "\\s": " ", // space
-    // ARCHIPHONEMES escaped
+    // ARCHIPHONEMES (escaped capitals)
     "\\A": "A",
     "\\B": "B",
     "\\C": "C",
@@ -340,6 +395,17 @@
     "\\v": "̩", // combining vertical line below (syllabic)
     "\\t": "͡", // combining double inverted breve (tie bar for affricates)
     "\\dental": "̪", // no trailing space
+    // TONE ACCENTS
+    // \H is taken by the archiphoneme, hence \doubleacute
+    "\\'": "́", // acute: high (á)
+    "\\`": "̀", // grave: low (à)
+    "\\=": "̄", // macron: mid (ā)
+    "\\^": "̂", // circumflex: falling (â)
+    "\\falling": "̂",
+    "\\rising": "̌", // caron: rising (ǎ)
+    "\\doubleacute": "̋", // extra high (a̋)
+    "\\doublegrave": "̏", // extra low (ȁ)
+    "\\textdoublegrave": "̏",
   )
 
   // Backward-looking: follow the phoneme in input (e.g., p \h → pʰ)
@@ -377,29 +443,14 @@
     }
   }
 
-  // Chao tone letters: digits 1-5 (5 = highest), e.g. "ma \tone{51}" → ma˥˩.
-  // \ltone gives left-stem bars; \ntone and \nltone give the dotted (neutral)
-  // right- and left-stem bars. Charis joins sequences into contour glyphs.
-  let tone_letters = (
-    "tone": ("˩", "˨", "˧", "˦", "˥"),
-    "ltone": ("꜖", "꜕", "꜔", "꜓", "꜒"),
-    "ntone": ("꜌", "꜋", "꜊", "꜉", "꜈"),
-    "nltone": ("꜑", "꜐", "꜏", "꜎", "꜍"),
-  )
-  let input = input.replace(regex("\\\\(tone|ltone|ntone|nltone)\\{([^}]*)\\}"), m => {
-    let (kind, levels) = m.captures
-    assert(
-      levels.len() > 0 and levels.clusters().all(d => d in ("1", "2", "3", "4", "5")),
-      message: "\\" + kind + "{" + levels + "}: tone levels must be digits 1-5",
-    )
-    levels.clusters().map(d => tone_letters.at(kind).at(int(d) - 1)).join()
-  })
+  let input = tone-letters(input)
 
   // Split by spaces and process each token
   let tokens = input.split(" ")
   let result = ""
   let i = 0
-  let pending_diacritic = none
+  // Forward diacritics stack: "\\` \\v m" gives a low-tone syllabic m
+  let pending_diacritics = ()
 
   while i < tokens.len() {
     let token = tokens.at(i)
@@ -407,7 +458,7 @@
     // Check if this token is a forward-looking diacritic
     if token in forward_diacritics {
       // Store it to apply to next character
-      pending_diacritic = forward_diacritics.at(token)
+      pending_diacritics.push(forward_diacritics.at(token))
     } else if token in backward_diacritics {
       // Apply immediately to previous character
       result += backward_diacritics.at(token)
@@ -415,31 +466,40 @@
       // Backslash command
       if token in mappings {
         result += mappings.at(token)
-        // Apply pending diacritic if any
-        if pending_diacritic != none {
-          result += attach(mappings.at(token), pending_diacritic)
-          pending_diacritic = none
+        // Apply pending diacritics if any
+        for d in pending_diacritics {
+          result += attach(mappings.at(token), d)
         }
+        pending_diacritics = ()
       } else {
         result += token
       }
     } else if token in mappings {
       // No backslash, but the whole token is a mapping (e.g., "||")
       result += mappings.at(token)
-      if pending_diacritic != none {
-        result += attach(mappings.at(token), pending_diacritic)
-        pending_diacritic = none
+      for d in pending_diacritics {
+        result += attach(mappings.at(token), d)
       }
+      pending_diacritics = ()
     } else {
       // No backslash: split into individual characters
       let chars = token.clusters()
       for (idx, char) in chars.enumerate() {
-        let out = if char in mappings { mappings.at(char) } else { char }
+        let out = if char in mappings { mappings.at(char) } else {
+          // An accented shortcut keeps its accent: É → ɛ́, @́ → ə́. Characters
+          // whose base maps to itself (á, ç) stay exactly as typed
+          let (base, ..marks) = char.normalize(form: "nfd").codepoints()
+          if marks.len() > 0 and base in mappings and mappings.at(base) != base {
+            mappings.at(base) + marks.join()
+          } else { char }
+        }
         result += out
-        // Apply pending diacritic to first character only
-        if idx == 0 and pending_diacritic != none {
-          result += attach(out, pending_diacritic)
-          pending_diacritic = none
+        // Apply pending diacritics to first character only
+        if idx == 0 {
+          for d in pending_diacritics {
+            result += attach(out, d)
+          }
+          pending_diacritics = ()
         }
       }
     }
@@ -450,6 +510,24 @@
   result
 }
 
+// Backslash commands in `input` that #ipa() does not know, as typed. Stress
+// marks, syllable dots, feet and braces around them are not part of the
+// command: "('\\ae.\\xyz)" gives ("\\xyz",). A command glued to other
+// characters ("t\\h") is unknown too, since commands need spaces around them
+#let unknown-commands(input) = {
+  // Adjacent braced groups ({tS \h}{ts}) are separate tokens
+  let s = tone-letters(str(input)).replace("\\'", "\u{E001}").replace("}{", "} {")
+  s
+    .split(regex("[\\s().,']+"))
+    .map(t => {
+      let t = t.trim("{", at: start)
+      while t.ends-with("}") and t.matches("}").len() > t.matches("{").len() { t = t.slice(0, -1) }
+      t.replace("\u{E001}", "\\'")
+    })
+    .filter(t => t.contains("\\") and ipa-to-unicode(t).contains("\\"))
+    .dedup()
+}
+
 // Main IPA function: converts tipa-style notation to IPA
 #import "_config.typ": phonokit-font
 
@@ -458,7 +536,7 @@
 // final ma˥˥. Word joiners keep a line from breaking at the box (ma | ˥˥).
 // Fonts without contour support are unaffected
 #let tone-runs(body) = {
-  show regex("[\u{02E5}-\u{02E9}\u{A708}-\u{A716}]+"): it => "\u{2060}" + box(it) + "\u{2060}"
+  show regex(tone-letter-class + "+"): it => "\u{2060}" + box(it) + "\u{2060}"
   body
 }
 

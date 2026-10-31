@@ -3,7 +3,7 @@
 
 #import "@preview/cetz:0.5.3"
 #import "features.typ": feat
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": ipa-to-unicode, strip-tones, tone-runs
 #import "_config.typ": phonokit-font
 #import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-geom-label
 
@@ -1377,8 +1377,10 @@
   // Only a TRAILING colon counts as a length mark — a colon elsewhere belongs to
   // a TIPA escape such as "\:t" (ʈ) and must not be stripped, or the preset lookup
   // would fail. Strip just the trailing mark; keep the original as label fallback.
-  let _is-long = ph != none and type(ph) == str and (ph.ends-with("ː") or ph.ends-with(":"))
   let _ph-orig = ph
+  // Tone is not part of the preset key: "a \tone{5}" loads "a" and keeps ˥ in the label
+  let ph = if type(ph) == str { strip-tones(ph) } else { ph }
+  let _is-long = ph != none and type(ph) == str and (ph.ends-with("ː") or ph.ends-with(":"))
   let ph = if _is-long { ph.trim("ː", at: end, repeat: false).trim(":", at: end, repeat: false) } else { ph }
 
   // Resolve timing:
@@ -1585,7 +1587,7 @@
             }
             content(
               (root-entry.x, label-y),
-              text(font: font, size: fsz * 1.2, fill: _norm, _seg(seg-label)),
+              tone-runs(text(font: font, size: fsz * 1.2, fill: _norm, _seg(seg-label))),
               anchor: "south",
             )
           }
@@ -1700,10 +1702,12 @@
     // Auto-detect a TRAILING length mark in ph; strip just that so preset lookup
     // works. A mid-string colon belongs to a TIPA escape like "\:t" (ʈ) — leave it.
     let ph-raw = spec.at("ph", default: none)
-    let _is-long = ph-raw != none and type(ph-raw) == str and (ph-raw.ends-with("ː") or ph-raw.ends-with(":"))
+    // As in geom(), tone is not part of the preset key; the label keeps it (ph-raw)
+    let ph-key = if type(ph-raw) == str { strip-tones(ph-raw) } else { ph-raw }
+    let _is-long = ph-key != none and type(ph-key) == str and (ph-key.ends-with("ː") or ph-key.ends-with(":"))
     let spec = if _is-long {
-      (..spec, ph: ph-raw.trim("ː", at: end, repeat: false).trim(":", at: end, repeat: false))
-    } else { spec }
+      (..spec, ph: ph-key.trim("ː", at: end, repeat: false).trim(":", at: end, repeat: false))
+    } else if ph-key != ph-raw { (..spec, ph: ph-key) } else { spec }
 
     // Resolve preset if ph key is present; explicit spec keys override the preset.
     // Sagey model uses _presets-sagey for vowels; consonants fall back to _presets.
@@ -1907,7 +1911,7 @@
           let seg-body = _seg(seg)
           content(
             (sx, label-y),
-            text(font: font, size: fsz * ts * 1.2, fill: _norm, seg-body),
+            tone-runs(text(font: font, size: fsz * ts * 1.2, fill: _norm, seg-body)),
             anchor: "south",
           )
         }

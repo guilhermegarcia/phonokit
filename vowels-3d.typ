@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.5.3": canvas, draw
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": as-typed, ipa-to-unicode
 #import "_config.typ": phonokit-font
 #import "vowels.typ": language-vowels, vowel-data
 
@@ -60,7 +60,7 @@
   let supported = "i e ɛ a u o ɔ ɒ ə (tipa: i e E a u o O 6 @)"
   assert(
     type(vowel-string) != str or lower(vowel-string) not in language-vowels,
-    message: "vowels-3d: language names are not accepted (got \"" + str(vowel-string)
+    message: "vowels-3d: language names are not accepted (got \"" + as-typed(vowel-string)
       + "\"). Use the nine default vowels or a subset of " + supported,
   )
   let scale-factor = scale // `scale` is shadowed by the built-in inside canvas closures
@@ -68,7 +68,7 @@
   for v in vowels-to-plot {
     assert(
       v in vowels-3d-inventory,
-      message: "vowels-3d: unsupported symbol \"" + v + "\". Only the nine default vowels or a subset of them are accepted: " + supported,
+      message: "vowels-3d: unsupported symbol \"" + as-typed(v) + "\". Only the nine default vowels or a subset of them are accepted: " + supported,
     )
   }
 

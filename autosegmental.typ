@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.5.3"
-#import "ipa.typ": ipa
+#import "ipa.typ": ipa, tone-letters, tone-runs
 #import "_config.typ": phonokit-font
 
 #let autoseg(
@@ -17,6 +17,10 @@
   gloss: "",
   dash: "dashed",
 ) = {
+  // Tier labels are plain text, but tone commands give Chao letters: "\tone{51}" → ˥˩
+  let to-label(f) = if type(f) == str { tone-letters(f) } else { f }
+  let features = features.map(f => if type(f) == array { f.map(to-label) } else { to-label(f) })
+
   box(inset: 1.2em, baseline: baseline, cetz.canvas({
     import cetz.draw: *
 
@@ -74,7 +78,7 @@
               radius: 100%,
               width: 1.2em,
               height: 1.2em,
-              align(center + horizon, context text(font: phonokit-font.get(), f)),
+              align(center + horizon, context tone-runs(text(font: phonokit-font.get(), f))),
             ))
 
             // Create anchor for this specific tone (for sub-indexing in links)
@@ -165,7 +169,7 @@
         radius: 100%,
         width: 1.2em,
         height: 1.2em,
-        align(center + horizon, context text(font: phonokit-font.get(), tone_text)),
+        align(center + horizon, context tone-runs(text(font: phonokit-font.get(), tone_text))),
       ))
 
       // Draw solid lines to each segment (no arrows, no dashes)

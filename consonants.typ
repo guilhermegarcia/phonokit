@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.5.3": canvas, draw
-#import "ipa.typ": ipa-to-unicode
+#import "ipa.typ": as-typed, ipa-to-unicode, tone-letters, unknown-commands
 #import "_config.typ": phonokit-font
 #import "ui-lang.typ": resolve-ui-lang, ui-lang-error, ui-consonant-labels
 
@@ -368,12 +368,25 @@
     if lang in language-consonants {
       consonants-to-plot = language-consonants.at(lang)
     } else {
-      return inventory-error
+      return [
+        *Error:* Unknown language #raw(as-typed(lang)). \
+        Available presets: #(language-consonants.keys().map(raw).join(", ")).
+        Use a listed preset or provide only consonant symbols.
+      ]
     }
   } else if consonant-string != none and consonant-string != "" {
     // Use as manual consonant specification
-    // Extract braced content first (affricates, aspirated consonants, etc.)
-    let extracted = extract-braced-content(consonant-string.replace(regex("\\s+"), " "))
+    let unknown = unknown-commands(consonant-string)
+    if unknown.len() > 0 {
+      return [
+        *Error:* Unknown command(s): #unknown.map(c => raw(as-typed(c))).join(", "). \
+        Available presets: #(language-consonants.keys().map(raw).join(", ")).
+        Use a listed preset or provide only consonant symbols.
+      ]
+    }
+    // Extract braced content first (affricates, aspirated consonants, etc.).
+    // Tone commands go before that, so their braces are not read as items
+    let extracted = extract-braced-content(tone-letters(consonant-string).replace(regex("\\s+"), " "))
 
     // Convert IPA notation to Unicode for consonants (excluding braced items)
     consonants-to-plot = ipa-to-unicode(extracted.cleaned)
@@ -385,7 +398,7 @@
     )
     if rejected.dedup().len() > 0 {
       return [
-        *Error:* Unknown symbol(s): #rejected.dedup().map(raw).join(", "). \
+        *Error:* Unknown symbol(s): #rejected.dedup().map(r => raw(as-typed(r))).join(", "). \
         Available presets: #(language-consonants.keys().map(raw).join(", ")).
         Use a listed preset or provide only consonant symbols.
       ]
