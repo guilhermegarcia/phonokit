@@ -1,5 +1,5 @@
 #import "phonokit/lib.typ": *
-#set page(height: auto, width: auto, margin: (bottom: 1em, top: 1em, left: 1em, right: 2cm))
+#set page(height: auto, width: auto, margin: 1em)
 
 #maxent(
   input: "kraTa",

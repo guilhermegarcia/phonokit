@@ -1263,6 +1263,11 @@
         .flatten()
     )]
 
-    if visualize { pad(right: -bar-col-width, tbl) } else { tbl }
+    // The bars float beyond the table so that it stays centered in the text. An
+    // auto-width page sizes itself to the content, so there they must count
+    // as content or they get clipped.
+    if not visualize { tbl } else {
+      layout(size => if size.width.pt() == float.inf { tbl } else { pad(right: -bar-col-width, tbl) })
+    }
   }
 }

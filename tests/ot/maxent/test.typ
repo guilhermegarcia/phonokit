@@ -1,6 +1,7 @@
 #import "/lib.typ": *
-// Probability bars sit outside the table bounds: leave room for them
-#set page(width: auto, height: auto, margin: (left: 0.5em, y: 0.5em, right: 6em))
+// On a fixed-width page the probability bars sit outside the table bounds:
+// leave room for them
+#set page(width: 369pt, height: auto, margin: (left: 0.5em, y: 0.5em, right: 6em))
 
 #maxent(
   input: "kraTa",
