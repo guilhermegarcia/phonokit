@@ -42,18 +42,6 @@
 // - \\{ and \\}: literal brace characters
 // - \\,: literal comma (since , maps to secondary stress)
 // - everything else: IPA-parsed as usual
-#let _ends-with-space(s) = {
-  let cls = s.clusters()
-  cls.len() > 0 and cls.at(cls.len() - 1) == " "
-}
-
-// Scripts are pulled left onto the preceding letter, except after a tone
-// (\tone{51}, ˥˩) or an accented letter (á), where they would hit the mark
-#let _keeps-scripts-apart(s) = {
-  let last = ipa-to-unicode(s).clusters().at(-1, default: "")
-  last.match(regex(tone-letter-class)) != none or last.normalize(form: "nfd").codepoints().len() > 1
-}
-
 #let parse-ot-string(s) = {
   if type(s) != str { return s }
 
@@ -72,20 +60,13 @@
         and (clusters.at(i + 1) == "{" or clusters.at(i + 1) == "}" or clusters.at(i + 1) == ",")
     ) {
       let literal = clusters.at(i + 1)
-      let tighten = buf != "" and not _ends-with-space(buf)
       if buf != "" {
         parts.push(ipa(buf))
         buf = ""
       }
-      let tighten-after = literal == "{" and i + 2 < len and clusters.at(i + 2) != " "
-      let lit = context text(font: phonokit-font.get(), literal)
-      let before-kern = if literal == "}" { -0.3em } else { -0.25em }
-      let after-kern = if literal == "{" { -0.3em } else { -0.15em }
-      let lit = if tighten { [#h(before-kern)#lit] } else { lit }
-      parts.push(if tighten-after { [#lit#h(after-kern)] } else { lit })
+      parts.push(context text(font: phonokit-font.get(), literal))
       i += 2
     } else if (ch == "_" or ch == "^") and i + 1 < len and not buf.ends-with("\\") {
-      let tighten = buf != "" and not _ends-with-space(buf) and not _keeps-scripts-apart(buf)
       if buf != "" {
         parts.push(ipa(buf))
         buf = ""
@@ -105,11 +86,7 @@
         } else {
           super(context text(font: phonokit-font.get(), group))
         }
-        if is-sub {
-          parts.push(if tighten { [#h(-0.25em)#script] } else { script })
-        } else {
-          parts.push(if tighten { [#h(-0.25em)#script] } else { script })
-        }
+        parts.push(script)
       } else {
         let c = clusters.at(i)
         i += 1
@@ -118,11 +95,7 @@
         } else {
           super(context text(font: phonokit-font.get(), c))
         }
-        if is-sub {
-          parts.push(if tighten { [#h(-0.25em)#script] } else { script })
-        } else {
-          parts.push(if tighten { [#h(-0.25em)#script] } else { script })
-        }
+        parts.push(script)
       }
     } else if ch == "{" and buf.match(regex("\\\\n?l?tone$")) != none {
       // \tone{51}, \ltone{..}, etc.: the braces belong to the IPA command
@@ -135,7 +108,6 @@
         i += 1
       }
     } else if ch == "{" {
-      let tighten = buf != "" and not _ends-with-space(buf)
       if buf != "" {
         parts.push(ipa(buf))
         buf = ""
@@ -147,8 +119,7 @@
         i += 1
       }
       if i < len { i += 1 }
-      let raw-text = context text(font: phonokit-font.get(), raw)
-      parts.push(if tighten { [#h(-0.25em)#raw-text] } else { raw-text })
+      parts.push(context text(font: phonokit-font.get(), raw))
     } else {
       buf += ch
       i += 1

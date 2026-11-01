@@ -3337,7 +3337,7 @@ Descriptions of Chinese languages often use the sinological apical vowels #ipa("
     [Tone letters are a subscript on #sym.sigma, wherever they were typed in the syllable. They are never segments, so they don't project moras or block geminates. Accented vowels are nuclei.],
 
     [`#tableau()` \ `#maxent()` \ `#hg()` \ `#nhg()`],
-    [Allowed in inputs, candidates and constraint names. Subscripts and superscripts after a tone or an accent are not pulled left. `\\^` is the falling tone, while `^{...}` is a superscript.],
+    [Allowed in inputs, candidates and constraint names. `\\^` is the falling tone, while `^{...}` is a superscript.],
 
     [`#met-grid()`], [Tone commands are converted in both formats, even with `ipa: false`.],
     [`#autoseg()`],
