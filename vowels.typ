@@ -121,28 +121,85 @@
 
 #let _strip-nasal(vowel) = vowel.normalize(form: "nfd").replace("̃", "")
 
+// Length marks: long (ː) and half-long (ˑ). They are separate grapheme
+// clusters, so they attach to whichever vowel cluster precedes them.
+#let _length-marks = ("ː", "ˑ")
+#let _strip-length(s) = _length-marks.fold(s, (acc, m) => acc.replace(m, ""))
+
+// Ordered variant keys of one vowel quality: the plain vowel first if it
+// occurs, then each length-marked variant in the order seen ("i", "iː").
+#let _variant-keys(prefix, short, marks) = {
+  (if short { (prefix,) } else { () }) + marks.map(m => prefix + m)
+}
+
 #let _collect-custom-vowels(input) = {
   let converted = ipa-to-unicode(input.replace(regex("\\s+"), " "))
   let oral = ""
   let nasals = ()
   let rejected = ()
+  // One token per vowel occurrence: (base, nasal, mark). A length mark is a
+  // separate cluster and attaches to the vowel cluster right before it.
+  let tokens = ()
+  let prev-is-vowel = false
 
   for cluster in converted.clusters() {
     let decomposed = cluster.normalize(form: "nfd")
     let base = _strip-nasal(decomposed)
-    if base in vowel-data {
+    if cluster in _length-marks and prev-is-vowel {
+      let last = tokens.pop()
+      last.mark = cluster
+      tokens.push(last)
+      prev-is-vowel = false
+    } else if base in vowel-data {
       if base not in oral {
         oral += base
       }
-      if "̃" in decomposed and base not in nasals {
+      let nasal = "̃" in decomposed
+      if nasal and base not in nasals {
         nasals.push(base)
       }
-    } else if cluster not in rejected {
-      rejected.push(cluster)
+      tokens.push((base: base, nasal: nasal, mark: none))
+      prev-is-vowel = true
+    } else {
+      if cluster not in rejected {
+        rejected.push(cluster)
+      }
+      prev-is-vowel = false
     }
   }
 
-  (oral: oral, nasals: nasals, rejected: rejected)
+  // Oral and nasal occurrences are tracked apart: "ã:" makes the nasal copy
+  // long, not the oral vowel.
+  let variants = (:)
+  let nasal-variants = (:)
+  for base in oral.clusters() {
+    for nasal in (false, true) {
+      let own = tokens.filter(t => t.base == base and t.nasal == nasal)
+      if own.len() == 0 { continue }
+      let short = own.any(t => t.mark == none)
+      let marks = own.filter(t => t.mark != none).map(t => t.mark).dedup()
+      if nasal {
+        nasal-variants.insert(base, _variant-keys(base + "\u{0303}", short, marks))
+      } else {
+        variants.insert(base, _variant-keys(base, short, marks))
+      }
+    }
+    // A vowel given only nasalized still plots its plain oral glyph
+    if base not in variants { variants.insert(base, (base,)) }
+  }
+
+  (oral: oral, nasals: nasals, rejected: rejected, variants: variants, nasal-variants: nasal-variants)
+}
+
+// Resolve a target (already converted to Unicode) to the variant of a plotted
+// vowel it names: (base, index) into `variants.at(base)`, or none. Variants
+// are independent characters: only an exact key matches, so "i:" picks "iː"
+// and "i" picks the short "i", never the other.
+#let _resolve-variant(variants, target) = {
+  let base = _strip-length(target)
+  if base not in variants { return none }
+  let idx = variants.at(base).position(k => k == target)
+  if idx != none { (base, idx) } else { none }
 }
 
 // Main vowels function
@@ -184,6 +241,8 @@
   // Determine which vowels to plot
   let vowels-to-plot = ""
   let nasal-target-vowels = ()
+  let parsed-variants = none
+  let parsed-nasal-variants = (:)
   let error-msg = none
   let presets = [
     Available presets: #(language-vowels.keys().map(raw).join(", ")).
@@ -218,6 +277,8 @@
     }
     vowels-to-plot = parsed.oral
     nasal-target-vowels = parsed.nasals
+    parsed-variants = parsed.variants
+    parsed-nasal-variants = parsed.nasal-variants
   } else {
     // Nothing specified
     error-msg = inventory-error
@@ -244,27 +305,39 @@
   let scaled-nasal-font-size = scaled-font-size * 0.9 * 1pt
   let nasal-color = gray.darken(10%)
   let resolved-shift-size = if shift-size != none { shift-size * scale } else { scaled-font-size * 1pt }
+  // Variant keys of each plotted vowel ("i" -> ("i", "iː")); presets have no length
+  let plotted = vowels-to-plot.clusters().filter(v => v in vowel-data)
+  let variants = if parsed-variants != none { parsed-variants } else {
+    plotted.fold((:), (acc, v) => { acc.insert(v, (v,)); acc })
+  }
   // Split highlight into regular-vowel highlights (strings) and shifted-vowel
-  // highlights (arrays in the same (tipa-str, x, y) format as shift:)
-  let highlight-set = highlight.filter(h => type(h) == str).map(ipa-to-unicode)
+  // highlights (arrays in the same (tipa-str, x, y) format as shift:).
+  // Regular highlights name one variant: "i:" never highlights a short "i".
+  let highlight-variants = highlight.filter(h => type(h) == str)
+    .map(h => _resolve-variant(variants, ipa-to-unicode(h)))
+    .filter(r => r != none)
   let highlight-shifts = highlight.filter(h => type(h) != str)
     .map(h => (ipa-to-unicode(h.at(0)), h.at(1), h.at(2)))
   let resolved-phoneme-colors = (:)
   for (phoneme, color) in phoneme-colors {
     resolved-phoneme-colors.insert(ipa-to-unicode(phoneme), color)
   }
-  let vowel-text = (size, phoneme) => {
-    if phoneme in resolved-phoneme-colors {
-      text(size: size, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme), top-edge: "x-height", bottom-edge: "baseline", phoneme)
+  // Exact keys only: "a" and "a:" are independent characters
+  let color-of(key) = resolved-phoneme-colors.at(key, default: none)
+  let styled-text(size, key, fill: auto) = {
+    let c = if fill != auto { fill } else { color-of(key) }
+    if c != none {
+      text(size: size, font: phonokit-font.get(), fill: c, top-edge: "x-height", bottom-edge: "baseline", key)
     } else {
-      text(size: size, font: phonokit-font.get(), top-edge: "x-height", bottom-edge: "baseline", phoneme)
+      text(size: size, font: phonokit-font.get(), top-edge: "x-height", bottom-edge: "baseline", key)
     }
   }
-  let shifted-vowel-text = (size, phoneme) => {
-    text(size: size, font: phonokit-font.get(), fill: resolved-phoneme-colors.at(phoneme, default: shift-color), top-edge: "x-height", bottom-edge: "baseline", phoneme)
-  }
+  let vowel-text = (size, phoneme) => styled-text(size, phoneme)
+  let shifted-vowel-text = (size, phoneme) => styled-text(size, phoneme,
+    fill: { let c = color-of(phoneme); if c != none { c } else { shift-color } })
 
-  canvas({
+  // Context: length-marked variants are measured to lay them out side by side
+  context canvas({
     import draw: *
 
     // Define the trapezoidal quadrilateral using scaled dimensions
@@ -300,17 +373,73 @@
     // Draw the outline
     line(..trapezoid, close: true, stroke: (paint: gray.lighten(30%), thickness: scaled-line-thickness * 1pt))
 
+    // Lay out the variants of one vowel side by side ("i iː"), relative to
+    // the vowel's position. The first variant's base glyph stays centered on
+    // the position; the rest follow after a narrow space. Returns the
+    // segments (key, dx: center offset) and `extra`, how far the label
+    // reaches past the right edge of the base glyph.
+    let width-of(size, body) = measure(text(size: size, font: phonokit-font.get(), body)).width / 1cm
+    let layout(keys, glyph, size) = {
+      let glyph-w = width-of(size, glyph)
+      let gap = width-of(size, "\u{202F}")
+      let left = -glyph-w / 2
+      let segments = ()
+      for (i, key) in keys.enumerate() {
+        let w = width-of(size, key)
+        segments.push((key: key, dx: if i == 0 { 0 } else { left + w / 2 }))
+        left += w + gap
+      }
+      (segments: segments, extra: left - gap - glyph-w / 2)
+    }
+    let layouts = (:)
+    for v in plotted {
+      layouts.insert(v, layout(variants.at(v), v, scaled-font-size * 1pt))
+    }
+
+    // Widen minimal pairs whose left member has length-marked variants: they
+    // hang to the right of the base glyph, so the right member (and with it
+    // the bullet) moves right by the extra width.
+    let pair-shift = (:)
+    for v1 in plotted {
+      let extra = layouts.at(v1).extra
+      if extra <= 0.001 { continue }
+      let i1 = vowel-data.at(v1)
+      let x1 = get-vowel-position(i1, trapezoid, scaled-width, scaled-height, scaled-offset).at(0)
+      for v2 in plotted {
+        let i2 = vowel-data.at(v2)
+        let x2 = get-vowel-position(i2, trapezoid, scaled-width, scaled-height, scaled-offset).at(0)
+        if i1.frontness == i2.frontness and i1.height == i2.height and i1.rounded != i2.rounded and x1 < x2 {
+          pair-shift.insert(v2, extra)
+        }
+      }
+    }
+    let vowel-pos(v) = {
+      let p = get-vowel-position(vowel-data.at(v), trapezoid, scaled-width, scaled-height, scaled-offset)
+      (p.at(0) + pair-shift.at(v, default: 0), p.at(1))
+    }
+    // Position of one variant of a plotted vowel
+    let variant-pos(base, idx) = {
+      let p = vowel-pos(base)
+      (p.at(0) + layouts.at(base).segments.at(idx).dx, p.at(1))
+    }
+
     // Resolve an arrow endpoint to a canvas position.
     // endpoint is either a tipa string (canonical vowel position) or a
     // (tipa-str, x-offset, y-offset) array (shifted position, same format as shift:).
     // Returns (found, position) where found is false if the vowel is unknown.
     let pos-of(endpoint) = {
       let is-str = type(endpoint) == str
-      let v = ipa-to-unicode(if is-str { endpoint } else { endpoint.at(0) })
+      let key = ipa-to-unicode(if is-str { endpoint } else { endpoint.at(0) })
+      let v = _strip-length(key)
       let x-off = if is-str { 0 } else { endpoint.at(1) }
       let y-off = if is-str { 0 } else { endpoint.at(2) }
-      if v in vowel-data {
-        let base = get-vowel-position(vowel-data.at(v), trapezoid, scaled-width, scaled-height, scaled-offset)
+      // A plain endpoint on a plotted vowel targets that variant; shifted
+      // endpoints and vowels not plotted use the canonical position
+      let r = if is-str { _resolve-variant(variants, key) } else { none }
+      if r != none {
+        (true, variant-pos(..r))
+      } else if v in vowel-data and not (is-str and v in variants) {
+        let base = vowel-pos(v)
         (true, (base.at(0) + x-off, base.at(1) + y-off))
       } else {
         (false, (0, 0))
@@ -321,7 +450,7 @@
     // the highlight circle if that vowel is highlighted, else the mask edge.
     let end-radius(endpoint) = {
       let highlighted = if type(endpoint) == str {
-        ipa-to-unicode(endpoint) in highlight-set
+        _resolve-variant(variants, ipa-to-unicode(endpoint)) in highlight-variants
       } else {
         let v = ipa-to-unicode(endpoint.at(0))
         highlight-shifts.any(h => h.at(0) == v and h.at(1) == endpoint.at(1) and h.at(2) == endpoint.at(2))
@@ -334,18 +463,16 @@
     for vowel in vowels-to-plot.clusters() {
       if vowel in vowel-data {
         let vowel-info = vowel-data.at(vowel)
-        let pos = get-vowel-position(vowel-info, trapezoid, scaled-width, scaled-height, scaled-offset)
-        vowel-positions.push((vowel: vowel, info: vowel-info, pos: pos))
+        vowel-positions.push((vowel: vowel, info: vowel-info, pos: vowel-pos(vowel)))
       }
     }
 
     // Build the global obstacle list for curved-arrow avoidance:
     // all plotted vowels plus all shifted copies, pre-computed once.
     let shifted-obs = shift
-      .filter(s => ipa-to-unicode(s.at(0)) in vowel-data)
+      .filter(s => _strip-length(ipa-to-unicode(s.at(0))) in vowel-data)
       .map(s => {
-        let sv = ipa-to-unicode(s.at(0))
-        let base = get-vowel-position(vowel-data.at(sv), trapezoid, scaled-width, scaled-height, scaled-offset)
+        let base = vowel-pos(_strip-length(ipa-to-unicode(s.at(0))))
         (base.at(0) + s.at(1), base.at(1) + s.at(2))
       })
     let preset-name = if vowel-string != none and vowel-string in language-vowels {
@@ -361,15 +488,24 @@
     let nasal-positions = if nasals {
       vowel-positions
         .filter(vp => vp.vowel in nasal-bases)
-        .map(vp => (
-          vowel: vp.vowel,
-          pos: (vp.pos.at(0), vp.pos.at(1) + scaled-nasal-dy),
-          label: vp.vowel + "̃",
-        ))
+        .map(vp => {
+          let glyph = vp.vowel + "̃"
+          let keys = parsed-nasal-variants.at(vp.vowel, default: (glyph,))
+          (
+            vowel: vp.vowel,
+            pos: (vp.pos.at(0), vp.pos.at(1) + scaled-nasal-dy),
+            glyph: glyph,
+            layout: layout(keys, glyph, scaled-nasal-font-size),
+          )
+        })
     } else {
       ()
     }
-    let all-obstacle-positions = vowel-positions.map(vp => vp.pos) + shifted-obs + nasal-positions.map(np => np.pos)
+    let all-obstacle-positions = (
+      vowel-positions.map(vp => layouts.at(vp.vowel).segments.map(sg => (vp.pos.at(0) + sg.dx, vp.pos.at(1)))).flatten().chunks(2)
+      + shifted-obs
+      + nasal-positions.map(np => np.layout.segments.map(sg => (np.pos.at(0) + sg.dx, np.pos.at(1)))).flatten().chunks(2)
+    )
 
     // True if p is either at/near endpoint ep, or is its minimal-pair partner.
     // Minimal-pair partners share height (dy ≈ 0) and lie exactly 2×scaled-offset
@@ -553,11 +689,12 @@
     // Shifted vowels: (vowel, position, highlighted)
     let shift-positions = ()
     for s in shift {
+      // The shifted copy keeps its length mark; its position is the base vowel's
       let vowel = ipa-to-unicode(s.at(0))
       let x-off = s.at(1)
       let y-off = s.at(2)
-      if vowel in vowel-data {
-        let base-pos = get-vowel-position(vowel-data.at(vowel), trapezoid, scaled-width, scaled-height, scaled-offset)
+      if _strip-length(vowel) in vowel-data {
+        let base-pos = vowel-pos(_strip-length(vowel))
         shift-positions.push((
           vowel: vowel,
           pos: (base-pos.at(0) + x-off, base-pos.at(1) + y-off),
@@ -571,10 +708,22 @@
     for vp in vowel-positions + shift-positions {
       circle(vp.pos, radius: scaled-circle-radius, fill: white, stroke: none)
     }
+    // Length-marked variants extend to the right: mask under them too, so
+    // grid lines don't cross "iː"
+    for vp in vowel-positions {
+      let extra = layouts.at(vp.vowel).extra
+      if extra <= 0.001 { continue }
+      let left = vp.pos.at(0) + width-of(scaled-font-size * 1pt, vp.vowel) / 2
+      rect((left, vp.pos.at(1) - scaled-circle-radius * 0.8), (left + extra, vp.pos.at(1) + scaled-circle-radius * 0.8), fill: white, stroke: none)
+    }
 
-    // Highlight circles: above the masks, below the minimal-pair bullets and symbols
-    for vp in vowel-positions.filter(vp => vp.vowel in highlight-set) + shift-positions.filter(sp => sp.highlighted) {
-      circle(vp.pos, radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
+    // Highlight circles: above the masks, below the minimal-pair bullets and
+    // symbols. Each one sits on the highlighted variant.
+    for r in highlight-variants.dedup() {
+      circle(variant-pos(..r), radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
+    }
+    for sp in shift-positions.filter(sp => sp.highlighted) {
+      circle(sp.pos, radius: scaled-highlight-radius, fill: highlight-color, stroke: none)
     }
 
     // Draw bullets between minimal pairs (same frontness/height, different rounding)
@@ -589,8 +738,11 @@
         let diff-round = v1.info.rounded != v2.info.rounded
 
         if same-front and same-height and diff-round {
-          // Draw bullet at midpoint between vowels
-          let mid-x = (v1.pos.at(0) + v2.pos.at(0)) / 2
+          // Draw bullet at midpoint between vowels. When the pair was widened
+          // for length-marked variants, the bullet moves with the right member so it
+          // keeps its usual gap from the end of the label.
+          let widened = pair-shift.at(v1.vowel, default: 0) + pair-shift.at(v2.vowel, default: 0)
+          let mid-x = (v1.pos.at(0) + v2.pos.at(0) + widened) / 2
           let mid-y = (v1.pos.at(1) + v2.pos.at(1)) / 2
           circle((mid-x, mid-y), radius: scaled-bullet-radius, fill: black)
         }
@@ -598,13 +750,27 @@
     }
 
     // Plot vowel symbols
+    // Draw the variants of one vowel. The first sits in an overflowing box
+    // as wide as the base glyph, so that glyph stays centered on the position
+    // even when a length mark follows it; the others are centered on their
+    // own slots.
+    let draw-variants(pos, glyph, lay, size, fill: auto) = {
+      for (i, sg) in lay.segments.enumerate() {
+        let body = styled-text(size, sg.key, fill: fill)
+        if i == 0 {
+          content(pos, context box(width: measure(styled-text(size, glyph, fill: fill)).width, body))
+        } else {
+          content((pos.at(0) + sg.dx, pos.at(1)), body)
+        }
+      }
+    }
     for vp in vowel-positions {
-      content(vp.pos, context vowel-text(scaled-font-size * 1pt, vp.vowel))
+      draw-variants(vp.pos, vp.vowel, layouts.at(vp.vowel), scaled-font-size * 1pt)
     }
 
     // Draw schematic nasalized copies slightly offset from the oral vowels.
     for np in nasal-positions {
-      content(np.pos, context text(size: scaled-nasal-font-size, font: phonokit-font.get(), fill: nasal-color, top-edge: "x-height", bottom-edge: "baseline", np.label))
+      draw-variants(np.pos, np.glyph, np.layout, scaled-nasal-font-size, fill: nasal-color)
     }
 
     // Draw shifted vowel symbols (on top of regular vowels)

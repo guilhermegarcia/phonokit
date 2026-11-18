@@ -370,7 +370,12 @@
 ///   name, or tipa-style IPA, passed positionally (e.g. `vowels("aeiou")` or
 ///   `vowels("spanish")`). Optional: you may omit it and pass `lang` instead
 ///   (e.g. `vowels(lang: "spanish")`). If both are given and the positional is a
-///   language name, the positional wins.
+///   language name, the positional wins. Length marks (`:` or `ː`, and `ˑ`)
+///   after a vowel are plotted to the right of it (e.g. `vowels("i: a u:")`);
+///   a vowel given both short and long is shown as both (`i iː`). Nasal copies
+///   keep their own length (`ã:` draws `ãː`, leaving the oral `a` plain).
+///   Variants are independent characters: in `highlight`, `arrows` and
+///   `phoneme-colors`, `"i:"` targets only `iː` and `"i"` only the short `i`.
 /// - lang (string, optional): Built-in language whose inventory to plot, used when
 ///   no language-name positional is given (e.g. `vowels(lang: "spanish")`). Also
 ///   selects the nasal-vowel preset when the positional is a custom symbol string.
@@ -409,6 +414,7 @@
 /// Examples:
 /// - `#vowels("english", scale: 0.6)` - Plot English vowel inventory
 /// - `#vowels("french", scale: 0.6)` - Plot French vowel inventory
+/// - `#vowels("i i: e a a: o u u:")` - Long vowels next to their short counterparts
 /// - `#vowels("aãioõu", nasals: true)` - Add only the nasal vowels marked in the custom inventory
 /// - `#vowels("french", nasals: true)` - Add the French nasal vowels
 /// - `#vowels("english", arrows: (("a", "U"), ("a", "I"), ("e", "I"), ("O", "I"), ("o", "U")), curved: true)` - Diphthong trajectories

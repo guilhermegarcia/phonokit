@@ -5,4 +5,5 @@
 #vowels("a e p t") \
 #vowels("a \\tone{5} i") \
 #vowels("a \\xyz i") \
-#vowels(lang: "klingon")
+#vowels(lang: "klingon") \
+#vowels(": a")
