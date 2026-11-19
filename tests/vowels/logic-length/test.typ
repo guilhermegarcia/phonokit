@@ -21,3 +21,15 @@
 #assert.eq(_resolve-variant(long-only, "iː"), ("i", 0))
 // Unplotted vowels resolve to nothing
 #assert.eq(_resolve-variant(parsed.variants, "u"), none)
+
+// Orphan length marks are kept apart from unknown symbols
+#let orphan = _collect-custom-vowels(": a")
+#assert.eq(orphan.orphans, ("ː",))
+#assert.eq(orphan.rejected, ())
+#assert.eq(_collect-custom-vowels("i:: e").orphans, ("ː",))
+#assert.eq(_collect-custom-vowels("ˑ a ː").orphans, ("ˑ",))
+// "ˑ a ː": the trailing mark attaches to a (spaces only separate tokens)
+#assert.eq(_collect-custom-vowels("ˑ a ː").variants.a, ("aː",))
+#assert.eq(_collect-custom-vowels("p: a").orphans, ())
+#assert.eq(_collect-custom-vowels("p: a").rejected, ("p",))
+#assert.eq(_collect-custom-vowels("i: a").orphans, ())
