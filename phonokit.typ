@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.8.0`]
+#let version = text(size: 0.8em)[`v 0.8.1`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.8.1` - `#vowels()`: vowel length (#box(ipa("[a:]"))), new arrows and highlights, auto nasals; `;` for #box(ipa("[ˑ]"))\
 `0.8.0` - Tones (#box(ipa("[ma \\tone{51}]")), accents), #box(ipa("\\apicals")) #box(ipa("\\apicalr")), `,` stress, `empty-nucleus`; `#sound-shift()` labels; fixes\
 `0.7.0` - `#consonants()`: #box(ipa("/ɥ/")), #box(ipa("/ʍ/")), alveolo-palatal column, renumbered `delete-cols`; fixes\
 `0.6.1` - Prosodic trees: syllabic consonants on descenders (e.g., ŋ̍) go in the nucleus\
@@ -377,7 +378,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.8.0": *
+  #import "@preview/phonokit:0.8.1": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -535,7 +536,7 @@ Both `vowels()` and `consonants()` look up preset names before interpreting cust
 
 Use `lang:` when you intend a preset, for example `vowels(lang: "english")`. Unknown explicit language names also display an error instead of a chart. The rest of the document continues to compile. A positional name consisting entirely of supported inventory symbols remains indistinguishable from a custom inventory.
 
-Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. The function can also add schematic nasalized copies. For custom strings, this happens automatically: the nasal vowels in the input are shown in a nasal layer, as in `#vowels("aãioõu")`. For preset languages, add them with `nasals: true` (currently French only); `nasals: false` hides them. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap. Custom strings can also mark vowel length with `:` (or `ː`) and the half-long `ˑ`: `#vowels("i: e a: o u:")` writes each long vowel with its length mark, which hangs to the right of the vowel symbol. If a vowel appears both short and long, as in `#vowels("i i: a a: u u:")`, both are shown side by side (#ipa("i i:")), and a minimal pair spreads out around its bullet to make room. Length on a nasal vowel stays with the nasal copy: `#vowels("a ã:")` draws #ipa("[ã:]") above a plain #ipa("[a]"). A length mark with no vowel before it, as in `": a"`, gives an error. Targets in `highlight`, `arrows` and `phoneme-colors` pick a single variant: `"i:"` refers only to #ipa("[i:]"), while a bare `"i"` refers only to the short #ipa("[i]"). The two are independent characters: each targets (and colors) only its own vowel. Nasal copies can be targeted the same way (`"ã"`, `"ã:"`). Presets don't include length. As with `#consonants()`, individual vowel symbols can be colored with `phoneme-colors`, for example `#vowels("aeiou", phoneme-colors: ("i": red, "u": blue))`.
+Besides the function `#consonants()`, the package has a function to print vowel inventories. The function `#vowels()` also accepts either a pre-defined language or a string as input. @fig-vowels-english and @fig-vowels-french show the inventories for English and French, respectively. The argument `scale` is also available here, so the user can adjust the size of the trapezoid as needed. The function can also add schematic nasalized copies. For custom strings, this happens automatically: the nasal vowels in the input are shown in a nasal layer, as in `#vowels("aãioõu")`. For preset languages, add them with `nasals: true` (currently French only); `nasals: false` hides them. These nasal positions are illustrative only and are simply offset slightly from the corresponding oral vowels to avoid overlap. Custom strings can also mark vowel length with `:` (or #ipa("ː")) and the half-long #ipa("ˑ") (typed `;`): `#vowels("i: e a: o u:")` writes each long vowel with its length mark, which hangs to the right of the vowel symbol. If a vowel appears both short and long, as in `#vowels("i i: a a: u u:")`, both are shown side by side (#ipa("i i:")), and a minimal pair spreads out around its bullet to make room. Length on a nasal vowel stays with the nasal copy: `#vowels("a ã:")` draws #ipa("[ã:]") above a plain #ipa("[a]"). A length mark with no vowel before it, as in `": a"`, gives an error. Targets in `highlight`, `arrows` and `phoneme-colors` pick a single variant: `"i:"` refers only to #ipa("[i:]"), while a bare `"i"` refers only to the short #ipa("[i]"). The two are independent characters: each targets (and colors) only its own vowel. Nasal copies can be targeted the same way (`"ã"`, `"ã:"`). Presets don't include length. As with `#consonants()`, individual vowel symbols can be colored with `phoneme-colors`, for example `#vowels("aeiou", phoneme-colors: ("i": red, "u": blue))`.
 
 #grid(
   columns: (1fr, 1fr),
@@ -3548,7 +3549,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.8.0": *
+    #import "@preview/phonokit:0.8.1": *
     ```
 
     Now you can use any function you want:
@@ -3560,7 +3561,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.8.0": *` to your `typ` document if you plan on using #logo (assuming version `0.8.0`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.8.1": *` to your `typ` document if you plan on using #logo (assuming version `0.8.1`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3590,7 +3591,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.8.0": *
+  #import "@preview/phonokit:0.8.1": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3640,7 +3641,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.8.0": *
+  #import "@preview/phonokit:0.8.1": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF
