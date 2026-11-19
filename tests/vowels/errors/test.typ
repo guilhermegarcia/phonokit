@@ -5,4 +5,11 @@
 #vowels("a e p t") \
 #vowels("a \\tone{5} i") \
 #vowels("a \\xyz i") \
-#vowels(lang: "klingon")
+#vowels(lang: "klingon") \
+// Length marks with no vowel before them: not "unknown symbol"
+#vowels(": a") \
+#vowels("i:: e") \
+#vowels("ˑ a ː") \
+#vowels("ˑ :: a") \
+// A mark after an unknown symbol is reported through that symbol
+#vowels("p: a")

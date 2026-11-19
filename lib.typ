@@ -370,7 +370,14 @@
 ///   name, or tipa-style IPA, passed positionally (e.g. `vowels("aeiou")` or
 ///   `vowels("spanish")`). Optional: you may omit it and pass `lang` instead
 ///   (e.g. `vowels(lang: "spanish")`). If both are given and the positional is a
-///   language name, the positional wins.
+///   language name, the positional wins. Length marks (`:` or `ː`, and `ˑ`)
+///   after a vowel are plotted to the right of it (e.g. `vowels("i: a u:")`);
+///   a vowel given both short and long is shown as both (`i iː`). Nasal copies
+///   keep their own length (`ã:` draws `ãː`, leaving the oral `a` plain).
+///   Variants are independent characters: in `highlight`, `arrows` and
+///   `phoneme-colors`, `"i:"` targets only `iː` and `"i"` only the short `i`.
+///   Nasal copies are targets too (`"ã"`, `"ã:"`). A length mark with no vowel
+///   before it (`": a"`) is an error.
 /// - lang (string, optional): Built-in language whose inventory to plot, used when
 ///   no language-name positional is given (e.g. `vowels(lang: "spanish")`). Also
 ///   selects the nasal-vowel preset when the positional is a custom symbol string.
@@ -379,16 +386,23 @@
 /// - rows (int): Number of horizontal grid lines (default: 3)
 /// - cols (int): Number of vertical grid lines (default: 2)
 /// - scale (float): Scale factor for entire chart (default: 0.7)
-/// - nasals (bool): Draw schematic nasalized copies near their oral
-///   counterparts. For preset languages, this currently adds only the French
-///   nasal vowels; for custom strings, only vowels explicitly nasalized in the
-///   input are shown in the nasal layer (default: false)
+/// - nasals (auto, bool): Draw schematic nasalized copies near their oral
+///   counterparts. `auto` draws them when a custom string writes a nasal vowel
+///   (`"aãioõu"`), showing only those vowels. `true` also adds a preset's nasal
+///   vowels (currently French only); `false` hides them (default: auto)
 /// - arrows (array): List of (from-vowel, to-vowel) tuples for drawing directed
 ///   arrows between vowel positions (e.g. diphthongs). Each vowel string accepts
 ///   tipa-style notation. Unknown vowels are silently skipped. (default: ())
 /// - arrow-color (color): Color for arrow lines and heads (default: black)
 /// - arrow-style (string): "solid" or "dashed" line style for arrows (default: "solid")
-/// - curved (bool): Curve arrows with a quadratic bezier arc (default: false)
+/// - arrow-head (string): Arrowhead shape: "curved-stealth", "stealth",
+///   "triangle" (filled), "barbed" or "straight" (open) (default: "curved-stealth")
+/// - curved (auto, bool): `auto` draws straight arrows, except between labels
+///   side by side: a minimal pair gets a U-shaped arc under them, and a vowel
+///   and its long form (`i` → `iː`) a wider loop. `true` curves every arrow;
+///   `false` keeps all arrows straight, and a straight arrow across a minimal
+///   pair replaces its bullet (default: auto). A straight arrow too short for
+///   its head is not drawn.
 /// - shift (array): List of (vowel, x-offset, y-offset) tuples. Draws a copy of
 ///   the vowel symbol offset from its canonical trapezoid position by (x, y) in
 ///   CeTZ canvas units. If the vowel is already plotted, an additional copy is
@@ -401,6 +415,8 @@
 /// - circle-size (float): Multiplier for the radius of the highlight circles.
 ///   Arrows pointing at a highlighted vowel stop at its circle edge. Does not
 ///   affect the gaps cut in the grid lines behind vowels (default: 1)
+/// - highlight-style (string): "gradient" (a soft circle that fades out) or
+///   "solid" (a hard-edged circle) (default: "gradient")
 /// - phoneme-colors (dictionary): Map vowel symbols to text colors. Keys accept
 ///   tipa-style notation and are matched after IPA conversion (default: (:))
 ///
@@ -409,7 +425,8 @@
 /// Examples:
 /// - `#vowels("english", scale: 0.6)` - Plot English vowel inventory
 /// - `#vowels("french", scale: 0.6)` - Plot French vowel inventory
-/// - `#vowels("aãioõu", nasals: true)` - Add only the nasal vowels marked in the custom inventory
+/// - `#vowels("i i: e a a: o u u:")` - Long vowels next to their short counterparts
+/// - `#vowels("aãioõu")` - Nasal copies of the nasal vowels in the string
 /// - `#vowels("french", nasals: true)` - Add the French nasal vowels
 /// - `#vowels("english", arrows: (("a", "U"), ("a", "I"), ("e", "I"), ("O", "I"), ("o", "U")), curved: true)` - Diphthong trajectories
 /// - `#vowels("aeiou", phoneme-colors: ("i": red, "u": blue))` - Color selected phonemes
