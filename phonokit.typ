@@ -874,7 +874,7 @@ The function `#vot()` creates schematic timelines to illustrate negative, zero, 
 
 == Vowel dispersion <dispersion>
 
-The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory phonology/phonetics courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the standard deviation used for synthetic jitter (`sd` for F1, and `sd2` for F2 when specified; otherwise both use the same value) and the number of samples (defaults to 10 per vowel). Vowel labels represent mean F1 and F2 values. As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. These preset values are schematic and intended only for pedagogical illustration. Several arguments are also available for aesthetic adjustments (point sizes, color, transparency, optional ellipses, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion, but the user should explore the function to experiment with the remaining arguments.
+The function `#formants()` creates a vowel plot to illustrate vowel dispersion. The function makes use of the great Lilaq package @lilaq. This can be handy in introductory phonology/phonetics courses to demonstrate how vowels overlap depending on how variable their F1 and F2 formant values are. The function allows for a number of arguments, including the standard deviation used for synthetic jitter (`sd` for F1, and `sd2` for F2 when specified; otherwise both use the same value) and the number of samples (defaults to 10 per vowel). Vowel labels represent mean F1 and F2 values. As with `#vowels()`, preset languages are also available, as shown in @fig-dispersion. These preset values are schematic and intended only for pedagogical illustration. For the same reason, length marks are ignored: `#formants("i: e a:")` plots #ipa("[i]"), #ipa("[e]") and #ipa("[a]"). Several arguments are also available for aesthetic adjustments (point sizes, color, transparency, optional ellipses, etc.). You can also scale it up or down using the `scale` argument. Some of the available arguments are shown in @code-dispersion, but the user should explore the function to experiment with the remaining arguments.
 
 
 #align(center)[
@@ -3132,6 +3132,8 @@ Typst is still in its infancy, and I believe most linguists do not know about it
     ipa(",ta"),
     raw("u:"),
     ipa("u:"),
+    raw("u;"),
+    ipa("u;"),
     raw("\\\~ a"),
     ipa("\\~ a"),
     raw("\\\\r i"),

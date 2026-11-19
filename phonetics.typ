@@ -84,7 +84,11 @@
   if cleaned in language-vowels {
     return language-vowels.at(cleaned).clusters()
   }
+  // Formant plots are illustrative and ignore length: "i:" plots as i, and
+  // ";" (TIPA half-long) still works as a separator once ˑ is dropped
   let normalized = ipa-to-unicode(cleaned)
+    .replace("ː", "")
+    .replace("ˑ", "")
     .replace("/", " ")
     .replace("[", " ")
     .replace("]", " ")

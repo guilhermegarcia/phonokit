@@ -107,7 +107,7 @@
 ///
 /// Arguments:
 /// - vowels (string): Tipa-style/IPA vowel string or a built-in language name
-///   such as `"english"`
+///   such as `"english"`. Length marks are ignored: `"i: e a:"` plots i, e, a
 /// - source (array, optional): Tabular data from `csv(...)` with required
 ///   columns `vowel`, `f1`, and `f2`; a plain `csv("...")` table with a
 ///   header row is accepted

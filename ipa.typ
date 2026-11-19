@@ -200,6 +200,7 @@
     "'": "ˈ", // primary stress
     ",": "ˌ", // secondary stress
     ":": "ː", // length mark
+    ";": "ˑ", // half-length mark (TIPA shortcut for \texthalflength)
     // SPACING
     "\\s": " ", // space
     // ARCHIPHONEMES (escaped capitals)

@@ -35,3 +35,14 @@
 // Forward diacritics stack
 #assert.eq(ipa-to-unicode("\\` \\v m"), "m\u{300}\u{329}")
 #assert.eq(ipa-to-unicode("\\~ \\' a"), "a\u{303}\u{301}")
+
+// Length: ":" is long, ";" half-long (TIPA shortcuts). Spaces separate
+// tokens only, so a mark after a space attaches to the previous symbol
+#assert.eq(ipa-to-unicode("i:"), "iː")
+#assert.eq(ipa-to-unicode("i;"), "iˑ")
+#assert.eq(ipa-to-unicode("a; b:"), "aˑbː")
+#assert.eq(ipa-to-unicode("i a :"), "iaː")
+#assert.eq(ipa-to-unicode("i a ;"), "iaˑ")
+// Small-cap commands keep their ";"
+#assert.eq(ipa-to-unicode("\;G"), "ɢ")
+#assert.eq(ipa-to-unicode("\;N a;"), "ɴaˑ")
