@@ -231,7 +231,7 @@
 #show link: set text(fill: blue)
 #show ref: set text(fill: rgb(200, 0, 0))
 
-#let version = text(size: 0.8em)[`v 0.8.1`]
+#let version = text(size: 0.8em)[`v 0.8.2`]
 
 // NOTE: Begin doc here
 #title([#logo #h(1fr) #version])
@@ -293,6 +293,7 @@ Any questions, comments or suggestions should be posted to the repository below 
 
 #heading(numbering: none, outlined: false)[Version history: what's new?]
 
+`0.8.2` - `#feat()`: leading signs (+, –, ±) spaced so feature names line up in any font\
 `0.8.1` - `#vowels()`: vowel length (#box(ipa("[a:]"))), new arrows and highlights, auto nasals; `;` for #box(ipa("[ˑ]"))\
 `0.8.0` - Tones (#box(ipa("[ma \\tone{51}]")), accents), #box(ipa("\\apicals")) #box(ipa("\\apicalr")), `,` stress, `empty-nucleus`; `#sound-shift()` labels; fixes\
 `0.7.0` - `#consonants()`: #box(ipa("/ɥ/")), #box(ipa("/ʍ/")), alveolo-palatal column, renumbered `delete-cols`; fixes\
@@ -378,7 +379,7 @@ All functions in #logo require the Charis font @charis_sil to work as intended o
   supplement: "Code",
   kind: "code",
   ```typst
-  #import "@preview/phonokit:0.8.1": *
+  #import "@preview/phonokit:0.8.2": *
   #phonokit-init(font: "New Computer Modern") // <- add to the top of your document
   ```,
 ) <code-font>
@@ -991,7 +992,7 @@ The first function is `#feat-matrix()`, shown in @feat-matrix. It outputs the ma
 
 
 
-Next, the function `#feat()` creates a matrix given a set of features. This is the function used in a rewrite rule, for example. The assimilation rule in @fig-spe is achieved with the code shown in @fig-spe-code --- notice that `alpha` notation requires a specific syntax, i.e., `X + "feat"` or `X + [#smallcaps("feat")]` if you prefer to use small caps. A helper function, `#blank()`, adds a long underline for the context of application in the rule. Likewise, `#a-r` adds an arrow using New Computer Modern (other arrows are available, such as `#a-l` #a-l, `#a-u` #a-u, `#a-d` #a-d, `#a-lr` #a-lr, `#a-sr` #a-sr); see @sec-arrows.
+Next, the function `#feat()` creates a matrix given a set of features. This is the function used in a rewrite rule, for example. The assimilation rule in @fig-spe is achieved with the code shown in @fig-spe-code --- notice that `alpha` notation requires a specific syntax, i.e., `X + "feat"` or `X + [#smallcaps("feat")]` if you prefer to use small caps. A helper function, `#blank()`, adds a long underline for the context of application in the rule. Likewise, `#a-r` adds an arrow using New Computer Modern (other arrows are available, such as `#a-l` #a-l, `#a-u` #a-u, `#a-d` #a-d, `#a-lr` #a-lr, `#a-sr` #a-sr); see @sec-arrows. Leading signs (+, –, ±) are spaced so that feature names line up whatever the font. Matrices are centered by default; to left-align them, add `#set math.vec(align: left)` to your document.
 
 #figure(
   caption: [Nasal place assimilation using `#feat()`],
@@ -3549,7 +3550,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
     ---
 
     ```{=typst}
-    #import "@preview/phonokit:0.8.1": *
+    #import "@preview/phonokit:0.8.2": *
     ```
 
     Now you can use any function you want:
@@ -3561,7 +3562,7 @@ If you use Quarto, it is very easy to use #logo with your `qmd` files. You need 
 
 = How do packages work in Typst? <app-packages>
 
-If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.8.1": *` to your `typ` document if you plan on using #logo (assuming version `0.8.1`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
+If you've used R, Python, #LaTeX, etc., you are used to installing packages and then importing them. This vignette has imported #logo, of course, which in turn imports CeTZ @cetz as a dependency. As you start using Typst, you will notice that it works a bit differently, and this may not be self-evident at first. As seen in @sec-installation, there are basically two ways to load and use a package, both of which require the function `#import` inside your `typ` document --- notice that you don't install a package _per se_. The traditional way is to import a package from the official Typst collection/repository, which means adding `#import "@preview/phonokit:0.8.2": *` to your `typ` document if you plan on using #logo (assuming version `0.8.2`). The `@preview` bit indicates that the package comes from Typst's official repository. This is what you should do most of the time. Typst packages are cached once you compile a document with a given package.
 
 Another option is to fork, clone or download a package from GitHub and import its `lib.typ` file instead: `#import "PACKAGE_DIRECTORY/lib.typ": *`. There's only one caveat: Typst restricts imports to files within the compilation root and its subdirectories (i.e., you can't load `lib.typ` if the package is in a parent directory or elsewhere in your system). Thus, you may need to use symlinks (this is the same strategy applied to `bib` files if you don't want to have a local copy of your references).
 
@@ -3591,7 +3592,7 @@ Fortunately, it is also easy to automate this process if you want to do it off-l
   kind: "code",
   ```typst
   // Create a file called maxent.typ:
-  #import "@preview/phonokit:0.8.1": *
+  #import "@preview/phonokit:0.8.2": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   #maxent(
     input: "kraTa",
@@ -3641,7 +3642,7 @@ You could go one step further and use a convenient bash script to take a #logo f
     local tmp=$(mktemp /tmp/phonokit-XXXXXX.typ)
 
     cat > "$tmp" << EOF
-  #import "@preview/phonokit:0.8.1": *
+  #import "@preview/phonokit:0.8.2": *
   #set page(width: auto, height: auto, margin: 0.5em, fill: none)
   $code
   EOF
