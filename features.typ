@@ -15,6 +15,10 @@
 /// - args (variadic): Feature specifications (e.g., "+consonantal", "-sonorant")
 ///   Can be passed as separate arguments or as a single comma-separated string
 ///
+/// Leading signs (+ – − - ± ∓) are width-compensated so that feature names
+/// line up whatever the font's sign metrics. Rows are centered by default;
+/// use `#set math.vec(align: left)` for left-aligned matrices.
+///
 /// Returns: Formatted feature matrix with proper spacing to prevent overlaps
 ///
 /// Example:
@@ -30,17 +34,55 @@
     items = items.at(0).split(",")
   }
 
-  // 2. Style the items
-  let features = items.map(i => {
-    let content = if type(i) == str { i.trim() } else { i }
-    text(font: phonokit-font.get(), size: 1em, content)
-  })
+  // 2. Align leading signs (+ – − - ± ∓). Fonts give these signs different
+  // advance widths (Charis "+" is 1em, its "–" 0.5em), so with left-aligned
+  // rows the feature names would not line up. A sign whose advance differs
+  // from the target (the narrower of "+" and "–" in the active font) gets
+  // symmetric h() compensation of a fraction of the difference. Only a
+  // fraction, because advances include side bearings: full compensation
+  // crowds the glyph. Signs already at the target are left as plain text, so
+  // the font's kerning (e.g. "–s" in Libertinus) is preserved.
+  let font = phonokit-font.get()
+  let signs = ("+", "–", "−", "-", "±", "∓")
+  let k = 0.35
+  let adv(x) = measure(text(font: font, x)).width
+  let target = calc.min(adv("+"), adv("–"))
+  let with-sign(s, rest) = {
+    let d = (adv(s) - target) * k
+    if calc.abs(d.to-absolute().pt()) < 0.3 { [#s#rest] } else { [#h(-d / 2)#s#h(-d / 2)#rest] }
+  }
+  let split-str(t) = {
+    let c = t.clusters()
+    if c.len() > 1 and c.first() in signs { with-sign(c.first(), c.slice(1).join()) } else { t }
+  }
+  // A feature is a string, plain text content, or a sequence whose first
+  // child is text starting with a sign (e.g. [–#text(fill: red)[son]])
+  let norm(i) = {
+    if type(i) == str { return split-str(i.trim()) }
+    if type(i) == content {
+      if i.func() == text { return split-str(i.text) }
+      if i.has("children") and i.children.len() > 0 {
+        let f = i.children.first()
+        if f.func() == text {
+          let c = f.text.clusters()
+          if c.len() > 0 and c.first() in signs {
+            let rest = c.slice(1).join()
+            return with-sign(c.first(), [#if rest != none { rest }#i.children.slice(1).join()])
+          }
+        }
+      }
+    }
+    i
+  }
 
-  // 3. Use math.vec for perfect axis alignment
+  // 3. Style the items
+  let features = items.map(i => text(font: font, size: 1em, norm(i)))
+
+  // 4. Use math.vec for perfect axis alignment
   set math.vec(gap: 0.5em)
   let matrix = math.vec(delim: "[", ..features)
 
-  // 4. Center the matrix on the math axis of the surrounding text (0.25em
+  // 5. Center the matrix on the math axis of the surrounding text (0.25em
   // above the baseline, where arrows and slashes sit). box.baseline is not
   // honored when the body is math content (the math baseline wins), so the
   // matrix is wrapped in a stack first, which gives the box plain block
